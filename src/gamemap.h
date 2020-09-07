@@ -63,9 +63,11 @@ class GameMap
 		{
 			FString name;
 			FString music;
+			FTextureID sky;
 			unsigned int width;
 			unsigned int height;
 			unsigned int tileSize;
+			int skyHorizonOffset;
 		};
 		struct Thing
 		{

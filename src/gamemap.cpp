@@ -622,6 +622,12 @@ FArchive &operator<< (FArchive &arc, GameMap *&gm)
 		<< gm->header.height
 		<< gm->header.tileSize;
 
+	if(GameSave::SaveVersion >= 1599444347)
+	{
+		arc << gm->header.sky
+		    << gm->header.skyHorizonOffset;
+	}
+
 	// zoneLinks
 	if(GameSave::SaveVersion >= 1383348286)
 	{

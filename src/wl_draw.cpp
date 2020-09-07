@@ -50,6 +50,7 @@
 */
 
 void DrawFloorAndCeiling(byte *vbuf, unsigned vbufPitch, int min_wallheight);
+void DrawParallax(byte *vbuf, unsigned vbufPitch);
 
 const RatioInformation AspectCorrection[] =
 {
@@ -1181,10 +1182,7 @@ void R_RenderView()
 
 	WallRefresh ();
 
-#if defined(USE_FEATUREFLAGS) && defined(USE_PARALLAX)
-	if(GetFeatureFlags() & FF_PARALLAXSKY)
-		DrawParallax(vbuf, vbufPitch);
-#endif
+	DrawParallax(vbuf, vbufPitch);
 #if defined(USE_FEATUREFLAGS) && defined(USE_CLOUDSKY)
 	if(GetFeatureFlags() & FF_CLOUDSKY)
 		DrawClouds(vbuf, vbufPitch, min_wallheight);

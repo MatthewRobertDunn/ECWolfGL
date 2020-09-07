@@ -153,6 +153,7 @@ class FMultiPatchTexture : public FTexture
 public:
 	FMultiPatchTexture (const void *texdef, FPatchLookup *patchlookup, int maxpatchnum, bool strife, int deflump);
 	FMultiPatchTexture (Scanner &sc, int usetype);
+	FMultiPatchTexture (int skynum, FTexture *lower, FTexture *upper); // ROTT Sky
 	~FMultiPatchTexture ();
 
 	const BYTE *GetColumn (unsigned int column, const Span **spans_out);
@@ -301,6 +302,44 @@ FMultiPatchTexture::FMultiPatchTexture (const void *texdef, FPatchLookup *patchl
 	}
 
 	DefinitionLump = deflumpnum;
+}
+
+//==========================================================================
+//
+// FMultiPatchTexture :: FMultiPatchTexture
+// ROTT Sky
+//
+//==========================================================================
+
+FMultiPatchTexture::FMultiPatchTexture (int skynum, FTexture *lower, FTexture *upper)
+: Pixels (0), Spans(0), Parts(NULL), Inits(NULL), bRedirect(false), bTranslucentPatches(false)
+{
+	bMultiPatch = true;
+
+	UseType = FTexture::TEX_Wall;
+	Width = lower->GetWidth();
+	if(upper->GetWidth() != Width)
+		I_Error ("ROTT sky patches %s and %s must have identical widths.", lower->Name, upper->Name);
+	Height = lower->GetHeight() + upper->GetHeight();
+	NumParts = 2;
+	Parts = new TexPart[2];
+	Inits = new TexInit[2];
+	Name.Format("SKY%d", skynum);
+	CalcBitSize ();
+
+	xScale = FRACUNIT;
+	yScale = FRACUNIT;
+
+	Parts[0].OriginY = upper->GetHeight();
+	Parts[0].Texture = lower;
+	Inits[0].TexName = lower->Name;
+
+	Parts[1].Texture = upper;
+	Inits[1].TexName = upper->Name;
+
+	Inits[0].UseType = Inits[1].UseType = TEX_WallPatch;
+
+	DefinitionLump = -1;
 }
 
 //==========================================================================
@@ -978,6 +1017,37 @@ void FTextureManager::AddTexturesLumps (int lump1, int lump2, int patcheslump)
 	}
 }
 
+
+//==========================================================================
+//
+// FTextureManager :: AddRottSkies
+//
+//==========================================================================
+
+void FTextureManager::AddRottSkies (int wadnum)
+{
+	int firsttx = Wads.GetFirstLump(wadnum);
+	int lasttx = Wads.GetLastLump(wadnum);
+
+	int skynum = 1;
+
+	// Must be at least two textures
+	while (firsttx+1 <= lasttx)
+	{
+		if (Wads.GetLumpNamespace(firsttx) == ns_rottsky && Wads.GetLumpNamespace(firsttx)+1)
+		{
+			FTexture *lower = operator[](CreateTexture (firsttx, FTexture::TEX_WallPatch));
+			FTexture *upper = operator[](CreateTexture (firsttx+1, FTexture::TEX_WallPatch));
+
+			TexMan.AddTexture (new FMultiPatchTexture (skynum++, lower, upper));
+
+			firsttx += 2;
+			//StartScreen->Progress();
+		}
+		else
+			++firsttx;
+	}
+}
 
 //==========================================================================
 //

@@ -295,6 +295,9 @@ LevelInfo::LevelInfo() : ResetHealth(false), ResetInventory(false),
 	SpawnWithWeaponRaised = false;
 	ForceTally = false;
 	HighScoresGraphic.SetInvalid();
+	Sky.SetInvalid();
+	SkyScrollSpeed = 0.0;
+	SkyHorizonOffset = 0;
 }
 
 FTextureID LevelInfo::GetBorderTexture() const
@@ -555,6 +558,26 @@ protected:
 		}
 		else if(key.CompareNoCase("Translator") == 0)
 			ParseStringAssignment(mapInfo.Translator);
+		else if(key.CompareNoCase("Sky1") == 0)
+		{
+			FString texName;
+			ParseStringAssignment(texName);
+			mapInfo.Sky = TexMan.CheckForTexture(texName, FTexture::TEX_Wall);
+
+			if(sc.CheckToken(','))
+			{
+				bool negative = sc.CheckToken('-');
+				sc.MustGetToken(TK_FloatConst);
+				mapInfo.SkyScrollSpeed = negative ? -sc->decimal : sc->decimal;
+
+				if(sc.CheckToken(','))
+				{
+					negative = sc.CheckToken('-');
+					sc.MustGetToken(TK_IntConst);
+					mapInfo.SkyHorizonOffset = negative ? -sc->number : sc->number;
+				}
+			}
+		}
 		else
 			return false;
 		return true;
