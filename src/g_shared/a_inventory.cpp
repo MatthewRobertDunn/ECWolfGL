@@ -259,7 +259,7 @@ bool AHealth::TryPickup(AActor *toucher)
 			toucher->health = max;
 	}
 
-	Destroy();
+	GoAwayAndDie();
 	return true;
 }
 
