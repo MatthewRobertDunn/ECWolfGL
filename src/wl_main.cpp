@@ -851,7 +851,11 @@ int CheckRatio (int width, int height, int *trueratio)
 			fakeratio = (height * 5/4 == width) ? 4 : 0;
 		}
 	}*/
-	if (abs (height * 64/27 - width) < 5 || abs (height * 43/18 - width) < 5)
+	if (abs (height * 32/9 - width) < 5)
+	{
+		ratio = ASPECT_32_9;
+	}
+	else if (abs (height * 64/27 - width) < 5 || abs (height * 43/18 - width) < 5)
 	{
 		ratio = ASPECT_64_27;
 	}
