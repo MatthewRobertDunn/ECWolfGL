@@ -1174,8 +1174,8 @@ FUNC(Teleport_Relative)
 	fixed y = activator->y + ((dest->GetY() - spot->GetY())<<FRACBITS);
 	if((args[2] & TELEPORT_Center))
 	{
-		x = (activator->x&0xFFFF0000)|0x8000;
-		y = (activator->y&0xFFFF0000)|0x8000;
+		x = (x&0xFFFF0000)|0x8000;
+		y = (y&0xFFFF0000)|0x8000;
 	}
 
 	angle_t angle = (args[1]<<24) +
