@@ -60,7 +60,9 @@ struct NetInit
 
 extern NetInit InitVars;
 
+bool IsArbiter();
 void Init(InitStatusCallback callback);
+void NewGame(int &difficulty, class FString &map, class FName (&playerClassNames)[MAXPLAYERS]);
 void PollControls();
 
 }

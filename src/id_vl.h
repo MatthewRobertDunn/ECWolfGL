@@ -36,6 +36,7 @@ void VL_SetTextMode (void);
 
 void VL_FadeOut     (int start, int end, int red, int green, int blue, int steps);
 void VL_FadeIn      (int start, int end, int steps);
+void VL_FadeClear   ();
 
 byte *VL_LockSurface();
 void VL_UnlockSurface();

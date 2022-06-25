@@ -49,6 +49,7 @@
 #include "wl_draw.h"
 #include "wl_game.h"
 #include "wl_main.h"
+#include "wl_net.h"
 #include "wl_play.h"
 
 AutoMap::Color &AutoMap::Color::operator=(int rgb)
@@ -85,6 +86,11 @@ bool am_pause = true;
 bool am_showratios = false;
 bool am_needsrecalc = false;
 
+static bool AM_ShouldPauseGame()
+{
+	return am_pause && Net::InitVars.mode == Net::MODE_SinglePlayer;
+}
+
 void AM_ChangeResolution()
 {
 	if(StatusBar == NULL)
@@ -113,7 +119,7 @@ void AM_CheckKeys()
 		AM_Main.SetScale(FRACUNIT*122/128, true);
 	}
 
-	if(am_pause)
+	if(AM_ShouldPauseGame())
 	{
 		const fixed PAN_AMOUNT = FixedDiv(FRACUNIT*10, AM_Main.GetScreenScale());
 		const fixed PAN_ANALOG_MULTIPLIER = PAN_AMOUNT/100;
@@ -176,7 +182,7 @@ void AM_Toggle()
 		DrawPlayScreen();
 	}
 
-	if(am_pause)
+	if(AM_ShouldPauseGame())
 	{
 		if(automap == AMA_Normal)
 			Paused |= 2;

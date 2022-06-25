@@ -589,8 +589,7 @@ void Menu::closeMenus(bool close)
 	if(close)
 	{
 		MenuFadeOut();
-		VWB_Clear(ColorMatcher.Pick(RPART(gameinfo.MenuFadeColor), GPART(gameinfo.MenuFadeColor), BPART(gameinfo.MenuFadeColor)),
-			0, 0, screenWidth, screenHeight);
+		VL_FadeClear();
 	}
 
 	Menu::close = close;

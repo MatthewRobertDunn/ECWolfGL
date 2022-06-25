@@ -1048,7 +1048,7 @@ void SpawnPlayer (int tilex, int tiley, int dir)
 	{
 		player_t &player = players[i];
 
-		player.mo = (APlayerPawn *) AActor::Spawn(gamestate.playerClass, ((int32_t)tilex<<TILESHIFT)+TILEGLOBAL/2, ((int32_t)tiley<<TILESHIFT)+TILEGLOBAL/2, 0, 0);
+		player.mo = (APlayerPawn *) AActor::Spawn(gamestate.playerClass[i], ((int32_t)tilex<<TILESHIFT)+TILEGLOBAL/2, ((int32_t)tiley<<TILESHIFT)+TILEGLOBAL/2, 0, 0);
 		player.mo->angle = dir*ANGLE_1;
 		player.mo->player = &player;
 		Thrust (player.mo,0,0); // set some variables

@@ -25,6 +25,7 @@
 #include "wl_inter.h"
 #include "wl_draw.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_text.h"
 #include "v_palette.h"
@@ -38,7 +39,7 @@
 #include <climits>
 
 static int	lastgamemusicoffset;
-const ClassDef *playerClass = NULL;
+static FName playerClass = NAME_None;
 EpisodeInfo	*episode = 0;
 int BORDCOLOR, BORD2COLOR, BORD3COLOR, BKGDCOLOR, STRIPE, STRIPEBG,
 	MENUWIN_BACKGROUND, MENUWIN_TOPBORDER, MENUWIN_BOTBORDER,
@@ -50,6 +51,7 @@ bool menusAreFaded = true;
 EMenuStyle MenuStyle = MENUSTYLE_Wolf;
 
 MENU_LISTENER(EnterControlBase);
+MENU_LISTENER(JoinNetGame);
 
 Menu mainMenu(MENU_X, MENU_Y, MENU_W, 24);
 Menu optionsMenu(80, 80, 190, 28);
@@ -81,7 +83,7 @@ MENU_LISTENER(ViewScoresOrEndGame)
 	}
 	else
 	{
-		if (gameinfo.TrackHighScores == true)
+		if (gameinfo.TrackHighScores == true && Net::InitVars.mode == Net::MODE_SinglePlayer)
 		{
 			MenuFadeOut();
 
@@ -166,9 +168,14 @@ MENU_LISTENER(EnterControlBase)
 
 MENU_LISTENER(SetPlayerClassAndSwitch)
 {
-	playerClass = ClassDef::FindClass(gameinfo.PlayerClasses[which]);
+	playerClass = gameinfo.PlayerClasses[which];
 
 	return true;
+}
+MENU_LISTENER(SetPlayerClassAndJoin)
+{
+	SetPlayerClassAndSwitch(which);
+	return JoinNetGame(which);
 }
 MENU_LISTENER(SetEpisodeAndSwitchToSkill)
 {
@@ -209,11 +216,21 @@ MENU_LISTENER(StartNewGame)
 
 	if(episode == NULL)
 		episode = &EpisodeInfo::GetEpisode(0);
-	if(playerClass == NULL)
-		playerClass = ClassDef::FindClass(gameinfo.PlayerClasses[0]);
 
 	Menu::closeMenus();
 	NewGame(which, episode->StartMap, true, playerClass);
+
+	//
+	// CHANGE "READ THIS!" TO NORMAL COLOR
+	//
+	readThis->setHighlighted(false);
+
+	return true;
+}
+MENU_LISTENER(JoinNetGame)
+{
+	Menu::closeMenus();
+	NewGame(0, "", true);
 
 	//
 	// CHANGE "READ THIS!" TO NORMAL COLOR
@@ -369,6 +386,8 @@ void CreateMenus()
 	const bool useEpisodeMenu = EpisodeInfo::GetNumEpisodes() > 1;
 	if(gameinfo.PlayerClasses.Size() > 1)
 		mainMenu.addItem(new MenuSwitcherMenuItem(language["STR_NG"], playerClasses));
+	else if(!Net::IsArbiter())
+		mainMenu.addItem(new MenuItem(language["STR_NG"], JoinNetGame));
 	else if(useEpisodeMenu)
 		mainMenu.addItem(new MenuSwitcherMenuItem(language["STR_NG"], episodes));
 	else
@@ -392,8 +411,10 @@ void CreateMenus()
 		const char* displayName = cls->Meta.GetMetaString(APMETA_DisplayName);
 		if(!displayName)
 			I_FatalError("Player class %s has no display name.", cls->GetName().GetChars());
-		MenuItem *tmp = new MenuSwitcherMenuItem(displayName, useEpisodeMenu ? episodes : skills, SetPlayerClassAndSwitch);
-		playerClasses.addItem(tmp);
+		if(Net::IsArbiter())
+			playerClasses.addItem(new MenuSwitcherMenuItem(displayName, useEpisodeMenu ? episodes : skills, SetPlayerClassAndSwitch));
+		else
+			playerClasses.addItem(new MenuItem(displayName, SetPlayerClassAndJoin));
 	}
 
 	episodes.setHeadText(language["STR_WHICHEPISODE"]);
@@ -600,15 +621,18 @@ void US_ControlPanel (ScanCode scancode)
 
 	if(ingame)
 	{
+		mainMenu[0]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer); // Require explicit end game for net games
 		mainMenu[mainMenu.countItems()-3]->setText(language["STR_EG"]);
 		mainMenu[mainMenu.countItems()-3]->setEnabled(true);
 		mainMenu[mainMenu.countItems()-2]->setText(language["STR_BG"]);
+		mainMenu[mainMenu.countItems()-2]->setEnabled(true);
 		mainMenu[mainMenu.countItems()-2]->setHighlighted(true);
-		mainMenu[3]->setEnabled(true);
+		mainMenu[3]->setEnabled(Net::IsArbiter());
 	}
 	else
 	{
-		if (gameinfo.TrackHighScores == true)
+		mainMenu[0]->setEnabled(true);
+		if (gameinfo.TrackHighScores == true && Net::InitVars.mode == Net::MODE_SinglePlayer)
 		{
 			mainMenu[mainMenu.countItems()-3]->setText(language["STR_VS"]);
 			mainMenu[mainMenu.countItems()-3]->setEnabled(true);
@@ -619,6 +643,7 @@ void US_ControlPanel (ScanCode scancode)
 			mainMenu[mainMenu.countItems()-3]->setEnabled(false);
 		}
 		mainMenu[mainMenu.countItems()-2]->setText(language["STR_BD"]);
+		mainMenu[mainMenu.countItems()-2]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer);
 		mainMenu[mainMenu.countItems()-2]->setHighlighted(false);
 		mainMenu[3]->setEnabled(false);
 	}

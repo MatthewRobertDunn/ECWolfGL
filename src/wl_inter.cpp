@@ -13,6 +13,7 @@
 #include "wl_agent.h"
 #include "wl_game.h"
 #include "wl_inter.h"
+#include "wl_net.h"
 #include "wl_text.h"
 #include "g_mapinfo.h"
 #include "colormatcher.h"
@@ -889,7 +890,7 @@ void DrawHighScores (void)
 
 void CheckHighScore (int32_t score, const LevelInfo *levelInfo)
 {
-	if (!gameinfo.TrackHighScores)
+	if (!gameinfo.TrackHighScores || Net::InitVars.mode != Net::MODE_SinglePlayer)
 		return;
 
 	word i, j;

@@ -37,7 +37,10 @@
 
 #include "wl_def.h"
 #include "id_in.h"
+#include "id_us.h"
+#include "id_vh.h"
 #include "wl_game.h"
+#include "wl_menu.h"
 #include "wl_play.h"
 #include "wl_net.h"
 #include "m_swap.h"
@@ -46,8 +49,13 @@
 #include "zdoomsupport.h"
 #include "zstring.h"
 
+#include "v_video.h"
+
 #define NET_DEFAULT_PORT 5029
 #define MAXEXTRATICS 4
+
+// TODO: Handle transfer of arbiter status as client quit
+#define Arbiter 0
 
 namespace Net {
 
@@ -56,7 +64,8 @@ enum
 	NET_RequestConnection,
 	NET_ConnectionStart,
 	NET_Ack,
-	NET_TicCmd
+	NET_TicCmd,
+	NET_NewGame
 };
 
 #pragma pack(1)
@@ -84,11 +93,23 @@ struct StartPacket
 	} clients[];
 };
 
+struct NewGamePacket
+{
+	enum { Type = NET_NewGame };
+
+	BYTE type;
+	int32_t TimeCount;
+	int32_t playerClass;
+	BYTE difficulty;
+	char map[9];
+};
+
 struct AckPacket
 {
 	enum { Type = NET_Ack };
 
 	BYTE type;
+	BYTE ackedType;
 	int32_t TimeCount;
 };
 
@@ -169,14 +190,155 @@ static bool CheckPacketType(const UDPpacket *packet)
 }
 
 // Sends an ACK packet to a given address
+template<typename T>
 static void SendAck(IPaddress address, int32_t TimeCount)
 {
 	AckPacket ackData;
 	ackData.type = AckPacket::Type;
+	ackData.ackedType = T::Type;
 	ackData.TimeCount = TimeCount;
 	UDPpacket packet = { -1, (Uint8*)&ackData, sizeof(AckPacket), sizeof(AckPacket), 0, address };
 
 	SDLNet_UDP_Send(Socket, -1, &packet);
+}
+
+template<typename T>
+bool BufferPacket(int client, const T &packet)
+{
+	return false;
+}
+
+template<>
+bool BufferPacket<TicCmdPacket>(int client, const TicCmdPacket &packet)
+{
+	if(packet.TimeCount > gamestate.TimeCount)
+	{
+		Client[client].extratics[Client[client].extrapos] = packet;
+		Client[client].extrapos = (Client[client].extrapos+1)%MAXEXTRATICS;
+	}
+	return true;
+}
+
+template<typename T>
+int UnbufferPacket(T (&packets)[MAXPLAYERS], bool (&received)[MAXPLAYERS])
+{
+	return 0;
+}
+
+template<>
+int UnbufferPacket<TicCmdPacket>(TicCmdPacket (&packets)[MAXPLAYERS], bool (&received)[MAXPLAYERS])
+{
+	int unbufferedCount = 0;
+	for(unsigned int i = 0;i < MAXEXTRATICS;++i)
+	{
+		for(unsigned int c = 0;c < InitVars.numPlayers;++c)
+		{
+			if(c == ConsolePlayer)
+				continue;
+
+			if(Client[c].extratics[i].TimeCount == gamestate.TimeCount)
+			{
+				packets[c] = Client[c].extratics[i];
+				if(received[c])
+					continue;
+				received[c] = true;
+				++unbufferedCount;
+			}
+		}
+	}
+	return unbufferedCount;
+}
+
+// Synchronously exchange a packet to all players and wait for ACK
+template<typename T>
+static void ExchangePacket(T (&packets)[MAXPLAYERS])
+{
+	bool acked[MAXPLAYERS] = { false };
+	bool received[MAXPLAYERS] = { false };
+	int numAcked = 1, numReceived = 1;
+	acked[ConsolePlayer] = true;
+	received[ConsolePlayer] = true;
+
+	numReceived += UnbufferPacket(packets, received);
+
+	UDPpacket outPacket = { -1, (Uint8*)&packets[ConsolePlayer], sizeof(T), sizeof(T), 0 };
+	packets[ConsolePlayer].type = T::Type;
+	packets[ConsolePlayer].TimeCount = gamestate.TimeCount;
+
+	// We need to keep an eye out for packets, but we also need to periodically
+	// resend our ticcmd in case it got lost.
+	unsigned int resend = 0;
+	while(numAcked != InitVars.numPlayers || numReceived != InitVars.numPlayers)
+	{
+		if(resend == 0)
+		{
+			for(unsigned int i = 0;i < InitVars.numPlayers;++i)
+			{
+				if(acked[i])
+					continue;
+
+				outPacket.address = Client[i].address;
+				SDLNet_UDP_Send(Socket, -1, &outPacket);
+			}
+			resend = 100;
+		}
+
+		--resend;
+		SDL_Delay(1);
+		IN_ProcessEvents();
+		while(SDLNet_UDP_Recv(Socket, Packet))
+		{
+			if(CheckPacketType<T>(Packet))
+			{
+				int client = FindClient(Packet->address);
+				if(client < 0)
+				{
+					Printf("Packet recieved from unknown source\n");
+					continue;
+				}
+
+				packets[client] = *reinterpret_cast<T *>(Packet->data);
+				T &data = packets[client];
+
+				if(data.TimeCount != gamestate.TimeCount)
+				{
+					if(BufferPacket<T>(client, packets[client]))
+						SendAck<T>(Packet->address, data.TimeCount);
+					continue;
+				}
+
+				SendAck<T>(Packet->address, data.TimeCount);
+
+				if(received[client])
+					continue;
+				received[client] = true;
+				++numReceived;
+			}
+			else if(CheckPacketType<AckPacket>(Packet))
+			{
+				const AckPacket *data = reinterpret_cast<AckPacket *>(Packet->data);
+				if(data->TimeCount != gamestate.TimeCount || data->ackedType != T::Type)
+					continue;
+
+				int client = FindClient(Packet->address);
+				if(client < 0)
+				{
+					Printf("Packet recieved from unknown source\n");
+					continue;
+				}
+				if(acked[client])
+					continue;
+
+				acked[client] = true;
+				++numAcked;
+			}
+			else if(CheckPacketType<StartPacket>(Packet))
+			{
+				// Host lost our start ack, so send another one
+				SendAck<StartPacket>(Client[0].address, 0xFFFFFFFF);
+			}
+		}
+	}
 }
 
 static void StartHost(InitStatusCallback callback)
@@ -346,7 +508,7 @@ static void StartJoin(InitStatusCallback callback)
 	callback("Sync recieved");
 
 	// Send ACK and forget, if we're waiting for ticcmd and we get a start, we'll send another ack then.
-	SendAck(address, 0xFFFFFFFF);
+	SendAck<StartPacket>(address, 0xFFFFFFFF);
 }
 
 static void Shutdown()
@@ -375,123 +537,68 @@ void Init(InitStatusCallback callback)
 		StartJoin(callback);
 }
 
+bool IsArbiter()
+{
+	return ConsolePlayer == Arbiter;
+}
+
+void NewGame(int &difficulty, FString &map, FName (&playerClassNames)[MAXPLAYERS])
+{
+	if(InitVars.numPlayers > 1)
+	{
+		WindowX = WindowY = 0;
+		WindowW = 320;
+		WindowH = 200;
+		Message("Waiting for all players to start");
+	}
+
+	NewGamePacket newGamePackets[MAXPLAYERS];
+	NewGamePacket &myNewGameRequest = newGamePackets[ConsolePlayer];
+
+	myNewGameRequest.difficulty = difficulty;
+	myNewGameRequest.playerClass = playerClassNames[ConsolePlayer];
+	strncpy(myNewGameRequest.map, map, 8);
+	myNewGameRequest.map[8] = 0;
+
+	ExchangePacket(newGamePackets);
+	for(unsigned int client = 0;client < InitVars.numPlayers;++client)
+	{
+		playerClassNames[client] = FName(static_cast<ENamedName>(newGamePackets[client].playerClass));
+
+		if(client == Arbiter)
+		{
+			difficulty = newGamePackets[client].difficulty;
+			newGamePackets[client].map[8] = 0;
+			map = newGamePackets[client].map;
+		}
+	}
+}
+
 void PollControls()
 {
-	bool acked[MAXPLAYERS] = { false };
+	TicCmdPacket ticcmdPackets[MAXPLAYERS];
 	bool controls[MAXPLAYERS] = { false };
-	unsigned int numAcked = 1;
-	unsigned int numControls = 1;
-	acked[ConsolePlayer] = true;
 
 	// We need to send a ticcmd to each player in the game.
-	TicCmdPacket ticcmdData;
-	UDPpacket ticcmdPacket = { -1, (Uint8*)&ticcmdData, sizeof(TicCmdPacket), sizeof(TicCmdPacket), 0 };
-	ticcmdData.type = TicCmdPacket::Type;
-	ticcmdData.TimeCount = gamestate.TimeCount;
+	TicCmdPacket &ticcmdData = ticcmdPackets[ConsolePlayer];
 	ticcmdData.controlx = control[ConsolePlayer].controlx;
 	ticcmdData.controly = control[ConsolePlayer].controly;
 	ticcmdData.controlstrafe = control[ConsolePlayer].controlstrafe;
 	memcpy(ticcmdData.buttonstate, control[ConsolePlayer].buttonstate, sizeof(control[ConsolePlayer].buttonstate));
 	memcpy(ticcmdData.buttonheld, control[ConsolePlayer].buttonheld, sizeof(control[ConsolePlayer].buttonheld));
 
-	for(unsigned int i = 0;i < MAXEXTRATICS;++i)
+	ExchangePacket(ticcmdPackets);
+	for(unsigned int client = 0;client < InitVars.numPlayers;++client)
 	{
-		for(unsigned int c = 0;c < InitVars.numPlayers;++c)
-		{
-			if(c == ConsolePlayer)
-				continue;
+		if(client == ConsolePlayer)
+			continue;
 
-			if(Client[c].extratics[i].TimeCount == gamestate.TimeCount)
-			{
-				const TicCmdPacket *data = &Client[c].extratics[i];
-
-				if(controls[c])
-					continue;
-				controls[c] = true;
-				++numControls;
-
-				control[c].controlx = data->controlx;
-				control[c].controly = data->controly;
-				control[c].controlstrafe = data->controlstrafe;
-				memcpy(control[c].buttonstate, data->buttonstate, sizeof(control[c].buttonstate));
-				memcpy(control[c].buttonheld, data->buttonheld, sizeof(control[c].buttonheld));
-			}
-		}
-	}
-
-	// We need to keep an eye out for packets, but we also need to periodically
-	// resend our ticcmd in case it got lost.
-	unsigned int resend = 0;
-	while(numAcked != InitVars.numPlayers || numControls != InitVars.numPlayers)
-	{
-		if(resend == 0)
-		{
-			for(unsigned int i = 0;i < InitVars.numPlayers;++i)
-			{
-				if(acked[i])
-					continue;
-
-				ticcmdPacket.address = Client[i].address;
-				SDLNet_UDP_Send(Socket, -1, &ticcmdPacket);
-			}
-			resend = 100;
-		}
-
-		--resend;
-		SDL_Delay(1);
-		IN_ProcessEvents();
-		while(SDLNet_UDP_Recv(Socket, Packet))
-		{
-			if(CheckPacketType<TicCmdPacket>(Packet))
-			{
-				// Controls from another player
-				const TicCmdPacket *data = reinterpret_cast<TicCmdPacket *>(Packet->data);
-				int client = FindClient(Packet->address);
-
-				if(data->TimeCount != gamestate.TimeCount)
-				{
-					if(data->TimeCount > gamestate.TimeCount)
-					{
-						Client[client].extratics[Client[client].extrapos] = *data;
-						Client[client].extrapos = (Client[client].extrapos+1)%MAXEXTRATICS;
-						SendAck(Packet->address, data->TimeCount);
-					}
-					continue;
-				}
-
-				SendAck(Packet->address, data->TimeCount);
-
-				if(controls[client])
-					continue;
-				controls[client] = true;
-				++numControls;
-
-				control[client].controlx = data->controlx;
-				control[client].controly = data->controly;
-				control[client].controlstrafe = data->controlstrafe;
-				memcpy(control[client].buttonstate, data->buttonstate, sizeof(control[client].buttonstate));
-				memcpy(control[client].buttonheld, data->buttonheld, sizeof(control[client].buttonheld));
-			}
-			else if(CheckPacketType<AckPacket>(Packet))
-			{
-				const AckPacket *data = reinterpret_cast<AckPacket *>(Packet->data);
-				if(data->TimeCount != gamestate.TimeCount)
-					continue;
-
-				// Good! A player got our controls.
-				int client = FindClient(Packet->address);
-				if(acked[client])
-					continue;
-
-				acked[FindClient(Packet->address)] = true;
-				++numAcked;
-			}
-			else if(CheckPacketType<StartPacket>(Packet))
-			{
-				// Host lost our start ack, so send another one
-				SendAck(Client[0].address, 0xFFFFFFFF);
-			}
-		}
+		TicCmdPacket &data = ticcmdPackets[client];
+		control[client].controlx = data.controlx;
+		control[client].controly = data.controly;
+		control[client].controlstrafe = data.controlstrafe;
+		memcpy(control[client].buttonstate, data.buttonstate, sizeof(control[client].buttonstate));
+		memcpy(control[client].buttonheld, data.buttonheld, sizeof(control[client].buttonheld));
 	}
 }
 

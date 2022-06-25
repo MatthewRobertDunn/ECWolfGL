@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include "c_cvars.h"
+#include "colormatcher.h"
 #include "wl_def.h"
 #include "id_in.h"
 #include "id_vl.h"
@@ -205,6 +206,22 @@ void VL_FadeIn (int start, int end, int steps)
 {
 	if(screenfaded)
 		VL_Fade(end, start, fadeR, fadeG, fadeB, steps);
+}
+
+/*
+=================
+=
+= VL_FadeIn
+= Match fade color and remove palette blend
+=
+=================
+*/
+
+void VL_FadeClear ()
+{
+	VWB_Clear(ColorMatcher.Pick(fadeR, fadeG, fadeB), 0, 0, screenWidth, screenHeight);
+	V_SetBlend(0, 0, 0, 0);
+	VH_UpdateScreen();
 }
 
 /*

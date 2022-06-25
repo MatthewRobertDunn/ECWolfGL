@@ -21,7 +21,7 @@ extern struct gametype
 {
 	char		mapname[9];
 	const class SkillInfo *difficulty;
-	const class ClassDef *playerClass;
+	const class ClassDef *playerClass[MAXPLAYERS];
 
 	FTextureID  faceframe;
 

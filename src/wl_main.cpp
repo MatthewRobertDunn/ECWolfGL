@@ -135,17 +135,22 @@ int     param_audiobuffer = 2048 / (44100 / param_samplerate);
 =====================
 */
 
-void NewGame (int difficulty, const FString &map, bool displayBriefing, const ClassDef *playerClass)
+void NewGame (int difficulty, FString map, bool displayBriefing, FName playerClass)
 {
-	if(!playerClass)
-		playerClass = ClassDef::FindClass(gameinfo.PlayerClasses[0]);
-
 	// void cast can be removed when we move to C++11
 	memset ((void*)&gamestate,0,sizeof(gamestate));
+
+	FName playerClassNames[MAXPLAYERS];
+	playerClassNames[ConsolePlayer] = playerClass != NAME_None ? playerClass : gameinfo.PlayerClasses[0];
+
+	Net::NewGame(difficulty, map, playerClassNames);
+
 	gamestate.difficulty = &SkillInfo::GetSkill(difficulty);
 	strncpy(gamestate.mapname, map, 8);
 	gamestate.mapname[8] = 0;
-	gamestate.playerClass = playerClass;
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		gamestate.playerClass[i] = ClassDef::FindClass(playerClassNames[i]);
+
 	levelInfo = &LevelInfo::Find(map);
 
 	if(displayBriefing)
@@ -496,11 +501,6 @@ static void InitGame()
 	CreateStatusBar();
 
 //
-// initialize the menusalcProjection
-	printf("CreateMenus: Preparing the menu system...\n");
-	CreateMenus();
-
-//
 // Load Noah's Ark quiz
 //
 	Dialog::LoadGlobalModule("NOAHQUIZ");
@@ -509,6 +509,11 @@ static void InitGame()
 // Net game?
 //
 	Net::Init(DrawStartupConsole);
+
+//
+// initialize the menusalcProjection
+	printf("CreateMenus: Preparing the menu system...\n");
+	CreateMenus();
 
 //
 // Finish signon screen

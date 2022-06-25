@@ -57,6 +57,7 @@
 #include "wl_loadsave.h"
 #include "wl_main.h"
 #include "wl_menu.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "textures/textures.h"
 
@@ -442,7 +443,7 @@ MENU_LISTENER(PerformSaveGame)
 		saveGame.setCurrentPosition(saveGame.getNumItems()-1);
 		loadGame.setCurrentPosition(saveGame.getNumItems()-1);
 
-		mainMenu[2]->setEnabled(true);
+		mainMenu[2]->setEnabled(Net::IsArbiter());
 	}
 	else
 	{
@@ -487,7 +488,7 @@ MENU_LISTENER(LoadSaveGame)
 
 void InitMenus()
 {
-	bool canLoad = SetupSaveGames();
+	bool canLoad = SetupSaveGames() && Net::IsArbiter();
 
 	loadGame.setHeadPicture("M_LOADGM");
 	saveGame.setHeadPicture("M_SAVEGM");
@@ -531,8 +532,15 @@ static void Serialize(FArchive &arc)
 		gamestate.difficulty = &SkillInfo::GetSkill(difficulty);
 	}
 
-	arc << gamestate.playerClass
-		<< gamestate.secretcount
+	arc << gamestate.playerClass[0];
+	if(SaveVersion >= 1599444347)
+	{
+		unsigned int maxPlayers = MAXPLAYERS;
+		arc << maxPlayers;
+		for(unsigned int i = 1;i < maxPlayers;++i)
+			arc << gamestate.playerClass[i];
+	}
+	arc << gamestate.secretcount
 		<< gamestate.treasurecount
 		<< gamestate.killcount
 		<< gamestate.secrettotal
