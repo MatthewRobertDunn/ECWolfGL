@@ -185,7 +185,7 @@ static int32_t lasttimecount;
 
 int32_t GetTimeCount()
 {
-	return SDL_GetTicks()*7/100;
+	return MS2TICS(SDL_GetTicks());
 }
 
 /*
@@ -211,11 +211,11 @@ void CalcTics()
 		ResetTimeCount();
 
 	uint32_t curtime = SDL_GetTicks();
-	tics = (curtime * 7) / 100 - lasttimecount;
+	tics = MS2TICS(curtime) - lasttimecount;
 	if(!tics)
 	{
 		// wait until end of current tic
-		SDL_Delay(((lasttimecount + 1) * 100) / 7 - curtime);
+		SDL_Delay(TICS2MS(lasttimecount + 1) - curtime);
 		tics = 1;
 	}
 	else if(noadaptive)
@@ -235,7 +235,7 @@ void ResetTimeCount()
 void Delay(int wolfticks)
 {
 	if(wolfticks>0)
-		SDL_Delay(wolfticks * 100 / 7);
+		SDL_Delay(TICS2MS(wolfticks));
 }
 
 /*
@@ -625,12 +625,12 @@ void ProcessEvents()
 		// wait up to DEMOTICS Wolf tics
 		uint32_t curtime = SDL_GetTicks();
 		lasttimecount += DEMOTICS;
-		int32_t timediff = (lasttimecount * 100) / 7 - curtime;
+		int32_t timediff = TICS2MS(lasttimecount) - curtime;
 		if(timediff > 0)
 			SDL_Delay(timediff);
 
 		if(timediff < -2 * DEMOTICS)       // more than 2-times DEMOTICS behind?
-			lasttimecount = (curtime * 7) / 100;    // yes, set to current timecount
+			lasttimecount = MS2TICS(curtime);    // yes, set to current timecount
 
 		tics = DEMOTICS;
 	}

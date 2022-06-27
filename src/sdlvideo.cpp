@@ -807,6 +807,22 @@ void SDLFB::Update ()
 
 	DrawRateStuff ();
 
+	if (NeedGammaUpdate)
+	{
+		bool Windowed = false;
+		NeedGammaUpdate = false;
+		CalcGamma ((Windowed || rgamma == 0.f) ? Gamma : (Gamma * rgamma), GammaTable[0]);
+		CalcGamma ((Windowed || ggamma == 0.f) ? Gamma : (Gamma * ggamma), GammaTable[1]);
+		CalcGamma ((Windowed || bgamma == 0.f) ? Gamma : (Gamma * bgamma), GammaTable[2]);
+		NeedPalUpdate = true;
+	}
+
+	if (NeedPalUpdate)
+	{
+		NeedPalUpdate = false;
+		UpdateColors ();
+	}
+
 #if 0
 #ifndef __APPLE__
 	if(vid_maxfps && !cl_capfps)
@@ -929,22 +945,6 @@ void SDLFB::Update ()
 #endif
 
 	//BlitCycles.Unclock();
-
-	if (NeedGammaUpdate)
-	{
-		bool Windowed = false;
-		NeedGammaUpdate = false;
-		CalcGamma ((Windowed || rgamma == 0.f) ? Gamma : (Gamma * rgamma), GammaTable[0]);
-		CalcGamma ((Windowed || ggamma == 0.f) ? Gamma : (Gamma * ggamma), GammaTable[1]);
-		CalcGamma ((Windowed || bgamma == 0.f) ? Gamma : (Gamma * bgamma), GammaTable[2]);
-		NeedPalUpdate = true;
-	}
-	
-	if (NeedPalUpdate)
-	{
-		NeedPalUpdate = false;
-		UpdateColors ();
-	}
 }
 
 void SDLFB::UpdateColors ()

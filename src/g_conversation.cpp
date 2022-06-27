@@ -556,7 +556,9 @@ void StartConversation(AActor *npc)
 				TAG_DONE);
 
 			VW_UpdateScreen();
-			VL_WaitVBL(140);
+			// Vanilla waited for sound to finish and then waited 30 frames.
+			// No bonus sound is about 42 frames long.
+			VL_WaitVBL(72);
 
 			*page = choice.NextPage;
 			if(choice.CloseDialog)

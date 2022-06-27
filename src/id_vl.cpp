@@ -42,7 +42,6 @@ unsigned windowedScreenHeight = 480;
 unsigned screenBits = static_cast<unsigned> (-1);      // use "best" color depth according to libSDL
 float screenGamma = 1.0f;
 
-SDL_Surface *curSurface = NULL;
 unsigned curPitch;
 
 unsigned scaleFactorX, scaleFactorY;
@@ -156,17 +155,17 @@ void VL_Fade (int start, int end, int red, int green, int blue, int steps)
 	end <<= FRACBITS;
 	start <<= FRACBITS;
 
-	const fixed aStep = (end-start)/steps;
-
-	VL_WaitVBL(1);
+	const int32_t fadems = TICS2MS(steps);
+	const int32_t startms = SDL_GetTicks();
+	const fixed aStep = (end-start)/fadems;
 
 //
 // fade through intermediate frames
 //
-	for (int a = start;(aStep < 0 ? a > end : a < end);a += aStep)
+	int32_t curtime;
+	while((curtime = SDL_GetTicks() - startms) < fadems)
 	{
-		if(!usedoublebuffering || screenBits == 8) VL_WaitVBL(1);
-		V_SetBlend(red, green, blue, a>>FRACBITS);
+		V_SetBlend(red, green, blue, (start+curtime*aStep)>>FRACBITS);
 		VH_UpdateScreen();
 	}
 
@@ -174,8 +173,6 @@ void VL_Fade (int start, int end, int red, int green, int blue, int steps)
 // final color
 //
 	V_SetBlend (red,green,blue,end>>FRACBITS);
-	// Not quite sure why I need to call this twice.
-	VH_UpdateScreen();
 	VH_UpdateScreen();
 
 	screenfaded = end != 0;

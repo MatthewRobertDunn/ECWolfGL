@@ -96,6 +96,10 @@ typedef SDWORD int32;
 #define MAXTICS 10
 #define DEMOTICS        4
 
+// Milliseconds/tics conversion with extra precision
+static inline uint32_t MS2TICS(uint32_t ms) { return ms * 7 / 100; }
+static inline uint32_t TICS2MS(uint32_t tics) { return tics * 100 / 7; }
+
 //
 // tile constants
 //
@@ -387,8 +391,6 @@ static inline fixed FixedDiv(fixed a, fixed b)
 {
 	return (fixed)(((((int64_t)a)<<32) / b) >> 16);
 }
-
-#define GetTicks() ((SDL_GetTicks()*7)/100)
 
 #define CHECKMALLOCRESULT(x) if(!(x)) I_FatalError("Out of memory at %s:%i", __FILE__, __LINE__)
 

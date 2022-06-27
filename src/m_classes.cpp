@@ -540,7 +540,7 @@ void Menu::drawGunHalfStep(int x, int y)
 		VWB_DrawGraphic (cursor, x, y-2, MENU_CENTER);
 		VW_UpdateScreen ();
 		SD_PlaySound ("menu/move1");
-		SDL_Delay (8 * 100 / 7);
+		SDL_Delay (TICS2MS(8));
 	}
 }
 
