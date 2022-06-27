@@ -458,7 +458,7 @@ void QuizMenu::loadQuestion(const Page *page)
 	hint = page->Hint;
 	if(hint[0] == '$')
 		hint = language[hint.Mid(1)];
-	hint.Format("(%s)", hint.GetChars());
+	hint.Format("(%s)", FString(hint).GetChars());
 
 	for(unsigned int i = 0;i < page->Choices.Size();++i)
 	{
