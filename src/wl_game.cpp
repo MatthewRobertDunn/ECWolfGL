@@ -541,7 +541,7 @@ void RecordDemo (void)
 
 	SetupGameLevel ();
 
-	if(usedoublebuffering) VH_UpdateScreen();
+	VH_UpdateScreen();
 	fizzlein = true;
 
 	PlayLoop ();
@@ -691,7 +691,7 @@ void Died (void)
 	//
 	FinishPaletteShifts ();
 
-	if(usedoublebuffering) VH_UpdateScreen();
+	VH_UpdateScreen();
 
     if (gamestate.difficulty->LivesCount >= 0) {
         --players[0].lives;

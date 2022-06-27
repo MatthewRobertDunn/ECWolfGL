@@ -5,7 +5,7 @@
 
 //===========================================================================
 
-extern  bool	fullscreen, usedoublebuffering;
+extern  bool	fullscreen;
 extern  unsigned screenWidth, screenHeight, screenBits, curPitch;
 extern  unsigned fullScreenWidth, fullScreenHeight;
 extern  unsigned windowedScreenWidth, windowedScreenHeight;

@@ -186,7 +186,7 @@ static void InterWriteCounter(int start, int end, int step, unsigned int x, unsi
 		}
 		else if(!((i++) % sndfreq))
 			SD_PlaySound (sound);
-		if(!usedoublebuffering || !(start & 1)) VW_UpdateScreen ();
+		if(!(start & 1)) VW_UpdateScreen ();
 		do
 		{
 			BJ_Breathe ();

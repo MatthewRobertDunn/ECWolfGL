@@ -32,7 +32,6 @@
 #endif
 
 bool fullscreen = true;
-bool usedoublebuffering = true;
 unsigned screenWidth = 640;
 unsigned screenHeight = 480;
 unsigned fullScreenWidth = 640;

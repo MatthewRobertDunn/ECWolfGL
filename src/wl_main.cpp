@@ -1006,8 +1006,6 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 		}
 		else IFARG("--noadaptive")
 			noadaptive = true;
-		else IFARG("--nodblbuf")
-			usedoublebuffering = false;
 		else IFARG("--extravbls")
 		{
 			if(++i >= argc)
@@ -1154,7 +1152,6 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 			" --bits <b>             Sets the screen color depth\n"
 			"                        (use this when you have palette/fading problems\n"
 			"                        allowed: 8, 16, 24, 32, default: \"best\" depth)\n"
-			" --nodblbuf             Don't use SDL's double buffering\n"
 			" --extravbls <vbls>     Sets a delay after each frame, which may help to\n"
 			"                        reduce flickering (unit is currently 8 ms, default: 0)\n"
 			" --joystick <index>     Use the index-th joystick if available\n"
