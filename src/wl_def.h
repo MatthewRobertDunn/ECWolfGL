@@ -427,49 +427,4 @@ static inline longword READLONGWORD(byte *&ptr)
 	return val;
 }
 
-
-/*
-=============================================================================
-
-						FEATURE DEFINITIONS
-
-=============================================================================
-*/
-
-#ifdef USE_FEATUREFLAGS
-	// The currently available feature flags
-	#define FF_STARSKY      0x0001
-	#define FF_CLOUDSKY     0x0004
-	#define FF_RAIN         0x0010
-	#define FF_SNOW         0x0020
-
-	// The ffData... variables contain the 16-bit values of the according corners of the current level.
-	// The corners are overwritten with adjacent tiles after initialization in SetupGameLevel
-	// to avoid interpretation as e.g. doors.
-	extern int ffDataTopLeft, ffDataTopRight, ffDataBottomLeft, ffDataBottomRight;
-
-	/*************************************************************
-	* Current usage of ffData... variables:
-	* ffDataTopLeft:     lower 8-bit: ShadeDefID
-	* ffDataTopRight:    FeatureFlags
-	* ffDataBottomLeft:  CloudSkyDefID or ParallaxStartTexture
-	* ffDataBottomRight: unused
-	*************************************************************/
-
-	// The feature flags are stored as a wall in the upper right corner of each level
-	static inline word GetFeatureFlags()
-	{
-		return ffDataTopRight;
-	}
-
-#endif
-
-#ifdef USE_PARALLAX
-	void DrawParallax(byte *vbuf, unsigned vbufPitch);
-#endif
-
-#ifdef USE_DIR3DSPR
-	void Scale3DShape(byte *vbuf, unsigned vbufPitch, statobj_t *ob);
-#endif
-
 #endif

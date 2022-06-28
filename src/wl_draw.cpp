@@ -1175,7 +1175,7 @@ void R_RenderView()
 //
 // follow the walls from there to the right, drawing as we go
 //
-#if defined(USE_FEATUREFLAGS) && defined(USE_STARSKY)
+#if 0 // USE_STARSKY
 	if(GetFeatureFlags() & FF_STARSKY)
 		DrawStarSky(vbuf, vbufPitch);
 #endif
@@ -1183,7 +1183,7 @@ void R_RenderView()
 	WallRefresh ();
 
 	DrawParallax(vbuf, vbufPitch);
-#if defined(USE_FEATUREFLAGS) && defined(USE_CLOUDSKY)
+#if 0 // USE_CLOUDSKY
 	if(GetFeatureFlags() & FF_CLOUDSKY)
 		DrawClouds(vbuf, vbufPitch, min_wallheight);
 #endif
@@ -1194,11 +1194,11 @@ void R_RenderView()
 //
 	DrawScaleds();                  // draw scaled stuff
 
-#if defined(USE_FEATUREFLAGS) && defined(USE_RAIN)
+#if 0 // USE_RAIN
 	if(GetFeatureFlags() & FF_RAIN)
 		DrawRain(vbuf, vbufPitch);
 #endif
-#if defined(USE_FEATUREFLAGS) && defined(USE_SNOW)
+#if 0 // USE_SNOW
 	if(GetFeatureFlags() & FF_SNOW)
 		DrawSnow(vbuf, vbufPitch);
 #endif

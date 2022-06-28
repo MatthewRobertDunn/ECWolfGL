@@ -61,10 +61,6 @@ gametype        gamestate;
 
 NewMap_t NewMap;
 
-#ifdef USE_FEATUREFLAGS
-int ffDataTopLeft, ffDataTopRight, ffDataBottomLeft, ffDataBottomRight;
-#endif
-
 //
 // ELEVATOR BACK MAPS - REMEMBER (-1)!!
 //
@@ -267,19 +263,6 @@ void SetupGameLevel (void)
 	CA_CacheMap (gamestate.mapname, loadedgame);
 	if (!loadedgame)
 		StartMusic ();
-
-#ifdef USE_FEATUREFLAGS
-	// Temporary definition to make things clearer
-	#define MXX MAPSIZE - 1
-
-	// Read feature flags data from map corners and overwrite corners with adjacent tiles
-	ffDataTopLeft     = MAPSPOT(0,   0,   0); MAPSPOT(0,   0,   0) = MAPSPOT(1,       0,       0);
-	ffDataTopRight    = MAPSPOT(MXX, 0,   0); MAPSPOT(MXX, 0,   0) = MAPSPOT(MXX,     1,       0);
-	ffDataBottomRight = MAPSPOT(MXX, MXX, 0); MAPSPOT(MXX, MXX, 0) = MAPSPOT(MXX - 1, MXX,     0);
-	ffDataBottomLeft  = MAPSPOT(0,   MXX, 0); MAPSPOT(0,   MXX, 0) = MAPSPOT(0,       MXX - 1, 0);
-
-	#undef MXX
-#endif
 
 //
 // spawn actors

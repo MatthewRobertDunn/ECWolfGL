@@ -1072,7 +1072,7 @@ int32_t funnyticount;
 
 void PlayLoop (void)
 {
-#if defined(USE_FEATUREFLAGS) && defined(USE_CLOUDSKY)
+#if 0 // USE_CLOUDSKY
 	if(GetFeatureFlags() & FF_CLOUDSKY)
 		InitSky();
 #endif
