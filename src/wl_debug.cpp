@@ -122,11 +122,11 @@ void PictureGrabber (void)
 //===========================================================================
 
 
-static void GiveAllWeaponsAndAmmo()
+static void GiveAllWeaponsAndAmmo(player_t &player)
 {
 	// Give Weapons and Max out ammo
 	const ClassDef *bestWeapon = NULL;
-	int bestWeaponOrder = players[0].ReadyWeapon ? players[0].ReadyWeapon->GetClass()->Meta.GetMetaInt(AWMETA_SelectionOrder) : INT_MAX;
+	int bestWeaponOrder = player.ReadyWeapon ? player.ReadyWeapon->GetClass()->Meta.GetMetaInt(AWMETA_SelectionOrder) : INT_MAX;
 
 	ClassDef::ClassIterator iter = ClassDef::GetClassIterator();
 	ClassDef::ClassPair *pair;
@@ -159,7 +159,7 @@ static void GiveAllWeaponsAndAmmo()
 				}
 			}
 
-			if(!inv->CallTryPickup(players[0].mo))
+			if(!inv->CallTryPickup(player.mo))
 				inv->Destroy();
 		}
 	}
@@ -167,12 +167,12 @@ static void GiveAllWeaponsAndAmmo()
 	// Switch to best weapon
 	if(bestWeapon)
 	{
-		AWeapon *weapon = static_cast<AWeapon *>(players[0].mo->FindInventory(bestWeapon));
+		AWeapon *weapon = static_cast<AWeapon *>(player.mo->FindInventory(bestWeapon));
 		if(weapon)
-			players[0].PendingWeapon = weapon;
+			player.PendingWeapon = weapon;
 	}
 	else
-		players[0].PendingWeapon = WP_NOCHANGE;
+		player.PendingWeapon = WP_NOCHANGE;
 }
 
 /*
@@ -244,9 +244,9 @@ int DebugKeys (void)
 	{
 		FString position;
 		position.Format("X: %d\nY: %d\nA: %d",
-			players[0].mo->x >> 10,
-			players[0].mo->y >> 10,
-			players[0].mo->angle/ANGLE_1
+			players[ConsolePlayer].mo->x >> 10,
+			players[ConsolePlayer].mo->y >> 10,
+			players[ConsolePlayer].mo->angle/ANGLE_1
 		);
 		US_CenterWindow (14,6);
 		US_PrintCentered(position);
@@ -276,16 +276,16 @@ int DebugKeys (void)
 	if (Keyboard[sc_H])             // H = hurt self
 	{
 		IN_ClearKeysDown ();
-		players[0].TakeDamage (16,NULL);
+		players[ConsolePlayer].TakeDamage (16,NULL);
 	}
 	else if (Keyboard[sc_I])        // I = item cheat
 	{
 		US_CenterWindow (12,3);
 		US_PrintCentered ("Free items!");
 		VW_UpdateScreen();
-		GiveAllWeaponsAndAmmo();
-		players[0].GivePoints (100000);
-		players[0].health = 100;
+		GiveAllWeaponsAndAmmo(players[ConsolePlayer]);
+		players[ConsolePlayer].GivePoints (100000);
+		players[ConsolePlayer].health = 100;
 		StatusBar->DrawStatusBar();
 		IN_Ack ();
 		return 1;
@@ -300,7 +300,7 @@ int DebugKeys (void)
 		if (!esc)
 		{
 			level = atoi (str);
-			P_GiveKeys(players[0].mo, level);
+			P_GiveKeys(players[ConsolePlayer].mo, level);
 		}
 		return 1;
 	}
@@ -469,19 +469,19 @@ int DebugKeys (void)
 			const ClassDef *cls = ClassDef::FindClass(str);
 			if(summon && cls)
 			{
-				fixed distance = FixedMul(cls->GetDefault()->radius + players[0].mo->radius, 0x16A0A); // sqrt(2)
+				fixed distance = FixedMul(cls->GetDefault()->radius + players[ConsolePlayer].mo->radius, 0x16A0A); // sqrt(2)
 				AActor *newobj = AActor::Spawn(cls,
-					players[0].mo->x + FixedMul(distance, finecosine[players[0].mo->angle>>ANGLETOFINESHIFT]),
-					players[0].mo->y - FixedMul(distance, finesine[players[0].mo->angle>>ANGLETOFINESHIFT]),
+					players[ConsolePlayer].mo->x + FixedMul(distance, finecosine[players[ConsolePlayer].mo->angle>>ANGLETOFINESHIFT]),
+					players[ConsolePlayer].mo->y - FixedMul(distance, finesine[players[ConsolePlayer].mo->angle>>ANGLETOFINESHIFT]),
 					0, 0);
-				newobj->angle = players[0].mo->angle;
+				newobj->angle = players[ConsolePlayer].mo->angle;
 			}
 			else
 			{
 				if(!cls || !cls->IsDescendantOf(NATIVE_CLASS(Inventory)))
 					return 1;
 
-				players[0].mo->GiveInventory(cls, 0, false);
+				players[ConsolePlayer].mo->GiveInventory(cls, 0, false);
 			}
 		}
 		return 1;
@@ -564,19 +564,19 @@ int DebugKeys (void)
 	return 0;
 }
 
-static void GiveMLI()
+static void GiveMLI(player_t &player)
 {
-	players[0].health = 100;
-	players[0].score = 0;
+	player.health = 100;
+	player.score = 0;
 	gamestate.TimeCount += 42000L;
-	GiveAllWeaponsAndAmmo();
-	P_GiveKeys(players[0].mo, 101);
+	GiveAllWeaponsAndAmmo(player);
+	P_GiveKeys(player.mo, 101);
 	DrawPlayScreen();
 }
 
 void DebugMLI()
 {
-	GiveMLI();
+	GiveMLI(players[ConsolePlayer]);
 
 	ClearSplitVWB ();
 
@@ -626,7 +626,7 @@ void DebugGod(bool noah)
 
 	if (noah)
 	{
-		GiveMLI();
+		GiveMLI(players[ConsolePlayer]);
 	}
 
 	if (viewsize < 18)

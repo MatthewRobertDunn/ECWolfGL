@@ -532,10 +532,11 @@ static void Serialize(FArchive &arc)
 		gamestate.difficulty = &SkillInfo::GetSkill(difficulty);
 	}
 
+	unsigned int maxPlayers = MAXPLAYERS;
+
 	arc << gamestate.playerClass[0];
 	if(SaveVersion >= 1599444347)
 	{
-		unsigned int maxPlayers = MAXPLAYERS;
 		arc << maxPlayers;
 		for(unsigned int i = 1;i < maxPlayers;++i)
 			arc << gamestate.playerClass[i];
@@ -562,7 +563,8 @@ static void Serialize(FArchive &arc)
 
 	arc << map;
 
-	players[0].Serialize(arc);
+	for(unsigned int i = 0;i < (SaveVersion >= 1656330251 ? maxPlayers : 1);++i)
+		players[i].Serialize(arc);
 }
 
 #define SNAP_ID MAKE_ID('s','n','A','p')
@@ -633,7 +635,7 @@ void SaveScreenshot(FILE *file)
 
 	vid_aspect = ASPECT_16_10;
 	NewViewSize(21, SAVEPICWIDTH, SAVEPICHEIGHT);
-	CalcProjection(players[0].mo->radius);
+	CalcProjection(players[ConsolePlayer].mo->radius);
 	R_RenderView();
 
 	M_CreatePNG(file, vbuf, GPalette.BaseColors, SS_PAL, SAVEPICWIDTH, SAVEPICHEIGHT, vbufPitch);

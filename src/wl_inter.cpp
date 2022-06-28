@@ -261,6 +261,24 @@ static void InterAddBonus(unsigned int bonus, bool count=false)
 	VW_UpdateScreen ();
 }
 
+// Divy up bonus points to all players
+static void InterGiveBonus(unsigned int bonus)
+{
+	unsigned int commonBonus = bonus/Net::InitVars.numPlayers;
+	unsigned int extraBonus = bonus%Net::InitVars.numPlayers;
+
+	// We'll give the remainder points to the lowest scoring player because why not?
+	player_t *extraRecipient = players;
+	for(unsigned int i = 1;i < Net::InitVars.numPlayers;++i)
+	{
+		if(players[i].score < extraRecipient->score)
+			extraRecipient = &players[i];
+	}
+
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		players[i].GivePoints(commonBonus + (&players[i] == extraRecipient ? extraBonus : 0));
+}
+
 /**
  * Displays a percentage ratio, counting up to the ratio.
  * Returns true if the intermission has been acked and should be skipped.
@@ -386,7 +404,7 @@ static void InterDoBonus()
 	VW_UpdateScreen ();
 	VW_FadeIn ();
 
-	players[0].GivePoints (levelInfo->LevelBonus);
+	InterGiveBonus (levelInfo->LevelBonus);
 }
 
 static void InterDoNormal()
@@ -437,7 +455,7 @@ static void InterDoNormal()
 	InterCountRatio(InterState.sr, 296, 112+16);
 	InterCountRatio(InterState.tr, 296, 112+32);
 
-	players[0].GivePoints (InterState.bonus);
+	InterGiveBonus (InterState.bonus);
 }
 
 static void InterDoGraphical()
@@ -500,7 +518,7 @@ static void InterDoGraphical()
 	InterCountRatio(InterState.tr, 232, 104+16);
 	InterCountRatio(InterState.sr, 232, 104+32);
 
-	players[0].GivePoints (InterState.bonus);
+	InterGiveBonus (InterState.bonus);
 
 	if(InterState.kr == 100 && InterState.sr == 100 && InterState.tr == 100)
 	{

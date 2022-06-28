@@ -57,8 +57,6 @@
 //
 // player state info
 //
-AActor			*LastAttacker;
-
 player_t		players[MAXPLAYERS];
 
 void ClipMove (AActor *ob, int32_t xmove, int32_t ymove);
@@ -304,8 +302,6 @@ void player_t::GivePoints (int32_t points)
 static FRandom pr_damageplayer("PlayerTakeDamge");
 void player_t::TakeDamage (int points, AActor *attacker)
 {
-	LastAttacker = attacker;
-
 	if (gamestate.victoryflag)
 		return;
 	points = (points*gamestate.difficulty->DamageFactor)>>FRACBITS;

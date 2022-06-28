@@ -160,7 +160,8 @@ void NewGame (int difficulty, FString map, bool displayBriefing, FName playerCla
 	LevelRatios.killratio = LevelRatios.secretsratio = LevelRatios.treasureratio =
 		LevelRatios.numLevels = LevelRatios.time = 0;
 
-	players[0].state = player_t::PST_ENTER;
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		players[i].state = player_t::PST_ENTER;
 
 	Dialog::ClearConversations();
 

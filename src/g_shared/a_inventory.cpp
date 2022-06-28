@@ -462,7 +462,7 @@ public:
 	{
 		if(Super::TryPickup(toucher))
 		{
-			Dialog::StartConversation(this);
+			Dialog::StartConversation(this, toucher);
 			return true;
 		}
 		return false;
@@ -507,7 +507,7 @@ void AWeapon::AttachToOwner(AActor *owner)
 	owner->player->PendingWeapon = this;
 
 	// Grin
-	if(!(weaponFlags & WF_NOGRIN) && owner->player->mo == players[0].camera)
+	if(!(weaponFlags & WF_NOGRIN) && owner->player->mo == players[ConsolePlayer].camera)
 		StatusBar->WeaponGrin();
 }
 

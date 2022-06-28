@@ -789,10 +789,13 @@ int CP_EndGame (int)
 		mainMenu.draw();
 	if(!res) return 0;
 
-	players[0].lives = 0;
 	playstate = ex_died;
-	players[0].killerobj = NULL;
-	players[0].mo->Die();
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+	{
+		players[i].lives = 0;
+		players[i].killerobj = NULL;
+		players[i].mo->Die();
+	}
 
 	return 1;
 }

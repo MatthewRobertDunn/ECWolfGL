@@ -524,7 +524,7 @@ extern "C"
 int inConversation;
 }
 #endif
-void StartConversation(AActor *npc)
+void StartConversation(AActor *npc, AActor *pc)
 {
 #ifdef __ANDROID__
 	inConversation = 1;
@@ -546,7 +546,7 @@ void StartConversation(AActor *npc)
 			FString response = choice.YesMessage;
 			if(response[0] == '$')
 				response = language[response.Mid(1)];
-			GiveConversationItem(players[0].mo, choice.GiveItem);
+			GiveConversationItem(pc, choice.GiveItem);
 
 			quiz.drawBackground();
 

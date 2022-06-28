@@ -771,24 +771,25 @@ void FinishTravel ()
 
 		if(actor->IsKindOf(NATIVE_CLASS(PlayerPawn)))
 		{
-			APlayerPawn *player = static_cast<APlayerPawn *>(actor);
+			APlayerPawn *pawn = static_cast<APlayerPawn *>(actor);
+			player_t *player = pawn->player;
 
 			// The player_t::mo has been replaced with a newly spawned player
 			// we want to transfer properties from the new player object onto
 			// the old one and then put the old one in place of the new one.
-			APlayerPawn *playertmp = player->player->mo;
-			player->x = playertmp->x;
-			player->y = playertmp->y;
-			player->angle = playertmp->angle;
-			player->EnterZone(playertmp->GetZone());
+			APlayerPawn *tmppawn = player->mo;
+			pawn->x = tmppawn->x;
+			pawn->y = tmppawn->y;
+			pawn->angle = tmppawn->angle;
+			pawn->EnterZone(tmppawn->GetZone());
 
-			players[0].mo = player;
-			players[0].camera = player;
-			playertmp->Destroy();
+			player->mo = pawn;
+			player->camera = pawn;
+			tmppawn->Destroy();
 
 			// We must move the linked list iterator here since we'll
 			// transfer to the new linked list at the SetPriority call
-			player->SetPriority(ThinkerList::PLAYER);
+			pawn->SetPriority(ThinkerList::PLAYER);
 			continue;
 		}
 	}

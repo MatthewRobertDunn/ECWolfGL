@@ -985,6 +985,9 @@ FUNC(Teleport_NewMap)
 	playstate = ex_newmap;
 	NewMap.newmap = args[0];
 	NewMap.flags = args[2];
+	NewMap.x = activator->x;
+	NewMap.y = activator->y;
+	NewMap.angle = activator->angle;
 	return 1;
 }
 
@@ -1133,7 +1136,7 @@ FUNC(StartConversation)
 		A_Face(activator, talker);
 	}
 
-	Dialog::StartConversation(talker);
+	Dialog::StartConversation(talker, activator);
 
 	return 1;
 }

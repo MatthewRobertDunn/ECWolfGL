@@ -25,6 +25,7 @@
 #include "v_video.h"
 #include "wl_inter.h"
 #include "wl_draw.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_game.h"
 #include "wl_text.h"
@@ -254,8 +255,8 @@ void SetupGameLevel (void)
 			= gamestate.secretcount
 			= gamestate.killcount
 			= gamestate.treasurecount = 0;
-		LastAttacker = NULL;
-		players[0].killerobj = NULL;
+		for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+			players[i].killerobj = NULL;
 	}
 
 	gamestate.faceframe.SetInvalid();
@@ -287,9 +288,16 @@ void SetupGameLevel (void)
 	{
 		map->SpawnThings();
 
-		// Check to see if a player spawned
-		if(players[0].mo == NULL)
-			throw CRecoverableError("No player 1 start!");
+		// Check to see if players spawned
+		for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		{
+			if(players[i].mo == NULL)
+			{
+				FString err;
+				err.Format("No player %u start!", i);
+				throw CRecoverableError(err);
+			}
+		}
 	}
 }
 
@@ -745,7 +753,7 @@ static void StripInventory(AActor *actor)
 			// Remove the inventory item and clean it up
 			AInventory *removeMe = inv;
 			inv = inv->inventory;
-			players[0].mo->RemoveInventory(removeMe);
+			actor->RemoveInventory(removeMe);
 			removeMe->Destroy();
 			continue;
 		}
@@ -778,9 +786,6 @@ restartgame:
 	dointermission = true;
 	do
 	{
-		if (!loadedgame)
-			players[0].score = players[0].oldscore;
-
 		startgame = false;
 		if (!loadedgame)
 		{
@@ -790,61 +795,72 @@ restartgame:
 				FinishTravel ();
 				if(playstate == ex_newmap)
 				{
-					if(NewMap.flags & NEWMAP_KEEPPOSITION)
+					// This logic could probably use refinement for multiplayer
+					for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
 					{
-						players[0].mo->x = NewMap.x;
-						players[0].mo->y = NewMap.y;
+						if(NewMap.flags & NEWMAP_KEEPPOSITION)
+						{
+							players[i].mo->x = NewMap.x;
+							players[i].mo->y = NewMap.y;
+						}
+						if(NewMap.flags & NEWMAP_KEEPFACING)
+							players[i].mo->angle = NewMap.angle;
 					}
-					if(NewMap.flags & NEWMAP_KEEPFACING)
-						players[0].mo->angle = NewMap.angle;
 				}
 			}
 
-			if(levelInfo->ResetHealth)
-				players[0].health = players[0].mo->health = players[0].mo->SpawnHealth();
-
-			if(levelInfo->ResetInventory)
+			for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
 			{
-				players[0].mo->ClearInventory();
-				players[0].mo->GiveStartingInventory();
-			}
+				player_t &player = players[i];
 
-			if(levelInfo->EnsureInventory.Size() > 0)
-			{
-				for(unsigned int i = 0;i < levelInfo->EnsureInventory.Size();++i)
+				player.score = player.oldscore;
+
+				if(levelInfo->ResetHealth)
+					player.health = player.mo->health = player.mo->SpawnHealth();
+
+				if(levelInfo->ResetInventory)
 				{
-					const ClassDef *ensure = levelInfo->EnsureInventory[i];
-					AInventory *holding = players[0].mo->FindInventory(ensure);
+					player.mo->ClearInventory();
+					player.mo->GiveStartingInventory();
+				}
 
-					if(ensure->IsDescendantOf(NATIVE_CLASS(Ammo)))
+				if(levelInfo->EnsureInventory.Size() > 0)
+				{
+					for(unsigned int i = 0;i < levelInfo->EnsureInventory.Size();++i)
 					{
-						// For ammo ensure we have the proper amount
-						AAmmo *ammo = static_cast<AAmmo*>(AActor::Spawn(ensure, 0, 0, 0, 0));
-						ammo->RemoveFromWorld();
+						const ClassDef *ensure = levelInfo->EnsureInventory[i];
+						AInventory *holding = player.mo->FindInventory(ensure);
 
-						if(!holding)
-							holding = players[0].mo->FindInventory(ammo->GetAmmoType());
-
-						if(holding && holding->amount < ammo->amount)
-							ammo->amount -= holding->amount;
-						else if(holding && holding->amount >= ammo->amount)
+						if(ensure->IsDescendantOf(NATIVE_CLASS(Ammo)))
 						{
-							ammo->Destroy();
-							ammo = NULL;
+							// For ammo ensure we have the proper amount
+							AAmmo *ammo = static_cast<AAmmo*>(AActor::Spawn(ensure, 0, 0, 0, 0));
+							ammo->RemoveFromWorld();
+
+							if(!holding)
+								holding = player.mo->FindInventory(ammo->GetAmmoType());
+
+							if(holding && holding->amount < ammo->amount)
+								ammo->amount -= holding->amount;
+							else if(holding && holding->amount >= ammo->amount)
+							{
+								ammo->Destroy();
+								ammo = NULL;
+							}
+
+							if(ammo && !ammo->CallTryPickup(player.mo))
+									ammo->Destroy();
+							continue;
 						}
 
-						if(ammo && !ammo->CallTryPickup(players[0].mo))
-								ammo->Destroy();
-						continue;
+						if(holding)
+							continue;
+
+						AInventory *item = static_cast<AInventory*>(AActor::Spawn(ensure, 0, 0, 0, 0));
+						item->RemoveFromWorld();
+						if(!item->CallTryPickup(player.mo))
+							item->Destroy();
 					}
-
-					if(holding)
-						continue;
-
-					AInventory *item = static_cast<AInventory*>(AActor::Spawn(ensure, 0, 0, 0, 0));
-					item->RemoveFromWorld();
-					if(!item->CallTryPickup(players[0].mo))
-						item->Destroy();
 				}
 			}
 		}
@@ -940,23 +956,20 @@ restartgame:
 							gotoMenu = ShowIntermission(intermission);
 						}
 
-						CheckHighScore (players[0].score,levelInfo);
+						CheckHighScore (players[ConsolePlayer].score,levelInfo);
 						return gotoMenu;
 					}
 				}
 				else
 				{
-					NewMap.x = players[0].mo->x;
-					NewMap.y = players[0].mo->y;
-					NewMap.angle = players[0].mo->angle;
-
 					LevelInfo &teleportMap = LevelInfo::FindByNumber(NewMap.newmap);
 					if(teleportMap.MapName[0] == 0)
 						I_FatalError("Tried to teleport to unkown map.");
 					next = teleportMap.MapName;
 				}
 
-				StripInventory(players[0].mo);
+				for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					StripInventory(players[i].mo);
 
 				if(dointermission)
 					VL_FadeOut(0, 255, RPART(levelInfo->ExitFadeColor), GPART(levelInfo->ExitFadeColor), BPART(levelInfo->ExitFadeColor), levelInfo->ExitFadeDuration);
@@ -975,11 +988,12 @@ restartgame:
 
 				if(next.CompareNoCase("EndDemo") == 0)
 				{
-					CheckHighScore (players[0].score,levelInfo);
+					CheckHighScore (players[ConsolePlayer].score,levelInfo);
 					return false;
 				}
 
-				players[0].oldscore = players[0].score;
+				for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					players[i].oldscore = players[i].score;
 
 				strncpy(gamestate.mapname, next, 8);
 				gamestate.mapname[8] = 0;
@@ -997,11 +1011,12 @@ restartgame:
 				if(screenHeight % 200 != 0)
 					VL_ClearScreen(0);
 
-				CheckHighScore (players[0].score,levelInfo);
+				CheckHighScore (players[ConsolePlayer].score,levelInfo);
 				return false;
 
 			case ex_warped:
-				players[0].state = player_t::PST_ENTER;
+				for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					players[i].state = player_t::PST_ENTER;
 				break;
 
 			default:

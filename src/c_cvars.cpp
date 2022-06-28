@@ -353,8 +353,9 @@ void ReadConfig(void)
 		screenWidth = windowedScreenWidth;
 	}
 
-		// Propogate localDesiredFOV to players[0]
-	players[0].SetFOV(localDesiredFOV);
+	// Propogate localDesiredFOV to players
+	for(unsigned int i = 0;i < MAXPLAYERS;++i)
+		players[i].SetFOV(localDesiredFOV);
 }
 
 /*
