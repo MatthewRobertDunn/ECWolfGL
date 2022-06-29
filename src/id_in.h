@@ -84,6 +84,7 @@ typedef	int		ScanCode;
 
 #define sc_ScrollLock		SDLx_SCANCODE(SCROLLOCK)
 #define sc_PrintScreen		SDLx_SCANCODE(PRINT)
+#define sc_Pause			SDLx_SCANCODE(PAUSE)
 
 #define	sc_1			SDLx_SCANCODE(1)
 #define	sc_2			SDLx_SCANCODE(2)
@@ -180,7 +181,6 @@ extern JoystickSens *JoySensitivity;
 extern bool Keyboard[];
 extern bool MousePresent;
 extern bool MouseWheel[4];
-extern unsigned short Paused;
 extern char LastASCII;
 extern ScanCode LastScan;
 extern int JoyNumButtons;

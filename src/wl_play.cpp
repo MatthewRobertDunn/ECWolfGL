@@ -60,6 +60,7 @@ bool noclip, ammocheat, mouselook = false;
 int godmode, singlestep;
 bool notargetmode = false;
 unsigned int extravbls = 0; // to remove flicker (gray stuff at the bottom)
+unsigned short Paused;
 
 //
 // replacing refresh manager
@@ -101,6 +102,7 @@ ControlScheme controlScheme[] =
 	{ bt_zoom,				"Zoom",			-1,			-1,				-1, CS_AxisDigital, 0 },
 	{ bt_automap,			"Automap",		-1,			-1,				-1, CS_AxisDigital, 0 },
 	{ bt_showstatusbar,		"Show Status",	-1,			sc_Tab,			-1,	CS_AxisDigital, 0 },
+	{ bt_pause,				"Pause",		-1,			sc_Pause,		-1, CS_AxisDigital, 0 },
 
 	// End of List
 	{ bt_nobutton,			NULL, -1, -1, -1, CS_AxisDigital, 0 }
@@ -610,6 +612,29 @@ void PollControls (bool absolutes)
 	{
 		AM_CheckKeys();
 	}
+
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+	{
+		if(control[i].buttonstate[bt_pause] && !control[i].buttonheld[bt_pause])
+		{
+			Paused ^= 1;
+
+			static int lastoffs;
+			if(Paused & 1)
+			{
+				lastoffs = StopMusic();
+				IN_ReleaseMouse();
+			}
+			else
+			{
+				IN_GrabMouse();
+				ContinueMusic(lastoffs);
+				if (MousePresent && IN_IsInputGrabbed())
+					IN_CenterMouse();     // Clear accumulated mouse movement
+				ResetTimeCount();
+			}
+		}
+	}
 }
 
 // This should be called once per frame
@@ -664,9 +689,9 @@ void BumpGamma()
 =====================
 */
 
-bool changeSize = true;
 void CheckKeys (void)
 {
+	static bool changeSize = true;
 	ScanCode scan;
 
 
@@ -755,26 +780,6 @@ void CheckKeys (void)
 
 		DrawPlayBorderSides ();
 		DebugOk = 1;
-	}
-
-//
-// pause key weirdness can't be checked as a scan code
-//
-	if(control[ConsolePlayer].buttonstate[bt_pause]) Paused |= 1;
-	if(Paused & 1)
-	{
-		int lastoffs = StopMusic();
-		IN_ReleaseMouse();
-		VWB_DrawGraphic(TexMan("PAUSED"), (20 - 4)*8, 80 - 2*8);
-		VH_UpdateScreen();
-		IN_Ack ();
-		IN_GrabMouse();
-		Paused &= ~1;
-		ContinueMusic(lastoffs);
-		if (MousePresent && IN_IsInputGrabbed())
-			IN_CenterMouse();     // Clear accumulated mouse movement
-		ResetTimeCount();
-		return;
 	}
 
 //
@@ -908,7 +913,8 @@ void StartMusic ()
 void ContinueMusic (int offs)
 {
 	SD_MusicOff ();
-	SD_ContinueMusic(levelInfo->GetMusic(map), offs);
+	if(!(Paused & 1))
+		SD_ContinueMusic(levelInfo->GetMusic(map), offs);
 }
 
 /*
@@ -1116,21 +1122,12 @@ void PlayLoop (void)
 		madenoise = false;
 
 		// Run tics
-		if(Paused & 2)
+		for (unsigned int i = 0;i < tics;++i)
 		{
-			static bool absolutes = false;
+			PollControls(!i);
 
-			// If paused due to the automap, continue polling controls but don't tick anything.
-			PollControls(absolutes);
-
-			absolutes = !absolutes;
-		}
-		else
-		{
-			for (unsigned int i = 0;i < tics;++i)
+			if(!Paused)
 			{
-				PollControls(!i);
-
 				++gamestate.TimeCount;
 				thinkerList.Tick();
 				AActor::FinishSpawningActors();
@@ -1143,6 +1140,8 @@ void PlayLoop (void)
 
 		if(automap && !gamestate.victoryflag)
 			BasicOverhead();
+		if(Paused & 1)
+			VWB_DrawGraphic(TexMan("PAUSED"), (20 - 4)*8, 80 - 2*8);
 
 		//
 		// MAKE FUNNY FACE IF BJ DOESN'T MOVE FOR AWHILE

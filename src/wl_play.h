@@ -19,6 +19,7 @@
 extern  bool noadaptive;
 extern  unsigned        tics;
 extern  int             viewsize;
+extern unsigned short Paused;
 
 //
 // current user input

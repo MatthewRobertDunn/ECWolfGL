@@ -77,7 +77,6 @@ bool MouseWheel[4];
 
 // 	Global variables
 bool Keyboard[SDL_NUM_SCANCODES];
-unsigned short Paused;
 char LastASCII;
 ScanCode LastScan;
 
@@ -431,8 +430,6 @@ static void processEvent(SDL_Event *event)
 
 			if(LastScan<SDL_NUM_SCANCODES)
 				Keyboard[LastScan] = 1;
-			if(LastScan == SDLx_SCANCODE(PAUSE))
-				Paused |= 1;
 			break;
 		}
 

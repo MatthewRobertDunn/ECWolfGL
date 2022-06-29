@@ -1135,7 +1135,7 @@ void CheckPause (void)
 {
 	static int SoundStatus = 1;
 	static int pauseofs = 0;
-	if (Paused & 1)
+	if (LastScan == sc_Pause)
 	{
 		switch (SoundStatus)
 		{
@@ -1150,7 +1150,6 @@ void CheckPause (void)
 		SoundStatus ^= 1;
 		VW_WaitVBL (3);
 		IN_ClearKeysDown ();
-		Paused &= ~1;
 	}
 }
 
