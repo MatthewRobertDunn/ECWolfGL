@@ -607,6 +607,10 @@ void US_ControlPanel (ScanCode scancode)
 			soundBase.show();
 			goto finishup;
 
+		case sc_F5:
+			displayMenu.show();
+			goto finishup;
+
 		case sc_F6:
 			controlBase.show ();
 			goto finishup;
@@ -1216,6 +1220,7 @@ void ShowMenu(Menu &menu)
 	Menu::closeMenus(false);
 	menu.show();
 
+	CleanupControlPanel();
 	IN_ClearKeysDown ();
 	VW_FadeOut();
 	if(viewsize != 21)

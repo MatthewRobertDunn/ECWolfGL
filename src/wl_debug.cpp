@@ -25,6 +25,7 @@
 #include "wl_draw.h"
 #include "wl_game.h"
 #include "wl_inter.h"
+#include "wl_iwad.h"
 #include "wl_play.h"
 #include "w_wad.h"
 #include "thingdef/thingdef.h"
@@ -37,47 +38,9 @@
 #include "wl_cloudsky.h"
 #endif
 
-/*
-=============================================================================
-
-												LOCAL CONSTANTS
-
-=============================================================================
-*/
-
-#define VIEWTILEX       (viewwidth/16)
-#define VIEWTILEY       (viewheight/16)
-
-/*
-=============================================================================
-
-												GLOBAL VARIABLES
-
-=============================================================================
-*/
-
-
-int DebugKeys (void);
-
-
-// from WL_DRAW.C
-
-void ScalePost();
-
-/*
-=============================================================================
-
-												LOCAL VARIABLES
-
-=============================================================================
-*/
-
-int     maporgx;
-int     maporgy;
-enum ViewType {mapview,tilemapview,actoratview,visview};
-ViewType viewtype;
-
-void ViewMap (void);
+#ifdef __ANDROID__
+extern bool ShadowingEnabled;
+#endif
 
 //===========================================================================
 
@@ -183,7 +146,7 @@ static void GiveAllWeaponsAndAmmo(player_t &player)
 ================
 */
 
-int DebugKeys (void)
+static int DebugKeys (void)
 {
 	bool esc;
 	int level;
@@ -574,7 +537,7 @@ static void GiveMLI(player_t &player)
 	DrawPlayScreen();
 }
 
-void DebugMLI()
+static void DebugMLI()
 {
 	GiveMLI(players[ConsolePlayer]);
 
@@ -588,7 +551,7 @@ void DebugMLI()
 	DrawPlayScreen();
 }
 
-void DebugGod(bool noah)
+static void DebugGod(bool noah)
 {
 	WindowH = 160;
 
@@ -631,4 +594,120 @@ void DebugGod(bool noah)
 
 	if (viewsize < 18)
 		StatusBar->RefreshBackground ();
+}
+
+/*
+================
+=
+= CheckDebugKeys
+=
+================
+*/
+
+void CheckDebugKeys()
+{
+	static bool DebugOk = false;
+
+	if (screenfaded || demoplayback) // don't do anything with a faded screen
+		return;
+
+	if(IWad::CheckGameFilter(NAME_Wolf3D))
+	{
+		//
+		// SECRET CHEAT CODE: TAB-G-F10
+		//
+		if (Keyboard[sc_Tab] && Keyboard[sc_G] && Keyboard[sc_F10])
+		{
+			DebugGod(false);
+			return;
+		}
+
+		//
+		// SECRET CHEAT CODE: 'MLI'
+		//
+		if (Keyboard[sc_M] && Keyboard[sc_L] && Keyboard[sc_I])
+			DebugMLI();
+
+		//
+		// TRYING THE KEEN CHEAT CODE!
+		//
+		if (Keyboard[sc_B] && Keyboard[sc_A] && Keyboard[sc_T])
+		{
+			ClearSplitVWB ();
+
+			Message ("Commander Keen is also\n"
+					"available from Apogee, but\n"
+					"then, you already know\n" "that - right, Cheatmeister?!");
+
+			IN_ClearKeysDown ();
+			IN_Ack ();
+
+			if (viewsize < 18)
+				StatusBar->RefreshBackground ();
+		}
+	}
+	else if(IWad::CheckGameFilter(NAME_Noah))
+	{
+		//
+		// Secret cheat code: JIM
+		//
+		if (Keyboard[sc_J] && Keyboard[sc_I] && Keyboard[sc_M])
+		{
+			DebugGod(true);
+		}
+	}
+
+	//
+	// OPEN UP DEBUG KEYS
+	//
+	if (Keyboard[sc_BackSpace] && Keyboard[sc_LShift] && Keyboard[sc_Alt])
+	{
+		ClearSplitVWB ();
+
+		Message ("Debugging keys are\nnow available!");
+		IN_ClearKeysDown ();
+		IN_Ack ();
+
+		DrawPlayBorderSides ();
+		DebugOk = 1;
+	}
+
+#ifdef __ANDROID__
+	if(ShadowingEnabled)
+		DebugOk = 1;
+#endif
+
+	//
+	// TAB-? debug keys
+	//
+	if(DebugOk)
+	{
+		// Jam debug sequence if we're trying to open the automap
+		// We really only need to check for the automap control since it's
+		// likely to be put in the Tab space and be tapped while using other controls
+		bool keyDown = Keyboard[sc_Tab] || Keyboard[sc_BackSpace] || Keyboard[sc_Grave];
+		if ((schemeAutomapKey.keyboard == sc_Tab || schemeAutomapKey.keyboard == sc_BackSpace || schemeAutomapKey.keyboard == sc_Grave)
+			&& (control[ConsolePlayer].buttonstate[bt_automap] || control[ConsolePlayer].buttonheld[bt_automap]))
+			keyDown = false;
+
+#ifdef __ANDROID__
+		// Soft keyboard
+		if (ShadowingEnabled)
+			keyDown = true;
+#endif
+
+		if (keyDown)
+		{
+			if (DebugKeys ())
+			{
+				if (viewsize < 20)
+					StatusBar->RefreshBackground ();       // dont let the blue borders flash
+
+				if (MousePresent && IN_IsInputGrabbed())
+					IN_CenterMouse();     // Clear accumulated mouse movement
+
+				ResetTimeCount();
+			}
+		}
+	}
 }
