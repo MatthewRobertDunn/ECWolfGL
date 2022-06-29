@@ -42,11 +42,13 @@ extern  bool        demorecord,demoplayback;
 extern  int8_t      *demoptr, *lastdemoptr;
 extern  memptr      demobuffer;
 
+void    PlayFrame();
 void    PlayLoop (void);
 
 void    InitRedShifts (void);
 void    FinishPaletteShifts (void);
 
+void    CheckKeys();
 void    PollControls (bool);
 int     StopMusic(void);
 void    StartMusic(void);

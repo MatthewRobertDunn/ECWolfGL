@@ -573,11 +573,29 @@ void US_ControlPanel (ScanCode scancode)
 	int which;
 	bool idEasterEgg = Wads.CheckNumForName("IDGUYPAL") != -1;
 
+	if (!Net::IsArbiter())
+	{
+		// Disable functions that should only be available to arbiter
+		switch(scancode)
+		{
+			case sc_F2:
+			case sc_F3:
+			case sc_F7:
+			case sc_F8:
+			case sc_F9:
+				return;
+			default:
+				break;
+		}
+	}
+
 	if (ingame)
 	{
 		if (CP_CheckQuick (scancode))
 			return;
 		lastgamemusicoffset = StartCPMusic (gameinfo.MenuMusic);
+
+		Net::BlockPlaysim();
 
 		VW_FadeOut();
 	}

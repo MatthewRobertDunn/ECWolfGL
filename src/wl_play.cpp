@@ -218,7 +218,7 @@ void CalcTics()
 		SDL_Delay(TICS2MS(lasttimecount + 1) - curtime);
 		tics = 1;
 	}
-	else if(noadaptive)
+	else if(noadaptive || Net::IsBlocked())
 		tics = 1;
 
 	lasttimecount += tics;
@@ -733,6 +733,9 @@ void CheckKeys (void)
 		DrawPlayBorderSides ();
 
 		IN_ClearKeysDown ();
+
+		if(screenfaded)
+			PlayFrame();
 		return;
 	}
 
@@ -743,9 +746,10 @@ void CheckKeys (void)
 
 		US_ControlPanel (control[ConsolePlayer].buttonstate[bt_esc] ? sc_Escape : scan);
 
+		IN_ClearKeysDown ();
+
 		if(screenfaded)
 		{
-			IN_ClearKeysDown ();
 			if (!startgame && !loadedgame)
 			{
 				VW_FadeOut();
@@ -755,13 +759,13 @@ void CheckKeys (void)
 			}
 			if (loadedgame)
 				playstate = ex_abort;
-			ResetTimeCount();
 			if (MousePresent && IN_IsInputGrabbed())
 				IN_CenterMouse();     // Clear accumulated mouse movement
+
+			PlayFrame();
 		}
 		else
 		{
-			IN_ClearKeysDown();
 			ContinueMusic (lastoffs);
 		}
 		return;
@@ -974,6 +978,47 @@ void FinishPaletteShifts (void)
 /*
 ===================
 =
+= PlayFrame
+=
+===================
+*/
+
+void PlayFrame()
+{
+	UpdatePaletteShifts ();
+
+	ThreeDRefresh ();
+
+	if(automap && !gamestate.victoryflag)
+		BasicOverhead();
+	if(Paused & 1)
+		VWB_DrawGraphic(TexMan("PAUSED"), (20 - 4)*8, 80 - 2*8);
+
+	if(Net::IsBlocked())
+	{
+		ClearSplitVWB();
+		Message("Waiting for players to return");
+	}
+
+	if (!loadedgame)
+	{
+		StatusBar->Tick();
+		if ((gamestate.TimeCount & 1) || !(tics & 1))
+			StatusBar->DrawStatusBar();
+	}
+
+	if (screenfaded)
+	{
+		VW_FadeIn ();
+		ResetTimeCount();
+	}
+
+	VH_UpdateScreen();
+}
+
+/*
+===================
+=
 = PlayLoop
 =
 ===================
@@ -1034,14 +1079,7 @@ void PlayLoop (void)
 			}
 		}
 
-		UpdatePaletteShifts ();
-
-		ThreeDRefresh ();
-
-		if(automap && !gamestate.victoryflag)
-			BasicOverhead();
-		if(Paused & 1)
-			VWB_DrawGraphic(TexMan("PAUSED"), (20 - 4)*8, 80 - 2*8);
+		PlayFrame();
 
 		//
 		// MAKE FUNNY FACE IF BJ DOESN'T MOVE FOR AWHILE
@@ -1052,23 +1090,10 @@ void PlayLoop (void)
 		GC::CheckGC();
 
 		UpdateSoundLoc ();      // JAB
-		if (screenfaded)
-		{
-			VW_FadeIn ();
-			ResetTimeCount();
-		}
 
 		CheckKeys ();
 		CheckDebugKeys ();
 
-		if (!loadedgame)
-		{
-			StatusBar->Tick();
-			if ((gamestate.TimeCount & 1) || !(tics & 1))
-				StatusBar->DrawStatusBar();
-		}
-
-		VH_UpdateScreen();
 //
 // debug aids
 //

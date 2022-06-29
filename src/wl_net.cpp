@@ -65,7 +65,8 @@ enum
 	NET_ConnectionStart,
 	NET_Ack,
 	NET_TicCmd,
-	NET_NewGame
+	NET_NewGame,
+	NET_BlockPlaysim,
 };
 
 #pragma pack(1)
@@ -125,6 +126,16 @@ struct TicCmdPacket
 	bool buttonstate[NUMBUTTONS];
 	bool buttonheld[NUMBUTTONS];
 };
+
+// Indicates that a player has temporarily left the playsim and other clients
+// must wait for them to return.
+struct BlockPlaysimPacket
+{
+	enum { Type = NET_BlockPlaysim };
+
+	BYTE type;
+	int32_t TimeCount;
+};
 #pragma pack()
 
 NetInit InitVars = {
@@ -143,6 +154,7 @@ struct NetClient
 static NetClient Client[MAXPLAYERS];
 static UDPsocket Socket;
 static UDPpacket *Packet;
+static int32_t PlaysimBlocked = INT_MIN;
 
 // Just so that we know something is happening do a little animation.
 static const char* const Waiting[4] = {"   ", ".  ", ".. ", "..." };
@@ -236,9 +248,10 @@ int UnbufferPacket<TicCmdPacket>(TicCmdPacket (&packets)[MAXPLAYERS], bool (&rec
 			if(c == ConsolePlayer)
 				continue;
 
-			if(Client[c].extratics[i].TimeCount == gamestate.TimeCount)
+			if(Client[c].extratics[i].TimeCount != 0 && Client[c].extratics[i].TimeCount == gamestate.TimeCount)
 			{
 				packets[c] = Client[c].extratics[i];
+				Client[c].extratics[i].TimeCount = 0;
 				if(received[c])
 					continue;
 				received[c] = true;
@@ -247,6 +260,26 @@ int UnbufferPacket<TicCmdPacket>(TicCmdPacket (&packets)[MAXPLAYERS], bool (&rec
 		}
 	}
 	return unbufferedCount;
+}
+
+static void HandleCommandPackets()
+{
+	if(CheckPacketType<BlockPlaysimPacket>(Packet))
+	{
+		const BlockPlaysimPacket *data = reinterpret_cast<BlockPlaysimPacket *>(Packet->data);
+
+		SendAck<BlockPlaysimPacket>(Packet->address, data->TimeCount);
+		if(data->TimeCount < gamestate.TimeCount-1) // Too old?
+			return;
+
+		PlaysimBlocked = data->TimeCount;
+		PlayFrame();
+	}
+	else if(CheckPacketType<StartPacket>(Packet))
+	{
+		// Host lost our start ack, so send another one
+		SendAck<StartPacket>(Client[0].address, 0xFFFFFFFF);
+	}
 }
 
 // Synchronously exchange a packet to all players and wait for ACK
@@ -266,8 +299,9 @@ static void ExchangePacket(T (&packets)[MAXPLAYERS])
 	packets[ConsolePlayer].TimeCount = gamestate.TimeCount;
 
 	// We need to keep an eye out for packets, but we also need to periodically
-	// resend our ticcmd in case it got lost.
+	// resend our packet in case it got lost.
 	unsigned int resend = 0;
+	bool waiting = false;
 	while(numAcked != InitVars.numPlayers || numReceived != InitVars.numPlayers)
 	{
 		if(resend == 0)
@@ -284,8 +318,18 @@ static void ExchangePacket(T (&packets)[MAXPLAYERS])
 		}
 
 		--resend;
-		SDL_Delay(1);
 		IN_ProcessEvents();
+
+		if(!waiting)
+			waiting = true;
+		else
+		{
+			// Allow user to enter control panels even if we're waiting for data
+			if(ingame)
+				CheckKeys();
+			SDL_Delay(1);
+		}
+
 		while(SDLNet_UDP_Recv(Socket, Packet))
 		{
 			if(CheckPacketType<T>(Packet))
@@ -297,12 +341,11 @@ static void ExchangePacket(T (&packets)[MAXPLAYERS])
 					continue;
 				}
 
-				packets[client] = *reinterpret_cast<T *>(Packet->data);
-				T &data = packets[client];
+				T &data = *reinterpret_cast<T *>(Packet->data);
 
 				if(data.TimeCount != gamestate.TimeCount)
 				{
-					if(BufferPacket<T>(client, packets[client]))
+					if(BufferPacket<T>(client, data))
 						SendAck<T>(Packet->address, data.TimeCount);
 					continue;
 				}
@@ -312,6 +355,7 @@ static void ExchangePacket(T (&packets)[MAXPLAYERS])
 				if(received[client])
 					continue;
 				received[client] = true;
+				packets[client] = data;
 				++numReceived;
 			}
 			else if(CheckPacketType<AckPacket>(Packet))
@@ -332,10 +376,83 @@ static void ExchangePacket(T (&packets)[MAXPLAYERS])
 				acked[client] = true;
 				++numAcked;
 			}
-			else if(CheckPacketType<StartPacket>(Packet))
+			else
 			{
-				// Host lost our start ack, so send another one
-				SendAck<StartPacket>(Client[0].address, 0xFFFFFFFF);
+				HandleCommandPackets();
+			}
+		}
+	}
+}
+
+// Synchronously send a packet to all players and wait for ACK
+template<typename T>
+static void SendReliablePacket(T &packet)
+{
+	bool acked[MAXPLAYERS] = { false };
+	int numAcked = 1;
+	acked[ConsolePlayer] = true;
+
+	UDPpacket outPacket = { -1, (Uint8*)&packet, sizeof(T), sizeof(T), 0 };
+	packet.type = T::Type;
+	packet.TimeCount = gamestate.TimeCount;
+
+	// We need to keep an eye out for packets, but we also need to periodically
+	// resend our packet in case it got lost.
+	unsigned int resend = 0;
+	bool waiting = false;
+	while(numAcked != InitVars.numPlayers)
+	{
+		if(resend == 0)
+		{
+			for(unsigned int i = 0;i < InitVars.numPlayers;++i)
+			{
+				if(acked[i])
+					continue;
+
+				outPacket.address = Client[i].address;
+				SDLNet_UDP_Send(Socket, -1, &outPacket);
+			}
+			resend = 100;
+		}
+
+		--resend;
+
+		if(!waiting)
+			waiting = true;
+		else
+		{
+			LastScan = 0;
+			IN_ProcessEvents();
+
+			// Allow user to enter control panels even if we're waiting for data
+			if(ingame && T::Type != (int)NET_BlockPlaysim)
+				CheckKeys();
+			SDL_Delay(1);
+		}
+
+		while(SDLNet_UDP_Recv(Socket, Packet))
+		{
+			if(CheckPacketType<AckPacket>(Packet))
+			{
+				const AckPacket *data = reinterpret_cast<AckPacket *>(Packet->data);
+				if(data->TimeCount != gamestate.TimeCount || data->ackedType != T::Type)
+					continue;
+
+				int client = FindClient(Packet->address);
+				if(client < 0)
+				{
+					Printf("Packet recieved from unknown source\n");
+					continue;
+				}
+				if(acked[client])
+					continue;
+
+				acked[client] = true;
+				++numAcked;
+			}
+			else
+			{
+				HandleCommandPackets();
 			}
 		}
 	}
@@ -426,7 +543,7 @@ static void StartHost(InitStatusCallback callback)
 			if(CheckPacketType<AckPacket>(Packet))
 			{
 				int client = FindClient(Packet->address);
-				if(client > 0)
+				if(client > 0 && !acked[client])
 				{
 					acked[client] = true;
 					++nextclient;
@@ -542,6 +659,25 @@ bool IsArbiter()
 	return ConsolePlayer == Arbiter;
 }
 
+bool IsBlocked()
+{
+	return PlaysimBlocked != INT_MIN;
+}
+
+void BlockPlaysim()
+{
+	if(InitVars.mode == MODE_SinglePlayer)
+		return;
+
+	if(!IsBlocked())
+	{
+		BlockPlaysimPacket packet;
+		SendReliablePacket(packet);
+
+		PlaysimBlocked = gamestate.TimeCount;
+	}
+}
+
 void NewGame(int &difficulty, FString &map, FName (&playerClassNames)[MAXPLAYERS])
 {
 	if(InitVars.numPlayers > 1)
@@ -599,6 +735,19 @@ void PollControls()
 		control[client].controlstrafe = data.controlstrafe;
 		memcpy(control[client].buttonstate, data.buttonstate, sizeof(control[client].buttonstate));
 		memcpy(control[client].buttonheld, data.buttonheld, sizeof(control[client].buttonheld));
+	}
+
+	if(PlaysimBlocked == gamestate.TimeCount)
+	{
+		// Probably unneeded since CalcTic will single step while blocked, but
+		// doesn't hurt to reset time count here
+		ResetTimeCount();
+	}
+	else if(PlaysimBlocked != INT_MIN)
+	{
+		// Unblock on the next completed tic
+		PlaysimBlocked = INT_MIN;
+		ResetTimeCount();
 	}
 }
 
