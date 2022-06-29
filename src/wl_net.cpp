@@ -67,6 +67,7 @@ enum
 	NET_TicCmd,
 	NET_NewGame,
 	NET_BlockPlaysim,
+	NET_InAck,
 };
 
 #pragma pack(1)
@@ -136,6 +137,16 @@ struct BlockPlaysimPacket
 	BYTE type;
 	int32_t TimeCount;
 };
+
+// Waiting for some player to press a key
+struct InAckPacket
+{
+	enum { Type = NET_InAck };
+
+	BYTE type;
+	int32_t TimeCount;
+	uint32_t Number;
+};
 #pragma pack()
 
 NetInit InitVars = {
@@ -155,6 +166,10 @@ static NetClient Client[MAXPLAYERS];
 static UDPsocket Socket;
 static UDPpacket *Packet;
 static int32_t PlaysimBlocked = INT_MIN;
+
+static AckType AwaitingAckType = ACK_Local;
+static uint32_t AwaitingAck = 0;
+static uint32_t DidAck = 0;
 
 // Just so that we know something is happening do a little animation.
 static const char* const Waiting[4] = {"   ", ".  ", ".. ", "..." };
@@ -274,6 +289,16 @@ static void HandleCommandPackets()
 
 		PlaysimBlocked = data->TimeCount;
 		PlayFrame();
+	}
+	else if(CheckPacketType<InAckPacket>(Packet))
+	{
+		const InAckPacket *data = reinterpret_cast<InAckPacket *>(Packet->data);
+
+		SendAck<InAckPacket>(Packet->address, data->TimeCount);
+		if(data->Number != AwaitingAck)
+			return;
+
+		DidAck = data->Number;
 	}
 	else if(CheckPacketType<StartPacket>(Packet))
 	{
@@ -749,6 +774,46 @@ void PollControls()
 		PlaysimBlocked = INT_MIN;
 		ResetTimeCount();
 	}
+}
+
+bool CheckAck(bool send)
+{
+	if(InitVars.mode == MODE_SinglePlayer || AwaitingAckType == ACK_Local)
+		return send;
+
+	if(DidAck == AwaitingAck)
+		return true;
+
+	while(SDLNet_UDP_Recv(Socket, Packet))
+	{
+		HandleCommandPackets();
+	}
+
+	if(DidAck == AwaitingAck)
+		return true;
+
+	if(send)
+	{
+		InAckPacket packet;
+		packet.Number = AwaitingAck;
+
+		SendReliablePacket(packet);
+		return true;
+	}
+
+	return send;
+}
+
+void StartAck(AckType type)
+{
+	if(type == ACK_Local)
+		return;
+
+	AwaitingAckType = type;
+	++AwaitingAck;
+
+	if(type == ACK_Block)
+		BlockPlaysim();
 }
 
 }

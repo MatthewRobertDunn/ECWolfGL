@@ -25,6 +25,7 @@
 #include "id_vl.h"
 #include "id_vh.h"
 #include "config.h"
+#include "wl_net.h"
 #include "wl_play.h"
 
 
@@ -528,7 +529,22 @@ static void processEvent(SDL_Event *event)
 void IN_WaitAndProcessEvents()
 {
 	SDL_Event event;
-	if(!SDL_WaitEvent(&event)) return;
+
+	if(Net::InitVars.mode == Net::MODE_SinglePlayer)
+	{
+		if(!SDL_WaitEvent(&event)) return;
+	}
+	else
+	{
+		// In net games we need to periodically return to process network packets
+#if SDL_VERSION_ATLEAST(2,0,0)
+		if(!SDL_WaitEventTimeout(&event, 10)) return;
+#else
+		SDL_Delay(1);
+		if(!SDL_PollEvent(event)) return;
+#endif
+	}
+
 	do
 	{
 		processEvent(&event);
@@ -806,8 +822,10 @@ IN_WaitForASCII(void)
 
 bool	btnstate[NUMBUTTONS];
 
-void IN_StartAck(void)
+void IN_StartAck(AckType type)
 {
+	Net::StartAck(type);
+
 	IN_ProcessEvents();
 //
 // get initial state of everything
@@ -833,7 +851,7 @@ bool IN_CheckAck (void)
 // see if something has been pressed
 //
 	if(LastScan)
-		return true;
+		return Net::CheckAck(true);
 
 	int buttons = IN_JoyButtons() << 4;
 
@@ -857,20 +875,20 @@ bool IN_CheckAck (void)
 				}
 				while(buttons & (1 << i));
 
-				return true;
+				return Net::CheckAck(true);
 			}
 		}
 		else
 			btnstate[i] = false;
 	}
 
-	return false;
+	return Net::CheckAck(false);
 }
 
 
-void IN_Ack (void)
+void IN_Ack (AckType type)
 {
-	IN_StartAck ();
+	IN_StartAck (type);
 
 	do
 	{
@@ -888,12 +906,12 @@ void IN_Ack (void)
 //		button up.
 //
 ///////////////////////////////////////////////////////////////////////////
-bool IN_UserInput(longword delay)
+bool IN_UserInput(longword delay, AckType type)
 {
 	longword	lasttime;
 
 	lasttime = GetTimeCount();
-	IN_StartAck ();
+	IN_StartAck (type);
 	do
 	{
 		IN_ProcessEvents();

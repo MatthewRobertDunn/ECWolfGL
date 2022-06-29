@@ -79,7 +79,7 @@ void PictureGrabber (void)
 	US_CenterWindow (18,2);
 	US_PrintCentered ("Screenshot taken");
 	VW_UpdateScreen();
-	IN_Ack();
+	IN_Ack(ACK_Block);
 }
 
 //===========================================================================
@@ -182,7 +182,7 @@ static int DebugKeys (void)
 		US_Print (SmallFont, actorCount);
 
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	if (Keyboard[sc_D])             // D = Darkone's FPS counter
@@ -193,7 +193,7 @@ static int DebugKeys (void)
 		else
 			US_PrintCentered ("Darkone's FPS Counter ON");
 		VW_UpdateScreen();
-		IN_Ack();
+		IN_Ack(ACK_Block);
 		fpscounter ^= 1;
 		return 1;
 	}
@@ -214,7 +214,7 @@ static int DebugKeys (void)
 		US_CenterWindow (14,6);
 		US_PrintCentered(position);
 		VW_UpdateScreen();
-		IN_Ack();
+		IN_Ack(ACK_Block);
 		return 1;
 	}
 
@@ -229,7 +229,7 @@ static int DebugKeys (void)
 			US_PrintCentered ("God mode OFF");
 
 		VW_UpdateScreen();
-		IN_Ack();
+		IN_Ack(ACK_Block);
 		if (godmode != 2)
 			godmode++;
 		else
@@ -250,7 +250,7 @@ static int DebugKeys (void)
 		players[ConsolePlayer].GivePoints (100000);
 		players[ConsolePlayer].health = 100;
 		StatusBar->DrawStatusBar();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if (Keyboard[sc_K])        // K = give keys
@@ -294,7 +294,7 @@ static int DebugKeys (void)
 		US_CenterWindow(17, 12);
 		US_PrintCentered(ratios);
 		VW_UpdateScreen();
-		IN_Ack();
+		IN_Ack(ACK_Block);
 
 		return 1;
 	}
@@ -307,7 +307,7 @@ static int DebugKeys (void)
 		else
 			US_PrintCentered ("Mouse look OFF");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if (Keyboard[sc_N])        // N = no clip
@@ -319,7 +319,7 @@ static int DebugKeys (void)
 		else
 			US_PrintCentered ("No clipping OFF");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if (Keyboard[sc_O])
@@ -331,7 +331,7 @@ static int DebugKeys (void)
 		else
 			US_PrintCentered ("Automap hidden");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if(Keyboard[sc_P])         // P = Ripper's picture grabber
@@ -365,7 +365,7 @@ static int DebugKeys (void)
 		else
 			US_PrintCentered("No target mode OFF");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if (Keyboard[sc_V])        // V = extra VBLs
@@ -485,7 +485,7 @@ static int DebugKeys (void)
 			US_CenterWindow (18,3);
 			US_PrintCentered ("Illegal color map!");
 			VW_UpdateScreen();
-			IN_Ack ();
+			IN_Ack (ACK_Block);
 		}
 	}
 #endif
@@ -520,7 +520,7 @@ static int DebugKeys (void)
 		else
 			US_PrintCentered("3D Sprite scaler: ECWolf");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 
@@ -546,7 +546,7 @@ static void DebugMLI()
 	Message (language["STR_CHEATER"]);
 
 	IN_ClearKeysDown ();
-	IN_Ack ();
+	IN_Ack (ACK_Block);
 
 	DrawPlayScreen();
 }
@@ -585,7 +585,7 @@ static void DebugGod(bool noah)
 	godmode ^= 1;
 
 	IN_ClearKeysDown ();
-	IN_Ack ();
+	IN_Ack (ACK_Block);
 
 	if (noah)
 	{
@@ -640,7 +640,7 @@ void CheckDebugKeys()
 					"then, you already know\n" "that - right, Cheatmeister?!");
 
 			IN_ClearKeysDown ();
-			IN_Ack ();
+			IN_Ack (ACK_Block);
 
 			if (viewsize < 18)
 				StatusBar->RefreshBackground ();
@@ -666,7 +666,7 @@ void CheckDebugKeys()
 
 		Message ("Debugging keys are\nnow available!");
 		IN_ClearKeysDown ();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 
 		DrawPlayBorderSides ();
 		DebugOk = 1;

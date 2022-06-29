@@ -709,7 +709,7 @@ void Died (void)
 
 		FizzleFade(viewscreenx,viewscreeny,viewwidth,viewheight,70,false);
 
-		IN_UserInput(100);
+		IN_UserInput(100, ACK_Any);
 	}
 	else
 	{

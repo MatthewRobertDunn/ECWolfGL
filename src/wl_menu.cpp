@@ -93,7 +93,7 @@ MENU_LISTENER(ViewScoresOrEndGame)
 			VW_UpdateScreen();
 			MenuFadeIn();
 
-			IN_Ack();
+			IN_Ack(ACK_Local);
 
 			StartCPMusic(gameinfo.MenuMusic);
 			MenuFadeOut();
@@ -188,7 +188,7 @@ MENU_LISTENER(SetEpisodeAndSwitchToSkill)
 				"from the Options menu to\n"
 				"find out how to order this\n" "episode from Apogee.");
 		IN_ClearKeysDown();
-		IN_Ack();
+		IN_Ack(ACK_Local);
 		episodes.draw();
 		return false;
 	}
@@ -703,7 +703,7 @@ void US_ControlPanel (ScanCode scancode)
 				while (Keyboard[sc_I] || Keyboard[sc_D])
 					IN_WaitAndProcessEvents();
 				IN_ClearKeysDown ();
-				IN_Ack ();
+				IN_Ack (ACK_Local);
 
 				VW_FadeOut ();
 				VL_ReadPalette(gameinfo.GamePalette);

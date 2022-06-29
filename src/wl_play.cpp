@@ -675,7 +675,7 @@ void BumpGamma()
 	msg.Format("Gamma: %g", screenGamma);
 	US_PrintCentered (msg);
 	VW_UpdateScreen();
-	IN_Ack();
+	IN_Ack(ACK_Block);
 }
 
 /*
@@ -1053,7 +1053,7 @@ void PlayLoop (void)
 		IN_CenterMouse();         // Clear accumulated mouse movement
 
 	if (demoplayback)
-		IN_StartAck ();
+		IN_StartAck (ACK_Local);
 
 	StatusBar->NewGame();
 

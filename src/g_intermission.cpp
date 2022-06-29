@@ -87,12 +87,12 @@ static bool WaitIntermission(unsigned int time)
 {
 	if(time)
 	{
-		return IN_UserInput(time);
+		return IN_UserInput(time, ACK_Any);
 	}
 	else
 	{
 		IN_ClearKeysDown ();
-		IN_Ack ();
+		IN_Ack (ACK_Any);
 		return true;
 	}
 }

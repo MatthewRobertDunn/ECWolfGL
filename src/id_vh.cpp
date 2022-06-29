@@ -241,7 +241,7 @@ bool FizzleFade (int x1, int y1,
 
 	pixperframe = width * height / frames;
 
-	IN_StartAck ();
+	IN_StartAck (ACK_Any);
 
 	frame = GetTimeCount();
 	screen->Lock(false);

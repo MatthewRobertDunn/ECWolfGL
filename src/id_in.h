@@ -134,6 +134,12 @@ typedef	int		ScanCode;
 
 #define	key_None		0
 
+enum AckType {
+	ACK_Local, // No network sync
+	ACK_Any, // Any player can ack
+	ACK_Block, // Local player can ack others must wait
+};
+
 enum Demo {
 	demo_Off,demo_Record,demo_Playback,demo_PlayDone
 };
@@ -196,10 +202,8 @@ void IN_ClearWheel();
 void IN_ReadControl(int,ControlInfo *);
 void IN_GetJoyAbs(word joy,word *xp,word *yp);
 void IN_SetupJoy(word joy,word minx,word maxx,word miny,word maxy);
-void IN_StopDemo();
-void IN_FreeDemoBuffer();
-void IN_Ack();
-bool IN_UserInput(longword delay);
+void IN_Ack(AckType type);
+bool IN_UserInput(longword delay, AckType type);
 char IN_WaitForASCII();
 ScanCode IN_WaitForKey();
 word IN_GetJoyButtonsDB(word joy);
@@ -220,7 +224,7 @@ int IN_JoyAxes (void);
 void IN_GetJoyDelta(int *dx,int *dy);
 int IN_GetJoyAxis(int axis);
 
-void IN_StartAck(void);
+void IN_StartAck(AckType type);
 bool IN_CheckAck (void);
 bool IN_IsInputGrabbed();
 void IN_CenterMouse();

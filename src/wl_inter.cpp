@@ -325,7 +325,7 @@ static void InterCountRatio(int ratio, unsigned int x, unsigned int y)
 static void InterWaitForAck()
 {
 	InterState.acked = false;
-	IN_StartAck ();
+	IN_StartAck (ACK_Any);
 	while (!IN_CheckAck ())
 		BJ_Breathe ();
 	IN_ClearKeysDown();
@@ -604,7 +604,7 @@ void LevelCompleted (void)
 	StartCPMusic (gameinfo.IntermissionMusic);
 
 	IN_ClearKeysDown ();
-	IN_StartAck ();
+	IN_StartAck (ACK_Any);
 
 	BJ_Breathe(true);
 
@@ -725,7 +725,7 @@ void Victory (bool fromIntermission)
 	VW_UpdateScreen ();
 	VW_FadeIn ();
 
-	IN_Ack ();
+	IN_Ack (ACK_Any);
 
 	EndText (levelInfo->Cluster);
 
@@ -803,7 +803,7 @@ void PreloadGraphics (bool showPsych)
 	if(showPsych)
 	{
 		PreloadUpdate (10, 10);
-		IN_UserInput (70);
+		IN_UserInput (70, ACK_Any);
 		VW_FadeOut ();
 
 		DrawPlayScreen ();
@@ -958,7 +958,7 @@ void CheckHighScore (int32_t score, const LevelInfo *levelInfo)
 	else
 	{
 		IN_ClearKeysDown ();
-		IN_UserInput (500);
+		IN_UserInput (500, ACK_Local);
 	}
 
 	VW_FadeOut();

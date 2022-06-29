@@ -523,10 +523,10 @@ static void InitGame()
 	if(DrawStartupConsole("Initialization complete"))
 	{
 		if (!param_nowait)
-			IN_UserInput(70*4);
+			IN_UserInput(70*4, ACK_Any);
 	}
 	else // Delay for a moment to allow the user to enter the jukebox if desired
-		IN_UserInput(16);
+		IN_UserInput(16, ACK_Any);
 
 //
 // HOLDING DOWN 'M' KEY?
@@ -721,7 +721,7 @@ static void PG13 (void)
 	VW_UpdateScreen ();
 
 	VW_FadeIn ();
-	IN_UserInput (TICRATE * 7);
+	IN_UserInput (TICRATE * 7, ACK_Any);
 
 	VW_FadeOut ();
 }
@@ -756,7 +756,7 @@ static void NonShareware (void)
 
 	VW_UpdateScreen ();
 	VW_FadeIn ();
-	IN_Ack ();
+	IN_Ack (ACK_Local);
 }
 
 //===========================================================================

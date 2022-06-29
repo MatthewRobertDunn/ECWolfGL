@@ -77,8 +77,10 @@ void ADeathCam::Tick()
 
 	if(gamestate.victoryflag)
 	{
-		if(killer->player)
-			barrier_cast<APlayerPawn *>(killer)->TickPSprites();
+		for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		{
+			players[i].mo->TickPSprites();
+		}
 	}
 
 	Super::Tick();
@@ -145,7 +147,7 @@ ACTION_FUNCTION(A_FinishDeathCam)
 	}
 	while(!CheckPosition(cam));
 
-	IN_UserInput(300);
+	IN_UserInput(300, ACK_Any);
 
 	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
 	{

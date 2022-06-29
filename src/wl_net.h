@@ -37,6 +37,7 @@
 
 #include <SDL_net.h>
 
+#include "id_in.h"
 #include "wl_def.h"
 
 namespace Net {
@@ -66,6 +67,9 @@ void BlockPlaysim();
 void Init(InitStatusCallback callback);
 void NewGame(int &difficulty, class FString &map, class FName (&playerClassNames)[MAXPLAYERS]);
 void PollControls();
+
+bool CheckAck(bool send);
+void StartAck(AckType type);
 
 }
 

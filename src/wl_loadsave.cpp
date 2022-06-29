@@ -577,7 +577,7 @@ bool Load(const FString &filename)
 		Message(language["STR_FAILREAD"]);
 		printf("Could not open %s for reading.\n", GetFullSaveFileName(filename).GetChars());
 		IN_ClearKeysDown ();
-		IN_Ack ();
+		IN_Ack (ACK_Local);
 		return false;
 	}
 
@@ -655,7 +655,7 @@ bool Save(const FString &filename, const FString &title)
 		Message(language["STR_FAILWRITE"]);
 		printf("Could not open %s for writing.\n", GetFullSaveFileName(filename).GetChars());
 		IN_ClearKeysDown ();
-		IN_Ack ();
+		IN_Ack (ACK_Local);
 		return false;
 	}
 
