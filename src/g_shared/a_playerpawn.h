@@ -87,6 +87,7 @@ class APlayerPawn : public AActor
 		AWeapon	*BestWeapon(const ClassDef *ammo=NULL);
 
 		void Cmd_Use();
+		void DeathTick();
 };
 
 #endif

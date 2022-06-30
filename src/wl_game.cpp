@@ -56,7 +56,7 @@
 =============================================================================
 */
 
-bool			ingame,fizzlein;
+bool			ingame;
 gametype        gamestate;
 
 NewMap_t NewMap;
@@ -533,7 +533,7 @@ void RecordDemo (void)
 	SetupGameLevel ();
 
 	VH_UpdateScreen();
-	fizzlein = true;
+	ThreeDStartFadeIn();
 
 	PlayLoop ();
 
@@ -624,66 +624,6 @@ void Died (void)
 		VW_FadeIn ();
 	}
 
-	SD_PlaySound ("player/death");
-
-	//
-	// swing around to face attacker
-	//
-	if(players[0].killerobj)
-	{
-		dx = players[0].killerobj->x - players[0].mo->x;
-		dy = players[0].mo->y - players[0].killerobj->y;
-
-		fangle = (float) atan2((float) dy, (float) dx);     // returns -pi to pi
-		if (fangle<0)
-			fangle = (float) (M_PI*2+fangle);
-
-		iangle = (angle_t) (fangle*ANGLE_180/M_PI);
-	}
-	else
-	{
-		iangle = players[0].mo->angle;
-	}
-
-	static const angle_t DEATHROTATE = ANGLE_1*2;
-	angle_t &curangle = players[0].mo->angle;
-	const int rotate = curangle - iangle > ANGLE_180 ? 1 : -1;
-
-	do
-	{
-		for(unsigned int t = tics;t-- > 0;)
-		{
-			players[0].mo->Tick();
-
-			if (curangle - iangle < DEATHROTATE)
-				curangle = iangle;
-			else
-				curangle += rotate*DEATHROTATE;
-		}
-
-		ThreeDRefresh ();
-		VH_UpdateScreen();
-		CalcTics ();
-	} while (curangle != iangle);
-
-	// Wait for weapon to drop
-	while(players[0].psprite[player_t::ps_weapon].frame)
-	{
-		for(unsigned int t = tics;t-- > 0;)
-			players[0].mo->Tick();
-
-		ThreeDRefresh();
-		VH_UpdateScreen();
-		CalcTics();
-	}
-
-	//
-	// fade to red
-	//
-	FinishPaletteShifts ();
-
-	VH_UpdateScreen();
-
     if (gamestate.difficulty->LivesCount >= 0) {
         --players[0].lives;
 
@@ -694,31 +634,6 @@ void Died (void)
                 R_DrawZoomer(texID);
         }
     }
-
-	if(gameinfo.DeathTransition == GameInfo::TRANSITION_Fizzle)
-	{
-		FizzleFadeStart();
-
-		// Fizzle fade used a slightly darker shade of red.
-		byte fr = RPART(players[0].mo->damagecolor)*2/3;
-		byte fg = GPART(players[0].mo->damagecolor)*2/3;
-		byte fb = BPART(players[0].mo->damagecolor)*2/3;
-		VWB_Clear(ColorMatcher.Pick(fr,fg,fb), viewscreenx, viewscreeny, viewwidth+viewscreenx, viewheight+viewscreeny);
-
-		IN_ClearKeysDown ();
-
-		FizzleFade(viewscreenx,viewscreeny,viewwidth,viewheight,70,false);
-
-		IN_UserInput(100, ACK_Any);
-	}
-	else
-	{
-		// If we get a game over we will fade out any way
-		if((players[0].lives > -1) || (gamestate.difficulty->LivesCount < 0))
-			VL_FadeOut(0, 255, 0, 0, 0, 64);
-	}
-
-	SD_WaitSoundDone ();
 
 	if ((players[0].lives > -1) || (gamestate.difficulty->LivesCount < 0))
 		players[0].state = player_t::PST_REBORN;
@@ -860,7 +775,7 @@ restartgame:
 		else
 		{
 			died = false;
-			fizzlein = true;
+			ThreeDStartFadeIn();
 		}
 
 		StatusBar->DrawStatusBar();

@@ -310,12 +310,14 @@ void player_t::TakeDamage (int points, AActor *attacker)
 	if (!godmode)
 		mo->health = health -= points;
 
+	if (godmode != 2 && GetPlayerNum() == ConsolePlayer)
+		StartDamageFlash (points);
+
 	if (health<=0)
 	{
 		mo->target = attacker;
 		mo->Die();
 		health = 0;
-		playstate = ex_died;
 		killerobj = attacker;
 	}
 	else
@@ -323,9 +325,6 @@ void player_t::TakeDamage (int points, AActor *attacker)
 		if(mo->PainState && pr_damageplayer() < mo->painchance)
 			mo->SetState(mo->PainState);
 	}
-
-	if (godmode != 2 && GetPlayerNum() == ConsolePlayer)
-		StartDamageFlash (points);
 
 	if (points > 0)
 		SD_PlaySound("player/pain");
@@ -819,6 +818,35 @@ ACTION_FUNCTION(A_Raise)
 	return true;
 }
 
+void player_t::DeathFade()
+{
+	if(ScreenFader)
+		return; // Already setup
+
+	if(GetPlayerNum() == ConsolePlayer)
+		FinishPaletteShifts();
+
+	switch(gameinfo.DeathTransition)
+	{
+		case GameInfo::TRANSITION_Fizzle:
+		{
+			// Fizzle fade used a slightly darker shade of red.
+			const byte fr = RPART(mo->damagecolor)*2/3;
+			const byte fg = GPART(mo->damagecolor)*2/3;
+			const byte fb = BPART(mo->damagecolor)*2/3;
+
+			FFizzleFader* fader = new FFizzleFader(viewscreenx,viewscreeny,viewwidth,viewheight,70,false);
+			fader->FadeToColor(fr, fg, fb);
+			ScreenFader = fader;
+			break;
+		}
+
+		case GameInfo::TRANSITION_Fade:
+			ScreenFader = new FBlendFader(0, 255, 0, 0, 0, 64);
+			break;
+	}
+}
+
 // Finds the target closest to the player within shooting range.
 AActor *player_t::FindTarget()
 {
@@ -883,10 +911,12 @@ size_t player_t::PropagateMark()
 
 void player_t::Reborn()
 {
+	ScreenFader.Reset();
 	ReadyWeapon = NULL;
 	PendingWeapon = WP_NOCHANGE;
 	flags = 0;
 	FOV = DesiredFOV;
+	RespawnEligible = -1;
 
 	if(state == PST_ENTER)
 	{

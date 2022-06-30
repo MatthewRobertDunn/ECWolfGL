@@ -504,13 +504,28 @@ ACTION_FUNCTION(A_Chase)
 	bool	dodge = !(flags & CHF_DONTDODGE);
 	bool	pathing = (self->flags & FL_PATHING) ? true : false;
 
-	if(!pathing && self->target == NULL)
+	if(!pathing)
 	{
-		// Auto select player to target. ZDoom tries to sight for a target and
-		// if it doesn't find one switches to idle. Wolf3D, however, never had
-		// explicit targets so the player was assumed to always be targeted.
-		self->target = players[pr_chase()%Net::InitVars.numPlayers].mo;
-		assert(self->target);
+		if(self->target == NULL)
+		{
+			// Auto select player to target. ZDoom tries to sight for a target and
+			// if it doesn't find one switches to idle. Wolf3D, however, never had
+			// explicit targets so the player was assumed to always be targeted.
+			self->target = players[pr_chase()%Net::InitVars.numPlayers].mo;
+			assert(self->target);
+		}
+
+		if(self->target->health <= 0 || !(self->target->flags & FL_SHOOTABLE))
+		{
+			// Target is no longer valid so find a new one
+			if (!SightPlayer (self, 0, 0, 0, 180, NULL))
+			{
+				self->SetIdle();
+				self->target = NULL;
+				self->flags &= ~(FL_ATTACKMODE|FL_FIRSTATTACK);
+				return true;
+			}
+		}
 	}
 
 	if (self->dir == nodir)

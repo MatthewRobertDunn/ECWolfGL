@@ -47,12 +47,6 @@ unsigned scaleFactorX, scaleFactorY;
 
 bool	 screenfaded;
 
-static struct
-{
-	uint8_t r,g,b;
-	int amount;
-} currentBlend;
-
 //===========================================================================
 
 void VL_ToggleFullscreen()
@@ -90,8 +84,6 @@ void VL_SetFullscreen(bool isFull)
 void VL_ReadPalette(const char* lump)
 {
 	InitPalette(lump);
-	if(currentBlend.amount)
-		V_SetBlend(currentBlend.r, currentBlend.g, currentBlend.b, currentBlend.amount);
 	R_InitColormaps();
 	TexMan.InvalidatePalette();
 	V_RetranslateFonts();
@@ -138,6 +130,28 @@ void	VL_SetVGAPlaneMode (bool forSignon)
 =============================================================================
 */
 
+FBlendFader::FBlendFader(int start, int end, int red, int green, int blue, int steps)
+: start(start<<FRACBITS), end(end<<FRACBITS), red(red), green(green),
+  blue(blue), fadems(TICS2MS(steps)), startms(SDL_GetTicks()),
+  aStep((this->end-this->start)/fadems)
+{
+}
+
+bool FBlendFader::Update()
+{
+	int32_t curtime;
+	if((curtime = SDL_GetTicks() - startms) < fadems)
+	{
+		V_SetBlend(red, green, blue, (start+curtime*aStep)>>FRACBITS);
+		return false;
+	}
+	else
+	{
+		V_SetBlend(red, green, blue, end>>FRACBITS);
+		return true;
+	}
+}
+
 /*
 =================
 =
@@ -148,30 +162,13 @@ void	VL_SetVGAPlaneMode (bool forSignon)
 =================
 */
 
-static int fadeR = 0, fadeG = 0, fadeB = 0;
+static FBlendFader fade(0, 0, 0, 0, 0, 1);
 void VL_Fade (int start, int end, int red, int green, int blue, int steps)
 {
-	end <<= FRACBITS;
-	start <<= FRACBITS;
+	fade = FBlendFader(start, end, red, green, blue, steps);
 
-	const int32_t fadems = TICS2MS(steps);
-	const int32_t startms = SDL_GetTicks();
-	const fixed aStep = (end-start)/fadems;
-
-//
-// fade through intermediate frames
-//
-	int32_t curtime;
-	while((curtime = SDL_GetTicks() - startms) < fadems)
-	{
-		V_SetBlend(red, green, blue, (start+curtime*aStep)>>FRACBITS);
+	while(!fade.Update())
 		VH_UpdateScreen();
-	}
-
-//
-// final color
-//
-	V_SetBlend (red,green,blue,end>>FRACBITS);
 	VH_UpdateScreen();
 
 	screenfaded = end != 0;
@@ -183,9 +180,6 @@ void VL_Fade (int start, int end, int red, int green, int blue, int steps)
 
 void VL_FadeOut (int start, int end, int red, int green, int blue, int steps)
 {
-	fadeR = red;
-	fadeG = green;
-	fadeB = blue;
 	VL_Fade(start, end, red, green, blue, steps);
 }
 
@@ -201,7 +195,7 @@ void VL_FadeOut (int start, int end, int red, int green, int blue, int steps)
 void VL_FadeIn (int start, int end, int steps)
 {
 	if(screenfaded)
-		VL_Fade(end, start, fadeR, fadeG, fadeB, steps);
+		VL_Fade(end, start, fade.R(), fade.G(), fade.B(), steps);
 }
 
 /*
@@ -215,7 +209,7 @@ void VL_FadeIn (int start, int end, int steps)
 
 void VL_FadeClear ()
 {
-	VWB_Clear(ColorMatcher.Pick(fadeR, fadeG, fadeB), 0, 0, screenWidth, screenHeight);
+	VWB_Clear(ColorMatcher.Pick(fade.R(), fade.G(), fade.B()), 0, 0, screenWidth, screenHeight);
 	V_SetBlend(0, 0, 0, 0);
 	VH_UpdateScreen();
 }

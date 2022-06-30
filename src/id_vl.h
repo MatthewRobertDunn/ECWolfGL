@@ -30,6 +30,33 @@ void VL_ReadPalette(const char* lump);
 void VL_SetVGAPlaneMode (bool forSignon=false);
 void VL_SetTextMode (void);
 
+class FFader
+{
+public:
+	virtual ~FFader() {}
+
+	// Performs a fade step and returns true if fade is complete
+	virtual bool Update()=0;
+};
+
+class FBlendFader : public FFader
+{
+	fixed start, end;
+	int red, green, blue;
+	int32_t fadems;
+	int32_t startms;
+	fixed aStep;
+
+public:
+	FBlendFader(int start, int end, int red, int green, int blue, int steps);
+
+	bool Update();
+
+	int R() const { return red; }
+	int G() const { return green; }
+	int B() const { return blue; }
+};
+
 void VL_FadeOut     (int start, int end, int red, int green, int blue, int steps);
 void VL_FadeIn      (int start, int end, int steps);
 void VL_FadeClear   ();

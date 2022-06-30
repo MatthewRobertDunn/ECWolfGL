@@ -116,6 +116,7 @@ class AActor : public Thinker,
 		void			RemoveFromWorld();
 		virtual void	RemoveInventory(AInventory *item);
 		void			Serialize(FArchive &arc);
+		void			SetIdle();
 		void			SetState(const Frame *state, bool norun=false);
 		void			SpawnFog();
 		static AActor	*Spawn(const ClassDef *type, fixed x, fixed y, fixed z, int flags);

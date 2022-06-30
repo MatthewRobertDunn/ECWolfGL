@@ -22,6 +22,7 @@
 #include "wl_agent.h"
 #include "wl_draw.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_state.h"
 #include "a_inventory.h"
@@ -1166,6 +1167,29 @@ void CalcViewVariables()
 		r_extralight = 0;
 }
 
+static TUniquePtr<FFader> fizzlein;
+void ThreeDStartFadeIn()
+{
+	// For multiplayer disable fade in since players need to be back in the
+	// action immediately after respawning.
+	if(Net::InitVars.mode != Net::MODE_SinglePlayer)
+		return;
+
+	switch(gameinfo.DeathTransition)
+	{
+		case GameInfo::TRANSITION_Fizzle:
+		{
+			FFizzleFader *fader = new FFizzleFader(0, 0, screenWidth, screenHeight, 20, true);
+			fader->CaptureFrame();
+			fizzlein.Reset(fader);
+			break;
+		}
+		case GameInfo::TRANSITION_Fade:
+			fizzlein.Reset(new FBlendFader(255, 0, 0, 0, 0, 24));
+			break;
+	}
+}
+
 //==========================================================================
 
 void R_RenderView()
@@ -1224,14 +1248,13 @@ void R_RenderView()
 ========================
 */
 
+
+
 void    ThreeDRefresh (void)
 {
 	// Ensure we have a valid camera
 	if(players[ConsolePlayer].camera == NULL)
 		players[ConsolePlayer].camera = players[ConsolePlayer].mo;
-
-	if (fizzlein && gameinfo.DeathTransition == GameInfo::TRANSITION_Fizzle)
-		FizzleFadeStart();
 
 //
 // clear out the traced array
@@ -1249,16 +1272,21 @@ void    ThreeDRefresh (void)
 	VL_UnlockSurface();
 	vbuf = NULL;
 
+	if(player_t *player = players[ConsolePlayer].camera->player)
+	{
+		if(player->ScreenFader)
+			player->ScreenFader->Update();
+	}
+
 //
 // show screen and time last cycle
 //
 	if (fizzlein)
 	{
-		if(gameinfo.DeathTransition == GameInfo::TRANSITION_Fizzle)
-			FizzleFade(0, 0, screenWidth, screenHeight, 20, false);
-		else
-			VL_FadeIn(0, 255, 24);
-		fizzlein = false;
+		while(!fizzlein->Update())
+			VH_UpdateScreen();
+		VH_UpdateScreen();
+		fizzlein.Reset();
 
 		// don't make a big tic count
 		ResetTimeCount();

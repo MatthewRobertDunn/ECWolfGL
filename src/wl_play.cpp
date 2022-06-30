@@ -958,6 +958,9 @@ void UpdatePaletteShifts (void)
 
 void FinishPaletteShifts (void)
 {
+	damagecount = 0;
+	bonuscount = 0;
+
 	if (palshifted)
 	{
 		V_SetBlend(0, 0, 0, 0);
@@ -1074,7 +1077,11 @@ void PlayLoop (void)
 			if(!Paused)
 			{
 				++gamestate.TimeCount;
-				thinkerList.Tick();
+				// In single player if the player dies only tick the pawn
+				if(Net::InitVars.mode != Net::MODE_SinglePlayer || players[0].state != player_t::PST_DEAD)
+					thinkerList.Tick();
+				else
+					thinkerList.Tick(ThinkerList::PLAYER);
 				AActor::FinishSpawningActors();
 			}
 		}

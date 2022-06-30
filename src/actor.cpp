@@ -497,6 +497,14 @@ void AActor::Serialize(FArchive &arc)
 	Super::Serialize(arc);
 }
 
+void AActor::SetIdle()
+{
+	if(const Frame *idle = FindState(NAME_Idle))
+		SetState(idle);
+	else
+		SetState(SpawnState);
+}
+
 void AActor::SetState(const Frame *state, bool norun)
 {
 	if(state == NULL)

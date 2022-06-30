@@ -1031,6 +1031,9 @@ bool CheckLine (AActor *ob, AActor *ob2)
 
 static bool CheckSightTo (AActor *ob, AActor *target, double minseedist, double maxseedist, double maxheardist, double fov)
 {
+	if (!(target->flags & FL_SHOOTABLE))
+		return false;
+
 	bool heardnoise = madenoise;
 
 	// Check if we can hear the player's noise
