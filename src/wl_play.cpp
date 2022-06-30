@@ -1077,11 +1077,15 @@ void PlayLoop (void)
 			if(!Paused)
 			{
 				++gamestate.TimeCount;
+
+				CheckSpawnPlayer();
+
 				// In single player if the player dies only tick the pawn
 				if(Net::InitVars.mode != Net::MODE_SinglePlayer || players[0].state != player_t::PST_DEAD)
 					thinkerList.Tick();
 				else
 					thinkerList.Tick(ThinkerList::PLAYER);
+
 				AActor::FinishSpawningActors();
 			}
 		}

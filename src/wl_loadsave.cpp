@@ -532,7 +532,7 @@ static void Serialize(FArchive &arc)
 		gamestate.difficulty = &SkillInfo::GetSkill(difficulty);
 	}
 
-	unsigned int maxPlayers = MAXPLAYERS;
+	unsigned int maxPlayers = Net::InitVars.numPlayers;
 
 	arc << gamestate.playerClass[0];
 	if(SaveVersion >= 1599444347)

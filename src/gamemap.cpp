@@ -53,8 +53,29 @@
 #include "g_mapinfo.h"
 
 const FName SpecialThingNames[SMT_NumThings] = {
-	"$Player1Start"
+	"$Player1Start",
+	"$Player2Start",
+	"$Player3Start",
+	"$Player4Start",
+	"$Player5Start",
+	"$Player6Start",
+	"$Player7Start",
+	"$Player8Start",
+	"$Player9Start",
+	"$Player10Start",
+	"$Player11Start",
+	"$DeathmatchStart"
 };
+
+ESpecialThings SpecialThingNamesLookup(FName name)
+{
+	for(unsigned int i = 0;i < SMT_NumThings;++i)
+	{
+		if(SpecialThingNames[i] == name)
+			return static_cast<ESpecialThings>(i);
+	}
+	return SMT_NumThings;
+}
 
 GameMap::GameMap(const FString &map) : map(map), valid(false), isUWMF(false),
 	file(NULL), zoneTraversed(NULL), zoneLinks(NULL)
@@ -322,6 +343,29 @@ void GameMap::GetHitlist(BYTE* hitlist) const
 	}
 }
 
+const GameMap::PlayerSpawn *GameMap::GetPlayerSpawn(int player) const
+{
+	if(const PlayerSpawn *spawn = playerStarts.CheckKey(player))
+		return spawn;
+
+	// No direct spawn, so overlap with another player, but if possible divide
+	// amongst any additional spawn points available
+	unsigned int alt = player % playerStarts.CountUsed();
+	const PlayerSpawn *best = NULL;
+	for(unsigned int i = 0;i < MAXPLAYERS;++i)
+	{
+		if(const PlayerSpawn *spawn = playerStarts.CheckKey(i))
+		{
+			best = spawn;
+			if(alt == 0)
+				break;
+			--alt;
+		}
+	}
+
+	return best;
+}
+
 // Looks up the MapSpot by tag number.  If spot is NULL then the first spot
 // in the chain is returned.
 // Technically at the moment further spots could be found by just using nexttag
@@ -498,20 +542,31 @@ void GameMap::SetupLinks()
 }
 
 extern FRandom pr_spawnmobj;
-void GameMap::SpawnThings() const
+void GameMap::SpawnThings()
 {
 #if 0
 	// Debug code - Show the number of things spawned at map start.
 	printf("Spawning %d things\n", things.Size());
 #endif
+
+	playerStarts.Clear();
+	deathmatchStarts.Clear();
+
 	for(unsigned int i = 0;i < things.Size();++i)
 	{
 		Thing &thing = things[i];
 		if(!thing.skill[gamestate.difficulty->SpawnFilter])
 			continue;
 
-		if(thing.type == SpecialThingNames[SMT_Player1Start])
-			SpawnPlayer(thing.x>>FRACBITS, thing.y>>FRACBITS, thing.angle);
+		ESpecialThings st = SpecialThingNamesLookup(thing.type);
+		if(st != SMT_NumThings)
+		{
+			PlayerSpawn spawn = {thing.x, thing.y, thing.angle};
+			if(st >= SMT_Player1Start && st <= SMT_Player11Start)
+				playerStarts.Insert(st - SMT_Player1Start, spawn);
+			else
+				deathmatchStarts.Push(spawn);
+		}
 		else
 		{
 			static const ClassDef *unknownClass = ClassDef::FindClass("Unknown");

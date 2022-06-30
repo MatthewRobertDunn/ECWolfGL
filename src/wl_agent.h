@@ -17,7 +17,8 @@
 
 extern  AActor   *LastAttacker;
 
-void    SpawnPlayer (int tilex, int tiley, int dir);
+void    CheckSpawnPlayer (bool setup=false);
+void    SpawnPlayer (int num);
 
 //
 // Status bar interface

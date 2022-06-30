@@ -3,6 +3,7 @@
 #include <cmath>
 #include <climits>
 
+#include "doomerrors.h"
 #include "wl_def.h"
 #include "id_ca.h"
 #include "id_sd.h"
@@ -1063,35 +1064,69 @@ FArchive &operator<< (FArchive &arc, player_t *&player)
 /*
 ===============
 =
+= CheckSpawnPlayer
+=
+= Look for any players waiting to be spawned
+=
+===============
+*/
+
+void CheckSpawnPlayer(bool setup)
+{
+	for(unsigned int p = 0;p < Net::InitVars.numPlayers;++p)
+	{
+		if(setup || players[p].state == player_t::PST_ENTER || players[p].state == player_t::PST_REBORN)
+		{
+			SpawnPlayer(p);
+			if(players[p].mo == NULL)
+			{
+				FString err;
+				err.Format("No player %u start!", p);
+				throw CRecoverableError(err);
+			}
+		}
+	}
+}
+
+/*
+===============
+=
 = SpawnPlayer
 =
 ===============
 */
 
-void SpawnPlayer (int tilex, int tiley, int dir)
+void SpawnPlayer (int num)
 {
-	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+	const GameMap::PlayerSpawn *spot = map->GetPlayerSpawn(num);
+	if(spot == NULL)
+		return;
+
+	player_t &player = players[num];
+
+	if(player.state == player_t::PST_REBORN && player.mo) // Detach from previous pawn if it exists
 	{
-		player_t &player = players[i];
-
-		player.mo = (APlayerPawn *) AActor::Spawn(gamestate.playerClass[i], ((int32_t)tilex<<TILESHIFT)+TILEGLOBAL/2, ((int32_t)tiley<<TILESHIFT)+TILEGLOBAL/2, 0, 0);
-		player.mo->angle = dir*ANGLE_1;
-		player.mo->player = &player;
-		Thrust (player.mo,0,0); // set some variables
-		player.mo->SetPriority(ThinkerList::PLAYER);
-
-		if(player.state == player_t::PST_ENTER || player.state == player_t::PST_REBORN)
-			player.Reborn();
-
-		player.camera = player.mo;
-		player.state = player_t::PST_LIVE;
-		player.extralight = 0;
-
-		// Re-raise the weapon like Doom if we don't have the flag set in mapinfo.
-		if(!levelInfo->SpawnWithWeaponRaised && player.PendingWeapon == WP_NOCHANGE)
-			player.PendingWeapon = player.ReadyWeapon;
-		player.BringUpWeapon();
+		player.mo->player = NULL;
+		player.mo->SetPriority(ThinkerList::NORMAL);
 	}
+
+	player.mo = (APlayerPawn *) AActor::Spawn(gamestate.playerClass[num], spot->x, spot->y, 0, 0);
+	player.mo->angle = spot->angle*ANGLE_1;
+	player.mo->player = &player;
+	Thrust (player.mo,0,0); // set some variables
+	player.mo->SetPriority(ThinkerList::PLAYER);
+
+	if(player.state == player_t::PST_ENTER || player.state == player_t::PST_REBORN)
+		player.Reborn();
+
+	player.camera = player.mo;
+	player.state = player_t::PST_LIVE;
+	player.extralight = 0;
+
+	// Re-raise the weapon like Doom if we don't have the flag set in mapinfo.
+	if(!levelInfo->SpawnWithWeaponRaised && player.PendingWeapon == WP_NOCHANGE)
+		player.PendingWeapon = player.ReadyWeapon;
+	player.BringUpWeapon();
 }
 
 

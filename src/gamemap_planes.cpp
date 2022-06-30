@@ -315,7 +315,8 @@ public:
 
 		// The player has a weird rotation pattern. It's 450-angle.
 		bool playerRotation = false;
-		if(thing.type == SpecialThingNames[SMT_Player1Start])
+		ESpecialThings st = SpecialThingNamesLookup(thing.type);
+		if(st >= SMT_Player1Start && st <= SMT_DeathmatchStart)
 			playerRotation = true;
 
 		if(type.angles)

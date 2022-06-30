@@ -270,17 +270,7 @@ void SetupGameLevel (void)
 	if(!loadedgame)
 	{
 		map->SpawnThings();
-
-		// Check to see if players spawned
-		for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
-		{
-			if(players[i].mo == NULL)
-			{
-				FString err;
-				err.Format("No player %u start!", i);
-				throw CRecoverableError(err);
-			}
-		}
+		CheckSpawnPlayer(true);
 	}
 }
 

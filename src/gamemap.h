@@ -185,6 +185,12 @@ class GameMap
 				Plane::Map		*nexttag;
 			}*	map;
 		};
+		struct PlayerSpawn
+		{
+			fixed x;
+			fixed y;
+			unsigned short angle;
+		};
 
 		GameMap(const FString &map);
 		~GameMap();
@@ -194,6 +200,7 @@ class GameMap
 		const Header	&GetHeader() const { return header; }
 		void			GetHitlist(BYTE* hitlist) const;
 		int				GetMarketLumpNum() const { return markerLump; }
+		const PlayerSpawn *GetPlayerSpawn(int player) const;
 		Plane::Map		*GetSpot(unsigned int x, unsigned int y, unsigned int z) const { return &GetPlane(z).map[y*header.width+x]; }
 		Plane::Map		*GetSpotByTag(unsigned int tag, Plane::Map *start) const;
 		const Zone		&GetZone(unsigned int index) { return zonePalette[index]; }
@@ -202,7 +209,7 @@ class GameMap
 		void			LoadMap(bool loadingSave);
 		unsigned int	NumPlanes() const { return planes.Size(); }
 		const Plane		&GetPlane(unsigned int index) const { return planes[index]; }
-		void			SpawnThings() const;
+		void			SpawnThings();
 
 		// Sound functions
 		bool			CheckLink(const Zone *zone1, const Zone *zone2, bool recurse);
@@ -259,15 +266,30 @@ class GameMap
 		// links that are opened).
 		bool*				zoneTraversed;
 		unsigned short**	zoneLinks;
+
+		TArray<PlayerSpawn> deathmatchStarts;
+		TMap<unsigned int, PlayerSpawn> playerStarts;
 };
 
 enum ESpecialThings
 {
 	SMT_Player1Start,
+	SMT_Player2Start,
+	SMT_Player3Start,
+	SMT_Player4Start,
+	SMT_Player5Start,
+	SMT_Player6Start,
+	SMT_Player7Start,
+	SMT_Player8Start,
+	SMT_Player9Start,
+	SMT_Player10Start,
+	SMT_Player11Start,
+	SMT_DeathmatchStart,
 
 	SMT_NumThings
 };
 extern const FName SpecialThingNames[SMT_NumThings];
+ESpecialThings SpecialThingNamesLookup(FName name);
 
 typedef GameMap::Plane::Map *	MapSpot;
 
