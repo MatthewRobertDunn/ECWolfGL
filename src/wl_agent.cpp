@@ -867,7 +867,7 @@ AActor *player_t::FindTarget()
 			if(check == mo)
 				continue;
 
-			if ((check->flags & FL_SHOOTABLE) && mo->CheckVisibility(check))
+			if ((check->flags & FL_SHOOTABLE) && mo->CheckVisibility(check, ANGLE_90/9))
 			{
 				const int dist = MAX(abs(check->x - mo->x), abs(check->y - mo->y));
 
@@ -1168,7 +1168,7 @@ ACTION_FUNCTION(A_CustomPunch)
 		if(check == self)
 			continue;
 
-		if ( (check->flags & FL_SHOOTABLE) && self->CheckVisibility(check))
+		if ( (check->flags & FL_SHOOTABLE) && self->CheckVisibility(check, ANGLE_90/9))
 		{
 			const int checkdist = MAX(abs(check->x - self->x), abs(check->y - self->y));
 

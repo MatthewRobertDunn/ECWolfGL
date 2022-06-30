@@ -32,7 +32,6 @@ extern  int      mousexadjustment;
 extern  int      mouseyadjustment;
 extern  int      panxadjustment;
 extern  int      panyadjustment;
-extern  int      shootdelta;
 extern  unsigned screenofs;
 
 extern  bool     startgame;

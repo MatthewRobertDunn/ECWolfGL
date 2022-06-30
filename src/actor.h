@@ -99,7 +99,7 @@ class AActor : public Thinker,
 		virtual void	BeginPlay() {}
 		void			ClearCounters();
 		void			ClearInventory();
-		bool			CheckVisibility(const AActor *check) const;
+		bool			CheckVisibility(const AActor *check, angle_t fov=ANGLE_45) const;
 		virtual void	Destroy();
 		virtual void	Die();
 		void			EnterZone(const MapZone *zone);

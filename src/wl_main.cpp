@@ -97,7 +97,6 @@ int      statusbarx;
 int      statusbary1, statusbary2;
 short    centerx;
 short    centerxwide;
-int      shootdelta;           // pixels away from centerx a target can be
 fixed    scale;
 fixed    pspritexscale;
 fixed    pspriteyscale;
@@ -599,8 +598,6 @@ static void SetViewSize (unsigned int screenWidth, unsigned int screenHeight)
 	viewheight = height&~1;
 	centerx = viewwidth/2-1;
 	centerxwide = AspectCorrection[r_ratio].isWide ? CorrectWidthFactor(centerx) : centerx;
-	// This should allow shooting within 9 degrees, but it's not perfect.
-	shootdelta = ((viewwidth<<FRACBITS)/AspectCorrection[r_ratio].viewGlobal)/10;
 	if((unsigned) viewheight == screenHeight)
 		viewscreenx = viewscreeny = screenofs = 0;
 	else

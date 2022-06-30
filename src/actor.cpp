@@ -177,7 +177,7 @@ void AActor::AddInventory(AInventory *item)
 }
 
 // This checks if this can see the specified actor. It replaces FL_VISABLE checks.
-bool AActor::CheckVisibility(const AActor *check) const
+bool AActor::CheckVisibility(const AActor *check, angle_t fov) const
 {
 	float angle = (float) atan2 ((float) (check->y - y), (float) (check->x - x));
 	if (angle<0)
@@ -186,7 +186,7 @@ bool AActor::CheckVisibility(const AActor *check) const
 	angle_t lowerAngle = MIN(iangle, this->angle);
 	angle_t upperAngle = MAX(iangle, this->angle);
 
-	return MIN(upperAngle - lowerAngle, lowerAngle - upperAngle) <= ANGLE_45 && CheckLine(check, this);
+	return MIN(upperAngle - lowerAngle, lowerAngle - upperAngle) <= fov && CheckLine(check, this);
 }
 
 void AActor::ClearCounters()
