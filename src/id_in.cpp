@@ -541,7 +541,7 @@ void IN_WaitAndProcessEvents()
 		if(!SDL_WaitEventTimeout(&event, 10)) return;
 #else
 		SDL_Delay(1);
-		if(!SDL_PollEvent(event)) return;
+		if(!SDL_PollEvent(&event)) return;
 #endif
 	}
 
