@@ -806,14 +806,14 @@ ACTION_FUNCTION(A_WolfAttack)
 
 		if (target->player->thrustspeed >= runspeed)
 		{
-			if (self->flags&FL_VISABLE)
+			if (target->CheckVisibility(self))
 				hitchance = 160-dist*16; // player can see to dodge
 			else
 				hitchance = 160-dist*8;
 		}
 		else
 		{
-			if (self->flags&FL_VISABLE)
+			if (target->CheckVisibility(self))
 				hitchance = 256-dist*16; // player can see to dodge
 			else
 				hitchance = 256-dist*8;

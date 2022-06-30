@@ -854,7 +854,7 @@ static inline bool CheckAdjacentTileBlockage(int x, int y, int lastx, int lasty)
 =
 =====================
 */
-bool CheckLine (AActor *ob, AActor *ob2)
+bool CheckLine (const AActor *ob, const AActor *ob2)
 {
 	int         x1,y1,xt1,yt1,x2,y2,xt2,yt2;
 	int         x,y;

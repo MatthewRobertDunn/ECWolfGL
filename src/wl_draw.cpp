@@ -613,11 +613,7 @@ void DrawScaleds (void)
 
 			if (visptr < &vislist[MAXVISABLE-1])    // don't let it overflow
 				visptr++;
-
-			obj->flags |= FL_VISABLE;
 		}
-		else
-			obj->flags &= ~FL_VISABLE;
 	}
 
 //

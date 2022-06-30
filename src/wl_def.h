@@ -184,7 +184,6 @@ typedef uint32_t angle_t;
 enum ActorFlag
 {
 	FL_SHOOTABLE        = 0x00000001,
-	FL_VISABLE          = 0x00000008,
 	FL_ATTACKMODE       = 0x00000010,
 	FL_FIRSTATTACK      = 0x00000020,
 	FL_AMBUSH           = 0x00000040,
