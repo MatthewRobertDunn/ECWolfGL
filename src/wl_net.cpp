@@ -39,6 +39,7 @@
 #include "id_in.h"
 #include "id_us.h"
 #include "id_vh.h"
+#include "wl_debug.h"
 #include "wl_game.h"
 #include "wl_menu.h"
 #include "wl_play.h"
@@ -68,6 +69,7 @@ enum
 	NET_NewGame,
 	NET_BlockPlaysim,
 	NET_InAck,
+	NET_DebugCmd,
 };
 
 #pragma pack(1)
@@ -146,6 +148,17 @@ struct InAckPacket
 	BYTE type;
 	int32_t TimeCount;
 	uint32_t Number;
+};
+
+struct DebugCmdPacket
+{
+	enum { Type = NET_DebugCmd };
+
+	BYTE type;
+	int32_t TimeCount;
+	int32_t CommandType;
+	int32_t ArgI;
+	char ArgS[9];
 };
 #pragma pack()
 
@@ -290,13 +303,37 @@ static void HandleCommandPackets()
 		PlaysimBlocked = data->TimeCount;
 		PlayFrame();
 	}
+	else if(CheckPacketType<DebugCmdPacket>(Packet))
+	{
+		const DebugCmdPacket *data = reinterpret_cast<DebugCmdPacket *>(Packet->data);
+
+		SendAck<DebugCmdPacket>(Packet->address, data->TimeCount);
+		if(data->TimeCount != gamestate.TimeCount)
+			Printf("Desync: Debug key command for tic %d arrived on %d\n", data->TimeCount, gamestate.TimeCount);
+
+		int client = FindClient(Packet->address);
+		if(client < 0)
+		{
+			Printf("Packet recieved from unknown source\n");
+			return;
+		}
+
+		DebugCmd cmd;
+		cmd.Type = static_cast<EDebugCmd>(data->CommandType);
+		cmd.ArgI = data->ArgI;
+		cmd.ArgS = data->ArgS;
+		DoDebugKey(client, cmd);
+	}
 	else if(CheckPacketType<InAckPacket>(Packet))
 	{
 		const InAckPacket *data = reinterpret_cast<InAckPacket *>(Packet->data);
 
 		SendAck<InAckPacket>(Packet->address, data->TimeCount);
 		if(data->Number != AwaitingAck)
+		{
+			Printf("Received wrong ACK %d\n", data->Number);
 			return;
+		}
 
 		DidAck = data->Number;
 	}
@@ -406,6 +443,10 @@ static void ExchangePacket(T (&packets)[MAXPLAYERS])
 				HandleCommandPackets();
 			}
 		}
+
+		// If a debug command changes the play state then we should abort
+		if((int)T::Type == NET_TicCmd && playstate != ex_stillplaying)
+			break;
 	}
 }
 
@@ -703,6 +744,22 @@ void BlockPlaysim()
 	}
 }
 
+void DebugKey(const DebugCmd &cmd)
+{
+	if(InitVars.mode != MODE_SinglePlayer)
+	{
+		DebugCmdPacket packet;
+		packet.CommandType = cmd.Type;
+		packet.ArgI = cmd.ArgI;
+		strncpy(packet.ArgS, cmd.ArgS, 8);
+		packet.ArgS[8] = 0;
+
+		SendReliablePacket(packet);
+	}
+
+	DoDebugKey(ConsolePlayer, cmd);
+}
+
 void NewGame(int &difficulty, FString &map, FName (&playerClassNames)[MAXPLAYERS])
 {
 	if(InitVars.numPlayers > 1)
@@ -749,6 +806,9 @@ void PollControls()
 	memcpy(ticcmdData.buttonheld, control[ConsolePlayer].buttonheld, sizeof(control[ConsolePlayer].buttonheld));
 
 	ExchangePacket(ticcmdPackets);
+	if(playstate != ex_stillplaying)
+		return;
+
 	for(unsigned int client = 0;client < InitVars.numPlayers;++client)
 	{
 		if(client == ConsolePlayer)
@@ -778,7 +838,7 @@ void PollControls()
 
 bool CheckAck(bool send)
 {
-	if(InitVars.mode == MODE_SinglePlayer || AwaitingAckType == ACK_Local)
+	if(InitVars.mode == MODE_SinglePlayer || AwaitingAckType != ACK_Any)
 		return send;
 
 	if(DidAck == AwaitingAck)
@@ -806,14 +866,19 @@ bool CheckAck(bool send)
 
 void StartAck(AckType type)
 {
-	if(type == ACK_Local)
-		return;
-
 	AwaitingAckType = type;
-	++AwaitingAck;
 
-	if(type == ACK_Block)
-		BlockPlaysim();
+	switch(type)
+	{
+		case ACK_Local:
+			break;
+		case ACK_Block:
+			BlockPlaysim();
+			break;
+		case ACK_Any:
+			++AwaitingAck;
+			break;
+	}
 }
 
 }

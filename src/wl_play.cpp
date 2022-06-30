@@ -1074,6 +1074,10 @@ void PlayLoop (void)
 		{
 			PollControls(!i);
 
+			// Net code may require this loop to abort early
+			if(playstate != ex_stillplaying)
+				break;
+
 			if(!Paused)
 			{
 				++gamestate.TimeCount;

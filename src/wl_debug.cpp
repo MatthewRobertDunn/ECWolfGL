@@ -26,6 +26,7 @@
 #include "wl_game.h"
 #include "wl_inter.h"
 #include "wl_iwad.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "w_wad.h"
 #include "thingdef/thingdef.h"
@@ -199,8 +200,13 @@ static int DebugKeys (void)
 	}
 	if (Keyboard[sc_E])             // E = quit level
 	{
-		playstate = ex_completed;
 		IN_ClearKeysDown();
+		if(Net::IsArbiter())
+		{
+			DebugCmd cmd = {DEBUG_NextLevel};
+			Net::DebugKey(cmd);
+		}
+		return 0;
 	}
 
 	if (Keyboard[sc_F])             // F = facing spot
@@ -230,27 +236,28 @@ static int DebugKeys (void)
 
 		VW_UpdateScreen();
 		IN_Ack(ACK_Block);
-		if (godmode != 2)
-			godmode++;
-		else
-			godmode = 0;
+
+		DebugCmd cmd = {DEBUG_GodMode};
+		cmd.ArgI = (godmode+1)%3;
+		Net::DebugKey(cmd);
 		return 1;
 	}
 	if (Keyboard[sc_H])             // H = hurt self
 	{
 		IN_ClearKeysDown ();
-		players[ConsolePlayer].TakeDamage (16,NULL);
+
+		DebugCmd cmd = {DEBUG_HurtSelf};
+		Net::DebugKey(cmd);
 	}
 	else if (Keyboard[sc_I])        // I = item cheat
 	{
 		US_CenterWindow (12,3);
 		US_PrintCentered ("Free items!");
 		VW_UpdateScreen();
-		GiveAllWeaponsAndAmmo(players[ConsolePlayer]);
-		players[ConsolePlayer].GivePoints (100000);
-		players[ConsolePlayer].health = 100;
-		StatusBar->DrawStatusBar();
 		IN_Ack (ACK_Block);
+
+		DebugCmd cmd = {DEBUG_GiveItems};
+		Net::DebugKey(cmd);
 		return 1;
 	}
 	else if (Keyboard[sc_K])        // K = give keys
@@ -262,8 +269,8 @@ static int DebugKeys (void)
 		esc = !US_LineInput (SmallFont,PrintX,py,str,NULL,true,3,WindowX+WindowW-PrintX,GPalette.WhiteIndex);
 		if (!esc)
 		{
-			level = atoi (str);
-			P_GiveKeys(players[ConsolePlayer].mo, level);
+			DebugCmd cmd = {DEBUG_GiveKey};
+			cmd.ArgI = atoi (str);
 		}
 		return 1;
 	}
@@ -312,7 +319,6 @@ static int DebugKeys (void)
 	}
 	else if (Keyboard[sc_N])        // N = no clip
 	{
-		noclip^=1;
 		US_CenterWindow (18,3);
 		if (noclip)
 			US_PrintCentered ("No clipping ON");
@@ -320,6 +326,9 @@ static int DebugKeys (void)
 			US_PrintCentered ("No clipping OFF");
 		VW_UpdateScreen();
 		IN_Ack (ACK_Block);
+
+		DebugCmd cmd = {DEBUG_NoClip};
+		Net::DebugKey(cmd);
 		return 1;
 	}
 	else if (Keyboard[sc_O])
@@ -385,6 +394,9 @@ static int DebugKeys (void)
 	}
 	else if (Keyboard[sc_W])        // W = warp to level
 	{
+		if(!Net::IsArbiter())
+			return 0;
+
 		US_CenterWindow(26,3);
 		PrintY+=6;
 		US_Print(SmallFont, "  Warp to which level: ");
@@ -410,12 +422,9 @@ static int DebugKeys (void)
 					strcpy(str, info.MapName);
 			}
 
-			if(GameMap::CheckMapExists(str))
-			{
-				strncpy(gamestate.mapname, str, 8);
-				gamestate.mapname[8] = 0;
-				playstate = ex_warped;
-			}
+			DebugCmd cmd = {DEBUG_Warp};
+			cmd.ArgS = str;
+			Net::DebugKey(cmd);
 		}
 		return 1;
 	}
@@ -429,23 +438,13 @@ static int DebugKeys (void)
 		esc = !US_LineInput (SmallFont,PrintX,py,str,NULL,true,summon ? 20 : 22,WindowX+WindowW-PrintX,GPalette.WhiteIndex);
 		if (!esc)
 		{
-			const ClassDef *cls = ClassDef::FindClass(str);
-			if(summon && cls)
-			{
-				fixed distance = FixedMul(cls->GetDefault()->radius + players[ConsolePlayer].mo->radius, 0x16A0A); // sqrt(2)
-				AActor *newobj = AActor::Spawn(cls,
-					players[ConsolePlayer].mo->x + FixedMul(distance, finecosine[players[ConsolePlayer].mo->angle>>ANGLETOFINESHIFT]),
-					players[ConsolePlayer].mo->y - FixedMul(distance, finesine[players[ConsolePlayer].mo->angle>>ANGLETOFINESHIFT]),
-					0, 0);
-				newobj->angle = players[ConsolePlayer].mo->angle;
-			}
-			else
-			{
-				if(!cls || !cls->IsDescendantOf(NATIVE_CLASS(Inventory)))
-					return 1;
+			FName clsName(str, true);
+			if(clsName == NAME_None)
+				return 1;
 
-				players[ConsolePlayer].mo->GiveInventory(cls, 0, false);
-			}
+			DebugCmd cmd = {summon ? DEBUG_Summon : DEBUG_Give};
+			cmd.ArgI = clsName;
+			Net::DebugKey(cmd);
 		}
 		return 1;
 	}
@@ -539,7 +538,8 @@ static void GiveMLI(player_t &player)
 
 static void DebugMLI()
 {
-	GiveMLI(players[ConsolePlayer]);
+	DebugCmd cmd = {DEBUG_MLI};
+	Net::DebugKey(cmd);
 
 	ClearSplitVWB ();
 
@@ -582,14 +582,17 @@ static void DebugGod(bool noah)
 		}
 	}
 
-	godmode ^= 1;
+	DebugCmd cmd = {DEBUG_GodMode};
+	cmd.ArgI = !godmode;
+	Net::DebugKey(cmd);
 
 	IN_ClearKeysDown ();
 	IN_Ack (ACK_Block);
 
 	if (noah)
 	{
-		GiveMLI(players[ConsolePlayer]);
+		DebugCmd cmd2 = {DEBUG_MLI};
+		Net::DebugKey(cmd2);
 	}
 
 	if (viewsize < 18)
@@ -709,5 +712,82 @@ void CheckDebugKeys()
 				ResetTimeCount();
 			}
 		}
+	}
+}
+
+
+/*
+================
+=
+= DoDebugKey
+=
+================
+*/
+
+void DoDebugKey(int player, const DebugCmd &cmd)
+{
+	switch(cmd.Type)
+	{
+		case DEBUG_Give:
+			if(const ClassDef *cls = ClassDef::FindClass(FName(ENamedName(cmd.ArgI))))
+			{
+				if(!cls->IsDescendantOf(NATIVE_CLASS(Inventory)))
+					return;
+
+				players[player].mo->GiveInventory(cls, 0, false);
+			}
+			break;
+
+		case DEBUG_GiveItems:
+			GiveAllWeaponsAndAmmo(players[player]);
+			players[player].GivePoints(100000);
+			players[player].health = 100;
+			StatusBar->DrawStatusBar();
+			break;
+
+		case DEBUG_GiveKey:
+			P_GiveKeys(players[player].mo, cmd.ArgI);
+			break;
+
+		case DEBUG_GodMode:
+			godmode = cmd.ArgI;
+			break;
+
+		case DEBUG_HurtSelf:
+			players[player].TakeDamage(16,NULL);
+			break;
+
+		case DEBUG_MLI:
+			GiveMLI(players[player]);
+			break;
+
+		case DEBUG_NextLevel:
+			playstate = ex_completed;
+			break;
+
+		case DEBUG_NoClip:
+			noclip^=1;
+			break;
+
+		case DEBUG_Summon:
+			if(const ClassDef *cls = ClassDef::FindClass(FName(ENamedName(cmd.ArgI))))
+			{
+				fixed distance = FixedMul(cls->GetDefault()->radius + players[player].mo->radius, 0x16A0A); // sqrt(2)
+				AActor *newobj = AActor::Spawn(cls,
+					players[player].mo->x + FixedMul(distance, finecosine[players[player].mo->angle>>ANGLETOFINESHIFT]),
+					players[player].mo->y - FixedMul(distance, finesine[players[player].mo->angle>>ANGLETOFINESHIFT]),
+					0, 0);
+				newobj->angle = players[player].mo->angle;
+			}
+			break;
+
+		case DEBUG_Warp:
+			if(GameMap::CheckMapExists(cmd.ArgS))
+			{
+				strncpy(gamestate.mapname, cmd.ArgS, 8);
+				gamestate.mapname[8] = 0;
+				playstate = ex_warped;
+			}
+			break;
 	}
 }

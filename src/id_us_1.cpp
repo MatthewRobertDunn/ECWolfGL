@@ -22,6 +22,7 @@
 
 #include "wl_def.h"
 #include "wl_menu.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "id_in.h"
 #include "id_vh.h"
@@ -378,6 +379,9 @@ bool US_LineInput(FFont *font, int x,int y,char *buf,const char *def,bool escok,
 	longword	curtime, lasttime, lastdirtime, lastbuttontime, lastdirmovetime;
 	ControlInfo ci;
 	Direction   lastdir = dir_None;
+
+	if(ingame)
+		Net::BlockPlaysim();
 
 	double clearx = x-1, cleary = y, clearw = maxwidth, clearh = font->GetHeight();
 	MenuToRealCoords(clearx, cleary, clearw, clearh, MENU_CENTER);

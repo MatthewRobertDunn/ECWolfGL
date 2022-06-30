@@ -39,6 +39,7 @@
 
 #include "id_in.h"
 #include "wl_def.h"
+#include "zstring.h"
 
 namespace Net {
 
@@ -64,6 +65,7 @@ extern NetInit InitVars;
 bool IsArbiter();
 bool IsBlocked();
 void BlockPlaysim();
+void DebugKey(const struct DebugCmd &cmd);
 void Init(InitStatusCallback callback);
 void NewGame(int &difficulty, class FString &map, class FName (&playerClassNames)[MAXPLAYERS]);
 void PollControls();
