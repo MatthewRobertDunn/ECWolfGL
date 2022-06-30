@@ -589,6 +589,21 @@ void US_ControlPanel (ScanCode scancode)
 		}
 	}
 
+	if (Net::InitVars.mode != Net::MODE_SinglePlayer)
+	{
+		// At this time we don't support saves in multiplayer
+		switch(scancode)
+		{
+			case sc_F2:
+			case sc_F3:
+			case sc_F8:
+			case sc_F9:
+				return;
+			default:
+				break;
+		}
+	}
+
 	if (ingame)
 	{
 		if (CP_CheckQuick (scancode))
@@ -645,11 +660,11 @@ void US_ControlPanel (ScanCode scancode)
 	{
 		mainMenu[0]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer); // Require explicit end game for net games
 		mainMenu[mainMenu.countItems()-3]->setText(language["STR_EG"]);
-		mainMenu[mainMenu.countItems()-3]->setEnabled(true);
+		mainMenu[mainMenu.countItems()-3]->setEnabled(Net::IsArbiter());
 		mainMenu[mainMenu.countItems()-2]->setText(language["STR_BG"]);
 		mainMenu[mainMenu.countItems()-2]->setEnabled(true);
 		mainMenu[mainMenu.countItems()-2]->setHighlighted(true);
-		mainMenu[3]->setEnabled(Net::IsArbiter());
+		mainMenu[3]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer);
 	}
 	else
 	{
@@ -811,14 +826,7 @@ int CP_EndGame (int)
 		mainMenu.draw();
 	if(!res) return 0;
 
-	playstate = ex_died;
-	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
-	{
-		players[i].lives = 0;
-		players[i].killerobj = NULL;
-		players[i].mo->Die();
-	}
-
+	Net::EndGame();
 	return 1;
 }
 

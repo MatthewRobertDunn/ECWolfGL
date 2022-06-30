@@ -66,6 +66,7 @@ bool IsArbiter();
 bool IsBlocked();
 void BlockPlaysim();
 void DebugKey(const struct DebugCmd &cmd);
+void EndGame();
 void Init(InitStatusCallback callback);
 void NewGame(int &difficulty, class FString &map, class FName (&playerClassNames)[MAXPLAYERS]);
 void PollControls();

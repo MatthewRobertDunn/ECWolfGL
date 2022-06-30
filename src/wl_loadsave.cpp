@@ -443,7 +443,7 @@ MENU_LISTENER(PerformSaveGame)
 		saveGame.setCurrentPosition(saveGame.getNumItems()-1);
 		loadGame.setCurrentPosition(saveGame.getNumItems()-1);
 
-		mainMenu[2]->setEnabled(Net::IsArbiter());
+		mainMenu[2]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer);
 	}
 	else
 	{
@@ -488,7 +488,7 @@ MENU_LISTENER(LoadSaveGame)
 
 void InitMenus()
 {
-	bool canLoad = SetupSaveGames() && Net::IsArbiter();
+	bool canLoad = SetupSaveGames() && Net::InitVars.mode == Net::MODE_SinglePlayer;
 
 	loadGame.setHeadPicture("M_LOADGM");
 	saveGame.setHeadPicture("M_SAVEGM");

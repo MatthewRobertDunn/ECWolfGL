@@ -39,6 +39,7 @@
 #include "id_in.h"
 #include "id_us.h"
 #include "id_vh.h"
+#include "wl_agent.h"
 #include "wl_debug.h"
 #include "wl_game.h"
 #include "wl_menu.h"
@@ -70,6 +71,7 @@ enum
 	NET_BlockPlaysim,
 	NET_InAck,
 	NET_DebugCmd,
+	NET_EndGame,
 };
 
 #pragma pack(1)
@@ -160,6 +162,14 @@ struct DebugCmdPacket
 	int32_t ArgI;
 	char ArgS[9];
 };
+
+struct EndGamePacket
+{
+	enum { Type = NET_EndGame };
+
+	BYTE type;
+	int32_t TimeCount;
+};
 #pragma pack()
 
 NetInit InitVars = {
@@ -220,6 +230,17 @@ static int FindClient(IPaddress address)
 			return i;
 	}
 	return -1;
+}
+
+static void DoEndGame()
+{
+	playstate = ex_died;
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+	{
+		players[i].lives = 0;
+		players[i].killerobj = NULL;
+		players[i].mo->Die();
+	}
 }
 
 // Check if we have a potentially valid packet of a certain type
@@ -323,6 +344,13 @@ static void HandleCommandPackets()
 		cmd.ArgI = data->ArgI;
 		cmd.ArgS = data->ArgS;
 		DoDebugKey(client, cmd);
+	}
+	else if(CheckPacketType<EndGamePacket>(Packet))
+	{
+		const EndGamePacket *data = reinterpret_cast<EndGamePacket *>(Packet->data);
+
+		SendAck<EndGamePacket>(Packet->address, data->TimeCount);
+		DoEndGame();
 	}
 	else if(CheckPacketType<InAckPacket>(Packet))
 	{
@@ -758,6 +786,17 @@ void DebugKey(const DebugCmd &cmd)
 	}
 
 	DoDebugKey(ConsolePlayer, cmd);
+}
+
+void EndGame()
+{
+	if(InitVars.mode != MODE_SinglePlayer)
+	{
+		EndGamePacket packet;
+		SendReliablePacket(packet);
+	}
+
+	DoEndGame();
 }
 
 void NewGame(int &difficulty, FString &map, FName (&playerClassNames)[MAXPLAYERS])

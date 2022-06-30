@@ -753,7 +753,7 @@ static void NonShareware (void)
 
 	VW_UpdateScreen ();
 	VW_FadeIn ();
-	IN_Ack (ACK_Local);
+	IN_Ack (ACK_Any);
 }
 
 //===========================================================================
