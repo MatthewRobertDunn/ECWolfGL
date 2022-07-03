@@ -734,7 +734,7 @@ void CheckKeys (void)
 
 		IN_ClearKeysDown ();
 
-		if(screenfaded)
+		if(screenfaded && Net::IsBlocked())
 			PlayFrame();
 		return;
 	}
@@ -762,7 +762,10 @@ void CheckKeys (void)
 			if (MousePresent && IN_IsInputGrabbed())
 				IN_CenterMouse();     // Clear accumulated mouse movement
 
-			PlayFrame();
+			// If another player is blocking the play sim we may need to refresh
+			// the frame now before we wait for input.
+			if (Net::IsBlocked())
+				PlayFrame();
 		}
 		else
 		{
