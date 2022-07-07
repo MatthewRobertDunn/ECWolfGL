@@ -1159,7 +1159,7 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 			" --audiobuffer <size>   Sets the size of the audio buffer (-> sound latency)\n"
 			"                        (given in bytes, default: 2048 / (44100 / samplerate))\n"
 			" --host <number>        Sets up a network game with the given number of players.\n"
-			" --connect <address>    Connects to the given host.\n"
+			" --join <address>       Joins a network game coordinated by the given host.\n"
 			" --port <number>        Port number to use for network communications.\n"
 			" --debugnet             Enable network debugging messages.\n"
 			" --foreignsave          Disable save game validity checking.\n"
