@@ -39,6 +39,7 @@
 #include "id_in.h"
 #include "id_us.h"
 #include "id_vh.h"
+#include "g_mapinfo.h"
 #include "wl_agent.h"
 #include "wl_debug.h"
 #include "wl_game.h"
@@ -75,6 +76,33 @@ enum
 };
 
 #pragma pack(1)
+// Convert player class FName to stable index
+struct PlayerClass
+{
+	uint32_t index;
+
+	static PlayerClass FromName(FName className)
+	{
+		for(uint32_t i = 0;i < gameinfo.PlayerClasses.Size();++i)
+		{
+			if(gameinfo.PlayerClasses[i] == className)
+			{
+				PlayerClass ret = {i};
+				return ret;
+			}
+		}
+		PlayerClass ret = {0};
+		return ret;
+	}
+
+	operator FName() const
+	{
+		if(index < gameinfo.PlayerClasses.Size())
+			return gameinfo.PlayerClasses[index];
+		return NAME_None;
+	}
+};
+
 struct RequestPacket
 {
 	// This could be static const BYTE, but I know old Mac compilers I use
@@ -105,7 +133,7 @@ struct NewGamePacket
 
 	BYTE type;
 	int32_t TimeCount;
-	int32_t playerClass;
+	PlayerClass playerClass;
 	BYTE difficulty;
 	char map[9];
 };
@@ -160,7 +188,15 @@ struct DebugCmdPacket
 	int32_t TimeCount;
 	int32_t CommandType;
 	int32_t ArgI;
-	char ArgS[9];
+	char ArgS[256];
+
+	// Returns false if truncated
+	bool SetArgS(FString str)
+	{
+		strncpy(ArgS, str, sizeof(ArgS));
+		ArgS[sizeof(ArgS)-1] = 0;
+		return strlen(ArgS) == str.Len();
+	}
 };
 
 struct EndGamePacket
@@ -779,8 +815,8 @@ void DebugKey(const DebugCmd &cmd)
 		DebugCmdPacket packet;
 		packet.CommandType = cmd.Type;
 		packet.ArgI = cmd.ArgI;
-		strncpy(packet.ArgS, cmd.ArgS, 8);
-		packet.ArgS[8] = 0;
+		if(packet.SetArgS(cmd.ArgS))
+			NetDPrintf("DebugKey called with ArgS of \"%s\" which exceeds packet limit.\n", cmd.ArgS.GetChars());
 
 		SendReliablePacket(packet);
 	}
@@ -813,14 +849,14 @@ void NewGame(int &difficulty, FString &map, FName (&playerClassNames)[MAXPLAYERS
 	NewGamePacket &myNewGameRequest = newGamePackets[ConsolePlayer];
 
 	myNewGameRequest.difficulty = difficulty;
-	myNewGameRequest.playerClass = playerClassNames[ConsolePlayer];
+	myNewGameRequest.playerClass = PlayerClass::FromName(playerClassNames[ConsolePlayer]);
 	strncpy(myNewGameRequest.map, map, 8);
 	myNewGameRequest.map[8] = 0;
 
 	ExchangePacket(newGamePackets);
 	for(unsigned int client = 0;client < InitVars.numPlayers;++client)
 	{
-		playerClassNames[client] = FName(static_cast<ENamedName>(newGamePackets[client].playerClass));
+		playerClassNames[client] = newGamePackets[client].playerClass;
 
 		if(client == Arbiter)
 		{

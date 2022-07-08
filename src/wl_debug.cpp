@@ -443,7 +443,7 @@ static int DebugKeys (void)
 				return 1;
 
 			DebugCmd cmd = {summon ? DEBUG_Summon : DEBUG_Give};
-			cmd.ArgI = clsName;
+			cmd.ArgS = clsName;
 			Net::DebugKey(cmd);
 		}
 		return 1;
@@ -729,7 +729,7 @@ void DoDebugKey(int player, const DebugCmd &cmd)
 	switch(cmd.Type)
 	{
 		case DEBUG_Give:
-			if(const ClassDef *cls = ClassDef::FindClass(FName(ENamedName(cmd.ArgI))))
+			if(const ClassDef *cls = ClassDef::FindClass(FName(cmd.ArgS, true)))
 			{
 				if(!cls->IsDescendantOf(NATIVE_CLASS(Inventory)))
 					return;
@@ -770,7 +770,7 @@ void DoDebugKey(int player, const DebugCmd &cmd)
 			break;
 
 		case DEBUG_Summon:
-			if(const ClassDef *cls = ClassDef::FindClass(FName(ENamedName(cmd.ArgI))))
+			if(const ClassDef *cls = ClassDef::FindClass(FName(cmd.ArgS, true)))
 			{
 				fixed distance = FixedMul(cls->GetDefault()->radius + players[player].mo->radius, 0x16A0A); // sqrt(2)
 				AActor *newobj = AActor::Spawn(cls,
