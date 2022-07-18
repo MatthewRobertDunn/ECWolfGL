@@ -639,7 +639,7 @@ bool AWeapon::HandlePickup(AInventory *item, bool &good)
 		good = static_cast<AWeapon *>(item)->UseForAmmo(this);
 
 		// Grin any way
-		if(weaponFlags & WF_ALWAYSGRIN)
+		if((weaponFlags & WF_ALWAYSGRIN) && owner->player->mo == players[ConsolePlayer].camera && (good || !ShouldStay()))
 			StatusBar->WeaponGrin();
 		return true;
 	}
@@ -778,7 +778,7 @@ class AWeaponGiver : public AWeapon
 					continue;
 
 				AWeapon *weap = static_cast<AWeapon *>(AActor::Spawn(cls, 0, 0, 0, 0));
-				weap->itemFlags &= ~IF_ALWAYSPICKUP;
+				weap->itemFlags &= ~(IF_ALWAYSPICKUP|IF_DROPPED);
 				weap->RemoveFromWorld();
 
 				if(noammo)
