@@ -589,6 +589,8 @@ void GameMap::SpawnThings()
 			if(thing.holo)
 				actor->flags &= ~(FL_SOLID);
 
+			actor->LevelSpawned();
+
 			// Check for valid frames
 			if(!actor->state || !R_CheckSpriteValid(actor->sprite))
 			{

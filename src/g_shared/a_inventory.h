@@ -48,10 +48,12 @@ class AInventory : public AActor
 
 	public:
 		virtual void	AttachToOwner(AActor *owner);
+		void			BeginPlay();
 		bool			CallTryPickup(AActor *toucher);
 		virtual void	DetachFromOwner();
 		virtual void	Destroy();
 		virtual bool	HandlePickup(AInventory *item, bool &good);
+		void			LevelSpawned();
 		void			Serialize(FArchive &arc);
 		void			Touch(AActor *toucher);
 		virtual bool	Use();
@@ -68,6 +70,7 @@ class AInventory : public AActor
 		virtual AInventory	*CreateCopy(AActor *holder);
 		void				GoAwayAndDie();
 		bool				GoAway();
+		virtual bool		ShouldStay();
 		virtual bool		TryPickup(AActor *toucher);
 };
 
@@ -185,6 +188,7 @@ class AWeapon : public AInventory
 
 	protected:
 		bool	UseForAmmo(AWeapon *owned);
+		bool	ShouldStay();
 };
 
 #endif

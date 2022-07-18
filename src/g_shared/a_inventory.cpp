@@ -41,6 +41,7 @@
 #include "wl_def.h"
 #include "wl_agent.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_loadsave.h"
 
@@ -53,6 +54,12 @@ void AInventory::AttachToOwner(AActor *owner)
 	this->owner = owner;
 }
 
+void AInventory::BeginPlay()
+{
+	// Default to marking items as dropped
+	itemFlags |= IF_DROPPED;
+}
+
 // This is so we can handle certain things (flags) without requiring all of
 // TryPickup to be called.
 bool AInventory::CallTryPickup(AActor *toucher)
@@ -62,7 +69,7 @@ bool AInventory::CallTryPickup(AActor *toucher)
 
 	bool ret = TryPickup(toucher);
 
-	if(!ret && (itemFlags & IF_ALWAYSPICKUP))
+	if(!ret && (itemFlags & IF_ALWAYSPICKUP) && !ShouldStay())
 	{
 		ret = true;
 		GoAwayAndDie();
@@ -112,12 +119,20 @@ void AInventory::GoAwayAndDie()
 // this actor is safe to be placed in an inventory.
 bool AInventory::GoAway()
 {
-	const Frame *hide = FindState(NAME_Hide);
-	if(hide && IsThinking()) // Only hide actors that are thinking
+	if(itemFlags & IF_DROPPED)
+		return false;
+
+	if(IsThinking()) // Only hide actors that are thinking
 	{
-		itemFlags |= IF_INACTIVE;
-		SetState(hide);
-		return true;
+		if(ShouldStay())
+			return true;
+
+		if(const Frame *hide = FindState(NAME_Hide))
+		{
+			itemFlags |= IF_INACTIVE;
+			SetState(hide);
+			return true;
+		}
 	}
 	return false;
 }
@@ -143,6 +158,11 @@ bool AInventory::HandlePickup(AInventory *item, bool &good)
 	return false;
 }
 
+void AInventory::LevelSpawned()
+{
+	itemFlags &= ~IF_DROPPED;
+}
+
 void AInventory::Serialize(FArchive &arc)
 {
 	arc << itemFlags
@@ -154,6 +174,11 @@ void AInventory::Serialize(FArchive &arc)
 		<< icon;
 
 	Super::Serialize(arc);
+}
+
+bool AInventory::ShouldStay()
+{
+	return false;
 }
 
 void AInventory::Touch(AActor *toucher)
@@ -644,6 +669,9 @@ void AWeapon::Serialize(FArchive &arc)
 
 bool AWeapon::UseForAmmo(AWeapon *owned)
 {
+	if(ShouldStay())
+		return false;
+
 	bool used = false;
 	for(unsigned int i = 0;i < 2;++i)
 	{
@@ -661,6 +689,11 @@ bool AWeapon::UseForAmmo(AWeapon *owned)
 		}
 	}
 	return used;
+}
+
+bool AWeapon::ShouldStay()
+{
+	return Net::InitVars.mode != Net::MODE_SinglePlayer && !(itemFlags & IF_DROPPED);
 }
 
 ACTION_FUNCTION(A_ReFire)
@@ -722,6 +755,11 @@ class AWeaponGiver : public AWeapon
 	DECLARE_NATIVE_CLASS(WeaponGiver, Weapon)
 
 	protected:
+		bool ShouldStay()
+		{
+			return Net::InitVars.mode != Net::MODE_SinglePlayer && !(itemFlags & IF_DROPPED);
+		}
+
 		bool TryPickup(AActor *toucher)
 		{
 			bool pickedup = true;

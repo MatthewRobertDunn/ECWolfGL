@@ -215,6 +215,7 @@ enum ItemFlag
 	IF_INVBAR			= 0x00000002,
 	IF_ALWAYSPICKUP		= 0x00000004,
 	IF_INACTIVE			= 0x00000008, // For picked up items that remain on the map
+	IF_DROPPED			= 0x00000010,
 };
 
 enum WeaponFlag

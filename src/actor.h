@@ -113,6 +113,7 @@ class AActor : public Thinker,
 		bool			GiveInventory(const ClassDef *cls, int amount=0, bool allowreplacement=true);
 		bool			InStateSequence(const Frame *basestate) const;
 		bool			IsFast() const;
+		virtual void	LevelSpawned() {}
 		virtual void	PostBeginPlay() {}
 		void			RemoveFromWorld();
 		virtual void	RemoveInventory(AInventory *item);
