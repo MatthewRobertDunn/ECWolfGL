@@ -38,6 +38,7 @@
 #include "mame/fmopl.h"
 #endif
 #include "wl_main.h"
+#include "wl_net.h"
 #include "id_sd.h"
 
 #ifndef ECWOLF_MIXER
@@ -60,17 +61,18 @@
 SDL_mutex *audioMutex;
 
 globalsoundpos channelSoundPos[MIX_CHANNELS];
+globalsoundpos AdlibSoundPos;
 
 //      Global variables
 bool	AdLibPresent,
-		SoundBlasterPresent,SBProPresent,
-		SoundPositioned;
+		SoundBlasterPresent,SBProPresent;
 SDMode	SoundMode;
 SMMode	MusicMode;
 SDSMode	DigiMode;
 int		AdlibVolume=MAX_VOLUME;
 int		MusicVolume=MAX_VOLUME;
 int		SoundVolume=MAX_VOLUME;
+int		AdlibVolumePositioned=MAX_VOLUME;
 
 // SDL_mixer values from Mix_QuerySpec
 static struct
@@ -253,18 +255,22 @@ static longword	pcNumReadySamples = 0;
 
 #define PC_BASE_TIMER 1193181
 
-// Function prototype is for menu listener
-bool SD_UpdatePCSpeakerVolume(int)
+static void _SDL_SetPCSpeakerVolume(int volume)
 {
 	SDL_LockMutex(audioMutex);
 
 	if(pcVolume > 0)
-		pcVolume = AdlibVolume*250;
+		pcVolume = volume*250;
 	else
-		pcVolume = -AdlibVolume*250;
+		pcVolume = -volume*250;
 
 	SDL_UnlockMutex(audioMutex);
+}
 
+// Function prototype is for menu listener
+bool SD_UpdatePCSpeakerVolume(int)
+{
+	_SDL_SetPCSpeakerVolume(AdlibVolume);
 	return true;
 }
 
@@ -486,7 +492,6 @@ void SD_StopDigitized(void)
 {
 	DigiPlaying = false;
 	DigiPriority = 0;
-	SoundPositioned = false;
 	if ((DigiMode == sds_PC) && (SoundMode == sdm_PC))
 		SDL_SoundFinished();
 
@@ -499,14 +504,22 @@ void SD_SetPosition(int channel, int leftpos, int rightpos)
 			|| ((leftpos == 15) && (rightpos == 15)))
 		I_FatalError("SD_SetPosition: Illegal position");
 
-	switch (DigiMode)
+	if(channel > 0)
 	{
-		default:
-			break;
-		case sds_SoundBlaster:
-//            SDL_PositionSBP(leftpos,rightpos);
-			Mix_SetPanning(channel, TO_SDL_POSITION(leftpos), TO_SDL_POSITION(rightpos));
-			break;
+		switch (DigiMode)
+		{
+			default:
+				break;
+			case sds_SoundBlaster:
+				Mix_SetPanning(channel, TO_SDL_POSITION(leftpos), TO_SDL_POSITION(rightpos));
+				break;
+		}
+	}
+	else
+	{
+		AdlibVolumePositioned = clamp(FixedMul((AdlibVolume << FRACBITS), (MAX(TO_SDL_POSITION(leftpos), TO_SDL_POSITION(rightpos))+1)<<8)>>FRACBITS, 0, MAX_VOLUME);
+		if (SoundMode == sdm_PC)
+			_SDL_SetPCSpeakerVolume(AdlibVolumePositioned);
 	}
 }
 
@@ -631,7 +644,7 @@ Mix_Chunk* SD_PrepareSound(int which)
 	return Mix_LoadWAV_RW(SDL_RWFromMem(soundLump.GetMem(), size), 1);
 }
 
-int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChannel chan)
+static int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChannel chan)
 {
 	if (!DigiMode)
 		return 0;
@@ -674,7 +687,8 @@ int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChanne
 void SD_ChannelFinished(int channel)
 {
 	SoundPlaying = FString();
-	channelSoundPos[channel].valid = 0;
+	channelSoundPos[channel].valid = false;
+	channelSoundPos[channel].positioned = false;
 }
 
 void
@@ -1235,7 +1249,8 @@ SD_PositionSound(int leftvol,int rightvol)
 ///////////////////////////////////////////////////////////////////////////
 //
 //      SD_PlaySound() - plays the specified sound on the appropriate hardware
-//              Returns the channel of the sound if it played, else 0.
+//             Returns the channel of the sound if it played, -1 if synthesized,
+//             else 0.
 //
 ///////////////////////////////////////////////////////////////////////////
 int SD_PlaySound(const char* sound, SoundChannel chan)
@@ -1281,7 +1296,7 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 #endif
 
 			int channel = SD_PlayDigitized(sindex, lp, rp, chan);
-			SoundPositioned = ispos;
+			channelSoundPos[channel].positioned = ispos;
 			DigiPriority = sindex.GetPriority();
 			SoundPlaying = sound;
 			return channel;
@@ -1304,6 +1319,13 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 
 	bool didPlaySound = false;
 
+	// Volume fall off for Adlib/PC Speaker sounds is added for multiplayer.
+	// We may wish to enable it for single player at a later time but it's
+	// absolutely needed in multiplayer.
+	ispos &= (Net::InitVars.mode != Net::MODE_SinglePlayer);
+	if(!ispos)
+		lp = rp = 0;
+
 	switch (SoundMode)
 	{
 		default:
@@ -1312,14 +1334,18 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 		case sdm_PC:
 			if(sindex.HasType(SoundData::PCSPEAKER))
 			{
+				SD_SetPosition(-1, lp, rp);
 				SDL_PCPlaySound((PCSound *)sindex.GetSpeakerData());
+				AdlibSoundPos.positioned = ispos;
 				didPlaySound = true;
 			}
 			break;
 		case sdm_AdLib:
 			if(sindex.HasType(SoundData::ADLIB))
 			{
+				SD_SetPosition(-1, lp, rp);
 				SDL_ALPlaySound((AdLibSound *)sindex.GetAdLibData());
+				AdlibSoundPos.positioned = ispos;
 				didPlaySound = true;
 			}
 			break;
@@ -1331,7 +1357,7 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 		SoundPlaying = sound;
 	}
 
-	return 0;
+	return didPlaySound ? -1 : 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1384,8 +1410,6 @@ SD_StopSound(void)
 			SDL_ALStopSound();
 			break;
 	}
-
-	SoundPositioned = false;
 
 	SDL_SoundFinished();
 }

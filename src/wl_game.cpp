@@ -197,30 +197,36 @@ void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,int chan)
 	SD_PositionSound(leftchannel, rightchannel);
 
 	int channel = SD_PlaySound(s, static_cast<SoundChannel> (chan));
-	if(channel)
+	if(channel > 0)
 	{
 		channelSoundPos[channel - 1].globalsoundx = gx;
 		channelSoundPos[channel - 1].globalsoundy = gy;
-		channelSoundPos[channel - 1].valid = 1;
+		channelSoundPos[channel - 1].valid = true;
+	}
+	else if(channel == -1)
+	{
+		AdlibSoundPos.globalsoundx = gx;
+		AdlibSoundPos.globalsoundy = gy;
+		AdlibSoundPos.valid = true;
 	}
 }
 
 void UpdateSoundLoc(void)
 {
-/*    if (SoundPositioned)
-	{
-		SetSoundLoc(globalsoundx,globalsoundy);
-		SD_SetPosition(leftchannel,rightchannel);
-	}*/
-
 	for(int i = 0; i < MIX_CHANNELS; i++)
 	{
-		if(channelSoundPos[i].valid)
+		if(channelSoundPos[i].valid && channelSoundPos[i].positioned)
 		{
 			SetSoundLoc(channelSoundPos[i].globalsoundx,
 				channelSoundPos[i].globalsoundy);
 			SD_SetPosition(i, leftchannel, rightchannel);
 		}
+	}
+
+	if(AdlibSoundPos.valid && AdlibSoundPos.positioned)
+	{
+		SetSoundLoc(AdlibSoundPos.globalsoundx, AdlibSoundPos.globalsoundy);
+		SD_SetPosition(-1, leftchannel, rightchannel);
 	}
 }
 
