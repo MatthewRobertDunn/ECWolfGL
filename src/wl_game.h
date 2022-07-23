@@ -59,9 +59,9 @@ extern struct NewMap_t
 // JAB
 #define PlaySoundLocMapSpot(s,spot)     PlaySoundLocGlobal(s,(((int32_t)spot->GetX() << TILESHIFT) + (1L << (TILESHIFT - 1))),(((int32_t)spot->GetY() << TILESHIFT) + (1L << (TILESHIFT - 1))),SD_GENERIC)
 #define PlaySoundLocTile(s,tx,ty)       PlaySoundLocGlobal(s,(((int32_t)(tx) << TILESHIFT) + (1L << (TILESHIFT - 1))),(((int32_t)ty << TILESHIFT) + (1L << (TILESHIFT - 1))),SD_GENERIC)
-#define PlaySoundLocActor(s,ob)         PlaySoundLocGlobal(s,(ob)->x,(ob)->y,SD_GENERIC)
-#define PlaySoundLocActorBoss(s,ob)     PlaySoundLocGlobal(s,(ob)->x,(ob)->y,SD_BOSSWEAPONS)
-void    PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,int chan);
+#define PlaySoundLocActorBoss(s,ob)     PlaySoundLocActor(s,ob,true)
+void PlaySoundLocActor(const char* s, AActor *ob, bool boss=false);
+void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,int chan);
 void UpdateSoundLoc(void);
 
 #endif

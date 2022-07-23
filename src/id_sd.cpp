@@ -687,6 +687,7 @@ static int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,Soun
 void SD_ChannelFinished(int channel)
 {
 	SoundPlaying = FString();
+	channelSoundPos[channel].source = NULL;
 	channelSoundPos[channel].valid = false;
 	channelSoundPos[channel].positioned = false;
 }

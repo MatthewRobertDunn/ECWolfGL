@@ -9,6 +9,7 @@
 #define __ID_SD__
 
 #include "wl_def.h"
+#include "dobject.h"
 #include "sndinfo.h"
 
 #define alOut(n,b) 		YM3812Write(oplChip, n, b, AdlibVolumePositioned)
@@ -108,6 +109,7 @@ typedef struct
 
 struct globalsoundpos
 {
+	TObjPtr<AActor> source;
 	fixed globalsoundx, globalsoundy;
 	bool valid, positioned;
 };

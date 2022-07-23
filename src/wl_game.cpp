@@ -199,33 +199,82 @@ void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,int chan)
 	int channel = SD_PlaySound(s, static_cast<SoundChannel> (chan));
 	if(channel > 0)
 	{
+		channelSoundPos[channel - 1].source = NULL;
 		channelSoundPos[channel - 1].globalsoundx = gx;
 		channelSoundPos[channel - 1].globalsoundy = gy;
 		channelSoundPos[channel - 1].valid = true;
 	}
 	else if(channel == -1)
 	{
+		AdlibSoundPos.source = NULL;
 		AdlibSoundPos.globalsoundx = gx;
 		AdlibSoundPos.globalsoundy = gy;
 		AdlibSoundPos.valid = true;
 	}
 }
 
+void PlaySoundLocActor(const char* s, AActor *ob, bool boss)
+{
+	const SoundChannel chan = boss ? SD_GENERIC : SD_BOSSWEAPONS;
+
+	SetSoundLoc(ob->x, ob->y);
+	SD_PositionSound(leftchannel, rightchannel);
+
+	int channel = SD_PlaySound(s, chan);
+	if(channel > 0)
+	{
+		channelSoundPos[channel - 1].source = ob;
+		channelSoundPos[channel - 1].globalsoundx = ob->x;
+		channelSoundPos[channel - 1].globalsoundy = ob->y;
+		channelSoundPos[channel - 1].valid = true;
+	}
+	else if(channel == -1)
+	{
+		AdlibSoundPos.source = ob;
+		AdlibSoundPos.globalsoundx = ob->x;
+		AdlibSoundPos.globalsoundy = ob->y;
+		AdlibSoundPos.valid = true;
+	}
+}
+
 void UpdateSoundLoc(void)
 {
+	fixed x, y;
+
 	for(int i = 0; i < MIX_CHANNELS; i++)
 	{
 		if(channelSoundPos[i].valid && channelSoundPos[i].positioned)
 		{
-			SetSoundLoc(channelSoundPos[i].globalsoundx,
-				channelSoundPos[i].globalsoundy);
+			if(channelSoundPos[i].source)
+			{
+				x = channelSoundPos[i].source->x;
+				y = channelSoundPos[i].source->y;
+			}
+			else
+			{
+				x = channelSoundPos[i].globalsoundx;
+				y = channelSoundPos[i].globalsoundy;
+			}
+
+			SetSoundLoc(x, y);
 			SD_SetPosition(i, leftchannel, rightchannel);
 		}
 	}
 
 	if(AdlibSoundPos.valid && AdlibSoundPos.positioned)
 	{
-		SetSoundLoc(AdlibSoundPos.globalsoundx, AdlibSoundPos.globalsoundy);
+		if(AdlibSoundPos.source)
+		{
+			x = AdlibSoundPos.source->x;
+			y = AdlibSoundPos.source->y;
+		}
+		else
+		{
+			x = AdlibSoundPos.globalsoundx;
+			y = AdlibSoundPos.globalsoundy;
+		}
+
+		SetSoundLoc(x, y);
 		SD_SetPosition(-1, leftchannel, rightchannel);
 	}
 }
