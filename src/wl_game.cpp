@@ -191,12 +191,12 @@ SetSoundLoc(fixed gx,fixed gy)
 =
 ==========================
 */
-void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,int chan)
+void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,SoundChannel chan)
 {
 	SetSoundLoc(gx, gy);
 	SD_PositionSound(leftchannel, rightchannel);
 
-	int channel = SD_PlaySound(s, static_cast<SoundChannel> (chan));
+	int channel = SD_PlaySound(s, chan);
 	if(channel > 0)
 	{
 		channelSoundPos[channel - 1].source = NULL;
@@ -213,10 +213,8 @@ void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,int chan)
 	}
 }
 
-void PlaySoundLocActor(const char* s, AActor *ob, bool boss)
+void PlaySoundLocActor(const char* s, AActor *ob, SoundChannel chan)
 {
-	const SoundChannel chan = boss ? SD_GENERIC : SD_BOSSWEAPONS;
-
 	SetSoundLoc(ob->x, ob->y);
 	SD_PositionSound(leftchannel, rightchannel);
 

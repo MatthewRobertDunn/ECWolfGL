@@ -504,7 +504,7 @@ void SD_SetPosition(int channel, int leftpos, int rightpos)
 			|| ((leftpos == 15) && (rightpos == 15)))
 		I_FatalError("SD_SetPosition: Illegal position");
 
-	if(channel > 0)
+	if(channel >= 0)
 	{
 		switch (DigiMode)
 		{
@@ -1297,7 +1297,7 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 #endif
 
 			int channel = SD_PlayDigitized(sindex, lp, rp, chan);
-			channelSoundPos[channel].positioned = ispos;
+			channelSoundPos[channel-1].positioned = ispos;
 			DigiPriority = sindex.GetPriority();
 			SoundPlaying = sound;
 			return channel;

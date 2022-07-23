@@ -271,7 +271,7 @@ void player_t::GiveExtraMan (int amount)
 		else if(lives > 9)
 			lives = 9;
 	}
-	SD_PlaySound ("misc/1up");
+	PlaySoundLocActor ("misc/1up", mo);
 }
 
 /*
@@ -328,7 +328,7 @@ void player_t::TakeDamage (int points, AActor *attacker)
 	}
 
 	if (points > 0)
-		SD_PlaySound("player/pain");
+		PlaySoundLocActor("player/pain", mo);
 
 	StatusBar->UpdateFace(points);
 	StatusBar->DrawStatusBar();
@@ -517,7 +517,7 @@ void ClipMove (AActor *ob, int32_t xmove, int32_t ymove)
 	}
 
 	if (!SD_SoundPlaying())
-		SD_PlaySound ("world/hitwall");
+		PlaySoundLocActor ("world/hitwall", ob);
 
 	ob->x = basex+xmove;
 	ob->y = basey;
@@ -646,7 +646,7 @@ void APlayerPawn::Cmd_Use()
 	}
 
 	if(doNothing)
-		SD_PlaySound ("misc/do_nothing");
+		PlaySoundLocActor("misc/do_nothing", this);
 	else
 		P_ChangeSwitchTexture(spot, static_cast<MapTile::Side>(direction), isRepeatable, lastTrigger);
 }
@@ -1153,7 +1153,7 @@ ACTION_FUNCTION(A_CustomPunch)
 	player_t *player = self->player;
 
 	if(flags & CPF_ALWAYSPLAYSOUND)
-		SD_PlaySound(player->ReadyWeapon->attacksound, SD_WEAPONS);
+		PlaySoundLocActor(player->ReadyWeapon->attacksound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 	if(range == 0)
 		range = 64;
 
@@ -1191,7 +1191,7 @@ ACTION_FUNCTION(A_CustomPunch)
 
 	// hit something
 	if(!(flags & CPF_ALWAYSPLAYSOUND))
-		SD_PlaySound(player->ReadyWeapon->attacksound, SD_WEAPONS);
+		PlaySoundLocActor(player->ReadyWeapon->attacksound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 	DamageActor(closest, self, damage);
 
 	// Ammo is only used when hit
@@ -1240,9 +1240,9 @@ ACTION_FUNCTION(A_GunAttack)
 	}
 
 	if(sound.Len() == 1 && sound[0] == '*')
-		SD_PlaySound(player->ReadyWeapon->attacksound, SD_WEAPONS);
+		PlaySoundLocActor(player->ReadyWeapon->attacksound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 	else
-		SD_PlaySound(sound, SD_WEAPONS);
+		PlaySoundLocActor(sound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 
 	if(self->MeleeState)
 		self->SetState(self->MeleeState);
