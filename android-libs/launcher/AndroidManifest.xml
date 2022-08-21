@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="12"
+        android:minSdkVersion="14"
         android:targetSdkVersion="19" />
 
     <!-- OpenGL ES 2.0 -->
@@ -61,6 +61,6 @@
         </activity>
     </application>
 
-    <uses-sdk android:minSdkVersion="12" />
+    <uses-sdk android:minSdkVersion="14" />
 
 </manifest>

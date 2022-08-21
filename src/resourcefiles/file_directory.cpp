@@ -33,6 +33,11 @@
 **
 */
 
+#if !defined(_WIN32) && !defined(__sun)
+#if !defined(__ANDROID__) || (__ANDROID_API__ >= 21)
+#define USE_FTS 1
+#endif
+#endif
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -41,7 +46,7 @@
 #define stat _stat
 #else
 #include <dirent.h>
-#ifndef __sun
+#ifdef USE_FTS
 #include <fts.h>
 #endif
 #endif
@@ -183,7 +188,7 @@ int FDirectory::AddDirectory(const char *dirpath)
 	return count;
 }
 
-#elif defined(__sun)
+#elif !defined(USE_FTS)
 
 int FDirectory::AddDirectory(const char *dirpath)
 {

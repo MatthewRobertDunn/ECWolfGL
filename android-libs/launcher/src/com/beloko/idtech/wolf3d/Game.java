@@ -53,7 +53,6 @@ public class Game extends SDLActivity
 
 	protected String[] getLibraries() {
 		return new String[] {
-			"hidapi",
 			"touchcontrols",
 			"ecwolf"
 		};

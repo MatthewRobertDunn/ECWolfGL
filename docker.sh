@@ -61,7 +61,7 @@ run_config() {
 	{
 		declare -fx
 		echo "\"${Config[entrypoint]}\" \"\$@\""
-	} | docker start -i "$Container"
+	} | docker start -i -a "$Container"
 	declare Ret=$?
 
 	# Copy out any logs or build artifacts we might be interested in
@@ -78,6 +78,13 @@ main() {
 	shift
 
 	declare ConfigName
+
+	# Determine if we should use podman instead of docker
+	if command -v podman &>/dev/null; then
+		docker() {
+			podman "$@"
+		}
+	fi
 
 	# List out configs
 	if [[ -z $SelectedConfig ]]; then
@@ -390,13 +397,14 @@ declare -A ConfigMinGW=(
 
 dockerfile_android() {
 	cat <<-'EOF'
-		FROM ubuntu:18.04
+		FROM ubuntu:22.04
 
 		RUN dpkg --add-architecture i386 && \
 		apt-get update && \
-		apt-get install libc6:i386 libstdc++6:i386 zlib1g:i386 \
+		apt-get install libc6:i386 libstdc++6:i386 zlib1g:i386 libtinfo5 \
 			g++ cmake git openjdk-8-jdk-headless p7zip-full curl \
 			libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev -y && \
+		rm -rf /var/lib/apt/lists/* && \
 		useradd -rm ecwolf && \
 		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install" >> /etc/sudoers && \
 		mkdir /home/ecwolf/results && \
@@ -405,12 +413,11 @@ dockerfile_android() {
 		mkdir sdk && \
 		cd sdk && \
 		curl https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -o sdk-tools-linux.zip && \
-		curl https://dl.google.com/android/repository/android-ndk-r14b-linux-x86_64.zip -o android-ndk.zip && \
+		curl https://dl.google.com/android/repository/android-ndk-r17c-linux-x86_64.zip -o android-ndk.zip && \
 		7za x sdk-tools-linux.zip && \
 		7za x android-ndk.zip && \
 		rm sdk-tools-linux.zip android-ndk.zip && \
-		mv android-ndk-r14b ndk-bundle && \
-		sed -i 's/__USE_FILE_OFFSET64)/__USE_FILE_OFFSET64) \&\& __ANDROID_API__ >= 24/' /sdk/ndk-bundle/sysroot/usr/include/stdio.h && \
+		mv android-ndk-r17c ndk-bundle && \
 		yes | tools/bin/sdkmanager --licenses && \
 		tools/bin/sdkmanager 'platforms;android-26' 'build-tools;19.1.0' 'extras;android;m2repository' && \
 		keytool -genkey -keystore untrusted.keystore -storepass untrusted -keypass untrusted -alias untrusted -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Untrusted,OU=Untrusted,O=Untrusted,L=Untrusted,S=Untrusted,C=US" -noprompt
@@ -428,11 +435,11 @@ build_android() {
 	declare Arch
 	for Arch in x86 x86_64 armeabi-v7a arm64-v8a; do
 		{
-			declare NDKVersion=12
+			declare NDKVersion=14
 			[[ $Arch =~ 64 ]] && NDKVersion=21
 
-			mkdir ~/build-mgw-"$Arch" &&
-			cd ~/build-mgw-"$Arch" &&
+			mkdir ~/build-android-"$Arch" &&
+			cd ~/build-android-"$Arch" &&
 			cmake "$SrcDir" \
 				-DCMAKE_SYSTEM_NAME=Android \
 				-DCMAKE_SYSTEM_VERSION="$NDKVersion" \
@@ -459,7 +466,7 @@ export -f build_android
 declare -A ConfigAndroid=(
 	[dockerfile]=dockerfile_android
 	[dockerimage]='ecwolf-android'
-	[dockertag]=3
+	[dockertag]=4
 	[entrypoint]=build_android
 	[prereq]=''
 	[type]=build

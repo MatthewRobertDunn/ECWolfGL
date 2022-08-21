@@ -61,7 +61,6 @@ add_dependencies(engine-android engine touchcontrols pk3)
 add_custom_command(TARGET engine-android POST_BUILD
 	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:engine>" "${CMAKE_CURRENT_BINARY_DIR}/lib/${CMAKE_ANDROID_ARCH_ABI}/$<TARGET_FILE_NAME:engine>"
 	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:touchcontrols>" "${CMAKE_CURRENT_BINARY_DIR}/lib/${CMAKE_ANDROID_ARCH_ABI}/$<TARGET_FILE_NAME:touchcontrols>"
-	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:hidapi>" "${CMAKE_CURRENT_BINARY_DIR}/lib/${CMAKE_ANDROID_ARCH_ABI}/$<TARGET_FILE_NAME:hidapi>"
 	COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../assets" "${OUTPUT_DIR}/assets"
 	COMMAND "${ANDROID_AAPT_BINARY}" package -f $<$<CONFIG:DEBUG>:--debug-mode> -M "${CMAKE_CURRENT_SOURCE_DIR}/../AndroidManifest.xml" -S "${CMAKE_CURRENT_SOURCE_DIR}/../res" -A "${OUTPUT_DIR}/assets" -I "${ANDROID_SDK_JAR}" -F "${APK_OUTPUT}"
 	COMMAND "${ANDROID_DX_BINARY}" --dex "--output=classes.dex"

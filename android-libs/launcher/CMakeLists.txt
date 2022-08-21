@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.5.0)
-
 find_package(Java REQUIRED)
 include(UseJava)
 
@@ -21,7 +19,7 @@ find_file(ANDROID_JAR_SIGNER NAMES jarsigner jarsigner.exe PATHS "/usr/bin")
 find_file(ANDROID_SUPPORT_V4_JAR support-v4-13.0.0.jar PATHS "${ANDROID_SDK_TOOLS}/../../extras/android/m2repository/com/android/support/support-v4/13.0.0")
 
 set(ANDROID_SIGN_STOREPASS "" CACHE STRING "Keystore password for jarsigner")
-set(ANDROID_SIGN_KEYSTORE "" CACHE FILE "Keystore name for jarsigner")
+set(ANDROID_SIGN_KEYSTORE "" CACHE FILEPATH "Keystore name for jarsigner")
 set(ANDROID_SIGN_KEYNAME "" CACHE STRING "Key name for jarsigner")
 
 set(CMAKE_JAVA_COMPILE_FLAGS -target 1.6 -source 1.6 -Xlint:-options ${CMAKE_JAVA_COMPILE_FLAGS})
