@@ -319,7 +319,7 @@ FMultiPatchTexture::FMultiPatchTexture (int skynum, FTexture *lower, FTexture *u
 	UseType = FTexture::TEX_Wall;
 	Width = lower->GetWidth();
 	if(upper->GetWidth() != Width)
-		I_Error ("ROTT sky patches %s and %s must have identical widths.", lower->Name, upper->Name);
+		I_Error ("ROTT sky patches %s and %s must have identical widths.", lower->Name.GetChars(), upper->Name.GetChars());
 	Height = lower->GetHeight() + upper->GetHeight();
 	NumParts = 2;
 	Parts = new TexPart[2];

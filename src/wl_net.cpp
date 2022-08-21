@@ -32,8 +32,6 @@
 **
 */
 
-#include <SDL.h>
-#include <SDL_net.h>
 
 #include "wl_def.h"
 #include "id_in.h"
@@ -52,7 +50,9 @@
 #include "zdoomsupport.h"
 #include "zstring.h"
 
-#include "v_video.h"
+#include <SDL.h>
+#include <SDL_net.h>
+#include <climits>
 
 #define NET_DEFAULT_PORT 5029
 #define MAXEXTRATICS 4
