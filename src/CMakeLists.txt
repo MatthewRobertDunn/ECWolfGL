@@ -1,7 +1,7 @@
+# Update gitinfo.h
 add_custom_target(revision_check ALL
-	COMMAND updaterevision ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h
+	COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/tools/updaterevision/UpdateRevision.cmake" "${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h"
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	DEPENDS updaterevision
 )
 
 # The ability to start with an empty target was added in CMake 3.11 so since

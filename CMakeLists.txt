@@ -187,7 +187,6 @@ if(MSVC)
 endif()
 
 add_subdirectory(tools/zipdir)
-add_subdirectory(tools/updaterevision)
 
 add_subdirectory(deps/gdtoa)
 add_subdirectory(deps/lzma)
