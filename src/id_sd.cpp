@@ -41,10 +41,6 @@
 #include "wl_net.h"
 #include "id_sd.h"
 
-#ifndef ECWOLF_MIXER
-#pragma message "Not using customized SDL_mixer. Features will be disabled. https://bitbucket.org/ecwolf/sdl_mixer-for-ecwolf"
-#endif
-
 // For AdLib sounds & music:
 #define MUSIC_RATE 700	// Must be a multiple of SOUND_RATE
 #define SOUND_RATE 140	// Also affects PC Speaker sounds
@@ -216,9 +212,10 @@ extern const int oplChip = 0;
 
 #endif
 
-#ifndef ECWOLF_MIXER
-static int Mix_SetMusicPCMPosition(Uint64 position) { return 0; }
-static Uint64 Mix_GetMusicPCMPosition() { return 0; }
+#if !SDL_MIXER_VERSION_ATLEAST(2,6,0)
+#warning SDL_mixer version lacks music position support
+static int Mix_SetMusicPosition(double) { return -1; }
+static double Mix_GetMusicPosition(Mix_Music*) { return 0.0; }
 #endif
 
 static void SDL_SoundFinished(void)
@@ -1312,12 +1309,6 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 	if (sindex.GetPriority() < SoundPriority)
 		return 0;
 
-#ifndef ECWOLF_MIXER
-	// With stock SDL_mixer we can't play music and emulated sounds.
-	if (music != NULL)
-		return 0;
-#endif
-
 	bool didPlaySound = false;
 
 	// Volume fall off for Adlib/PC Speaker sounds is added for multiplayer.
@@ -1474,7 +1465,7 @@ SD_MusicOff(void)
 				if(Mix_PlayingMusic() == 1)
 				{
 					Mix_PauseMusic();
-					return (int)Mix_GetMusicPCMPosition();
+					return FLOAT2FIXED(Mix_GetMusicPosition(music));
 				}
 				return 0;
 			}
@@ -1536,7 +1527,7 @@ SD_StartMusic(const char* chunk)
 		SDL_RWops *mus_cunk = SDL_RWFromMem(chunkmem.Get(), Wads.LumpLength(lumpNum));
 
 		// Technically an SDL_mixer 2 feature to free the source
-#if defined(ECWOLF_MIXER) || SDL_VERSION_ATLEAST(2,0,0)
+#if SDL_MIXER_VERSION_ATLEAST(2,0,0)
 		music = Mix_LoadMUS_RW(mus_cunk, true);
 #else
 		music = Mix_LoadMUS_RW(mus_cunk);
@@ -1622,7 +1613,7 @@ SD_ContinueMusic(const char* chunk, int startoffs)
 			}
 
 			SDL_RWops *mus_cunk = SDL_RWFromMem(chunkmem.Get(), Wads.LumpLength(lumpNum));
-#if defined(ECWOLF_MIXER) || SDL_VERSION_ATLEAST(2,0,0)
+#if SDL_MIXER_VERSION_ATLEAST(2,0,0)
 			music = Mix_LoadMUS_RW(mus_cunk, true);
 #else
 			music = Mix_LoadMUS_RW(mus_cunk);
@@ -1683,7 +1674,7 @@ SD_ContinueMusic(const char* chunk, int startoffs)
 				printf("Unable to play music file: %s\n", Mix_GetError());
 			}
 
-			Mix_SetMusicPCMPosition(startoffs);
+			Mix_SetMusicPosition(FIXED2FLOAT(startoffs));
 		}
 	}
 }
