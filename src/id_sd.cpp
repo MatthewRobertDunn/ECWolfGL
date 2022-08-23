@@ -1180,6 +1180,8 @@ SD_Startup(void)
 		return;
 	}
 
+	SD_UpdatePCSpeakerVolume();
+
 #if defined(__ANDROID__)
 	// Working directory will be in the form: Beloko/Wolf3d/FULL
 	Mix_SetSoundFonts("../../FluidR3_GM.sf2");
