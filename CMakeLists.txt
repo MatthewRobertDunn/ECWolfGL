@@ -7,6 +7,11 @@ endif()
 
 include(src/versiondefs.cmake)
 
+# Set the default MSVC runtime library for newer CMake versions that support it
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0" AND MSVC)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "MSVC runtime library to compile against")
+endif()
+
 # We need a newer CPack version to get desirable results.
 # Note: CMake 3.11+ recommended for best results
 if(NOT CMAKE_VERSION VERSION_LESS "3.6.0")
