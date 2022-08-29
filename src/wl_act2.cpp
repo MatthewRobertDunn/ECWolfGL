@@ -795,6 +795,10 @@ ACTION_FUNCTION(A_WolfAttack)
 
 	A_Face(self, target);
 
+	// Targeting something we shouldn't be able to hit?
+	if(!(target->flags & FL_SHOOTABLE))
+		return true;
+
 	if (CheckLine (self, target)) // player is not behind a wall
 	{
 		dx = abs(self->x - target->x);

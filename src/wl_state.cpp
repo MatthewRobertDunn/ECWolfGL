@@ -677,7 +677,7 @@ bool MoveObj (AActor *ob, int32_t move)
 			if (abs(ob->x - players[i].mo->x) > r || abs(ob->y - players[i].mo->y) > r)
 				continue;
 
-			if (ob->GetClass()->Meta.GetMetaInt(AMETA_Damage) >= 0)
+			if ((players[i].mo->flags & FL_SHOOTABLE) && ob->GetClass()->Meta.GetMetaInt(AMETA_Damage) >= 0)
 				DamageActor (players[i].mo, ob, ob->GetDamage());
 
 			//
