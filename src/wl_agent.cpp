@@ -848,6 +848,19 @@ void player_t::DeathFade()
 	}
 }
 
+void player_t::DeathFadeClear()
+{
+	if(ScreenFader)
+		ScreenFader.Reset();
+
+	switch(gameinfo.DeathTransition)
+	{
+		case GameInfo::TRANSITION_Fade:
+			V_SetBlend(0, 0, 0, 0);
+			break;
+	}
+}
+
 // Finds the target closest to the player within shooting range.
 AActor *player_t::FindTarget()
 {

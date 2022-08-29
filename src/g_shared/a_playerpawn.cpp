@@ -145,6 +145,7 @@ void APlayerPawn::DeathTick()
 			else
 			{
 				player->state = player_t::PST_REBORN;
+				player->DeathFadeClear();
 			}
 		}
 	}

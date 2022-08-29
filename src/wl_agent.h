@@ -68,6 +68,7 @@ extern class player_t
 		void	BobWeapon(fixed_t *x, fixed_t *y);
 		void	BringUpWeapon();
 		void	DeathFade();
+		void	DeathFadeClear();
 		AActor	*FindTarget();
 		inline unsigned int GetPlayerNum() const;
 		void	GiveExtraMan(int amount);
