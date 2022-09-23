@@ -51,6 +51,8 @@ class SoundIndex
 		SoundIndex(int index = 0) : index(index) {}
 		SoundIndex(const char* logical);
 
+		bool IsNull() const { return index == 0; }
+
 		operator int() const { return index; }
 	private:
 		int index;
