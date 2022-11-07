@@ -67,6 +67,8 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 	string(TOUPPER "${LIB}" INTERNAL_VAR_NAME)
 	string(REPLACE "SDL2" "INTERNAL_SDL" INTERNAL_VAR_NAME "${INTERNAL_VAR_NAME}")
 
+	set(MODERN_TARGET "${LIB}::${LIB}")
+
 	# Detect if we have vendored libraries available
 	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/${PKG}/CMakeLists.txt")
 		option(${INTERNAL_VAR_NAME} "Force build with internal ${LIB}" OFF)
@@ -96,8 +98,8 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 				if(HAS_${INTERNAL_VAR_NAME})
 					set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
 					add_subdirectory(deps/${PKG} EXCLUDE_FROM_ALL)
-					if(NOT TARGET SDL2::${LIB})
-						add_library(SDL2::${LIB} ALIAS ${INTERNAL_TARGET})
+					if(NOT TARGET "${MODERN_TARGET}")
+						add_library("${MODERN_TARGET}" ALIAS ${INTERNAL_TARGET})
 					endif()
 					set(TARGET_TYPE "internal")
 				else()
@@ -109,7 +111,7 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 		endif()
 
 		# Tell the user what we're using and finalize the config
-		if(TARGET SDL2::${LIB})
+		if(TARGET "${MODERN_TARGET}")
 			message(STATUS "Using ${TARGET_TYPE} ${LIB}")
 		else()
 			message(STATUS "Using ${LIB}: ${${LIB}_LIBRARIES}, ${${LIB}_INCLUDE_DIRS}")
@@ -128,7 +130,7 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 		set(${LIB}_INCLUDE_DIRS ${${SDL1_VAR}_INCLUDE_DIR})
 	endif()
 
-	sdl_modernize(SDL2::${LIB} ${LIB}_LIBRARIES ${LIB}_INCLUDE_DIRS)
+	sdl_modernize("${MODERN_TARGET}" ${LIB}_LIBRARIES ${LIB}_INCLUDE_DIRS)
 endfunction()
 
 find_sdl_library(SDL SDL2 SDL.h SDL2-static)

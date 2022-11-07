@@ -317,8 +317,8 @@ target_sources(engine PRIVATE ${HEADER_FILES})
 
 add_dependencies(engine revision_check)
 target_link_libraries(engine PRIVATE
-	SDL2::SDL2_mixer
-	SDL2::SDL2_net
+	SDL2_mixer::SDL2_mixer
+	SDL2_net::SDL2_net
 	SDL2::SDL2
 	${BZIP2_LIBRARIES}
 	${JPEG_LIBRARIES}
