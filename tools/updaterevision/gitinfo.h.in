@@ -6,3 +6,4 @@
 #define GIT_DESCRIPTION "@Tag@"
 #define GIT_HASH "@Hash@"
 #define GIT_TIME "@Timestamp@"
+#define GIT_DATE_INT @TimestampDateInt@ull

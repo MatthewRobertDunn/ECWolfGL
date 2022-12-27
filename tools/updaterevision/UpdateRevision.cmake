@@ -28,7 +28,7 @@ function(query_repo_info)
 	endif()
 
 	execute_process(
-		COMMAND git log -1 "--format=%ai;%H"
+		COMMAND git log -1 "--format=%ai;%H;%at"
 		RESULT_VARIABLE Error
 		OUTPUT_VARIABLE CommitInfo
 		ERROR_QUIET
@@ -41,9 +41,11 @@ function(query_repo_info)
 
 	list(GET CommitInfo 0 Timestamp)
 	list(GET CommitInfo 1 Hash)
+	list(GET CommitInfo 2 TimestampDateInt)
 
 	ret_var(Tag)
 	ret_var(Timestamp)
+	ret_var(TimestampDateInt)
 	ret_var(Hash)
 endfunction()
 
