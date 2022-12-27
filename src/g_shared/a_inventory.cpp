@@ -844,12 +844,22 @@ class AWeaponGiver : public AWeapon
 						break;
 					}
 				}
-				else if(!noammo)
+				else
 				{
-					// Main weapon picked up!
-					GoAwayAndDie();
-					if(toucher->player->PendingWeapon == weap)
-						switchTo = weap;
+					// If we didn't insert our spawned object into inventory
+					// then we should destroy it now.
+					if(weap->owner != toucher)
+						weap->Destroy();
+
+					if(!noammo)
+					{
+						// Main weapon picked up!
+						GoAwayAndDie();
+
+						// PendingWeapon may be a copy
+						if(toucher->player->PendingWeapon->GetClass() == weap->GetClass())
+							switchTo = toucher->player->PendingWeapon;
+					}
 				}
 			}
 
