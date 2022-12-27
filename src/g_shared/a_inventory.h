@@ -53,8 +53,11 @@ class AInventory : public AActor
 		virtual void	DetachFromOwner();
 		virtual void	Destroy();
 		virtual bool	HandlePickup(AInventory *item, bool &good);
+		void			ItemFog();
 		void			LevelSpawned();
 		void			Serialize(FArchive &arc);
+		virtual bool	ShouldRespawn();
+		void			Tick();
 		void			Touch(AActor *toucher);
 		virtual bool	Use();
 
@@ -66,6 +69,8 @@ class AInventory : public AActor
 		unsigned int	maxamount;
 		unsigned int	interhubamount;
 		FTextureID		icon;
+
+		unsigned int	respawnTimer;
 	protected:
 		virtual AInventory	*CreateCopy(AActor *holder);
 		void				GoAwayAndDie();

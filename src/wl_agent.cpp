@@ -320,6 +320,17 @@ void player_t::TakeDamage (int points, AActor *attacker)
 		mo->Die();
 		health = 0;
 		killerobj = attacker;
+
+		if(attacker && attacker->player)
+		{
+			if(attacker == mo)
+				--frags;
+			else
+			{
+				++attacker->player->frags;
+				Printf("Attacker got frag (%d)\n", attacker->player->frags);
+			}
+		}
 	}
 	else
 	{
@@ -880,7 +891,9 @@ AActor *player_t::FindTarget()
 			if(check == mo)
 				continue;
 
-			if ((check->flags & FL_SHOOTABLE) && mo->CheckVisibility(check, ANGLE_90/9))
+			if ((check->flags & FL_SHOOTABLE) &&
+				(!check->player || Net::FriendlyFire()) &&
+				mo->CheckVisibility(check, ANGLE_90/9))
 			{
 				const int dist = MAX(abs(check->x - mo->x), abs(check->y - mo->y));
 
@@ -929,6 +942,7 @@ void player_t::Reborn()
 		lives = gamestate.difficulty->LivesCount;
 		score = oldscore = 0;
 		nextextra = EXTRAPOINTS;
+		frags = 0;
 	}
 
 	mo->GiveStartingInventory();
@@ -967,6 +981,11 @@ void player_t::Serialize(FArchive &arc)
 
 	if(GameSave::SaveProdVersion >= 0x001002FF && GameSave::SaveVersion > 1374729160)
 		arc << FOV << DesiredFOV;
+
+	if(GameSave::SaveVersion > 1672116695)
+		arc << frags;
+	else
+		frags = 0;
 
 	if(arc.IsLoading())
 	{
@@ -1181,7 +1200,9 @@ ACTION_FUNCTION(A_CustomPunch)
 		if(check == self)
 			continue;
 
-		if ( (check->flags & FL_SHOOTABLE) && self->CheckVisibility(check, ANGLE_90/9))
+		if((check->flags & FL_SHOOTABLE) &&
+			(!check->player || Net::FriendlyFire()) &&
+			self->CheckVisibility(check, ANGLE_90/9))
 		{
 			const int checkdist = MAX(abs(check->x - self->x), abs(check->y - self->y));
 

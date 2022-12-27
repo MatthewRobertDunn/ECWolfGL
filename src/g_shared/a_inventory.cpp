@@ -122,6 +122,10 @@ bool AInventory::GoAway()
 	if(itemFlags & IF_DROPPED)
 		return false;
 
+	bool respawn = ShouldRespawn();
+	if(respawn)
+		respawnTimer = 30*TICRATE; // ROTT uses 30 second timer by default
+
 	if(IsThinking()) // Only hide actors that are thinking
 	{
 		if(ShouldStay())
@@ -134,7 +138,8 @@ bool AInventory::GoAway()
 			return true;
 		}
 	}
-	return false;
+
+	return respawn;
 }
 
 // Returns true if the pickup was handled by an already existing inventory item.
@@ -158,6 +163,16 @@ bool AInventory::HandlePickup(AInventory *item, bool &good)
 	return false;
 }
 
+void AInventory::ItemFog()
+{
+	if(const ClassDef *cls = ClassDef::FindClass("ItemFog"))
+	{
+		AActor *fog = Spawn(cls, x, y, 0, SPAWN_AllowReplacement);
+		fog->angle = angle;
+		fog->target = this;
+	}
+}
+
 void AInventory::LevelSpawned()
 {
 	itemFlags &= ~IF_DROPPED;
@@ -173,12 +188,37 @@ void AInventory::Serialize(FArchive &arc)
 		<< interhubamount
 		<< icon;
 
+	if(GameSave::SaveVersion > 1672116695)
+		arc << respawnTimer;
+
 	Super::Serialize(arc);
+}
+
+bool AInventory::ShouldRespawn()
+{
+	return Net::RespawnItems();
 }
 
 bool AInventory::ShouldStay()
 {
 	return false;
+}
+
+void AInventory::Tick()
+{
+	Super::Tick();
+
+	if(respawnTimer > 0)
+	{
+		if(--respawnTimer == 0)
+		{
+			flags |= FL_PICKUP;
+			itemFlags &= ~IF_INACTIVE;
+			PlaySoundLocActor("misc/spawn", this);
+			ItemFog();
+			SetState(SpawnState);
+		}
+	}
 }
 
 void AInventory::Touch(AActor *toucher)

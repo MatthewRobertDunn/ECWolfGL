@@ -119,6 +119,7 @@ struct StartPacket
 	BYTE type;
 	BYTE playerNumber;
 	BYTE numPlayers;
+	BYTE gameMode;
 	DWORD rngseed;
 	struct Client
 	{
@@ -210,8 +211,9 @@ struct EndGamePacket
 
 NetInit InitVars = {
 	MODE_SinglePlayer,
+	GM_Cooperative,
 	NET_DEFAULT_PORT,
-	1
+	1,
 };
 
 struct NetClient
@@ -641,6 +643,7 @@ static void StartHost(InitStatusCallback callback)
 	UDPpacket startPacket = { -1, (Uint8*)startData, startSize, startSize, 0 };
 	startData->type = StartPacket::Type;
 	startData->numPlayers = InitVars.numPlayers;
+	startData->gameMode = InitVars.gameMode;
 	startData->rngseed = rngseed;
 	for(unsigned int i = 1;i < InitVars.numPlayers;++i)
 	{
@@ -733,6 +736,7 @@ static void StartJoin(InitStatusCallback callback)
 			{
 				ConsolePlayer = data->playerNumber;
 				InitVars.numPlayers = data->numPlayers;
+				InitVars.gameMode = static_cast<GameMode>(data->gameMode);
 				rngseed = data->rngseed;
 
 				Client[0].address = Packet->address;

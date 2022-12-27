@@ -110,8 +110,9 @@ extern class player_t
 		TUniquePtr<FFader> ScreenFader;
 
 		int32_t		oldscore,score,nextextra;
-		short		lives;
 		int32_t		health;
+		int32_t		frags;
+		short		lives;
 		float		FOV, DesiredFOV;
 
 		int32_t		thrustspeed;

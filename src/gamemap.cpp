@@ -42,8 +42,10 @@
 #include "lnspec.h"
 #include "actor.h"
 #include "thingdef/thingdef.h"
+#include "wl_act.h"
 #include "wl_agent.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "r_sprites.h"
 #include "resourcefiles/resourcefile.h"
@@ -345,6 +347,37 @@ void GameMap::GetHitlist(BYTE* hitlist) const
 
 const GameMap::PlayerSpawn *GameMap::GetPlayerSpawn(int player) const
 {
+	if(Net::InitVars.gameMode == Net::GM_Battle)
+	{
+		// Spawn farthest
+		unsigned int best = 0;
+		fixed distance = 0;
+
+		for(unsigned int i = 0;i < deathmatchStarts.Size();++i)
+		{
+			PlayerSpawn &spot = deathmatchStarts[i];
+
+			fixed closest = INT_MAX;
+			for(unsigned int p = 0;p < Net::InitVars.numPlayers;++p)
+			{
+				if(!players[p].mo && players[p].health <= 0)
+					continue;
+
+				fixed player_distance = P_AproxDistance(players[p].mo->x - spot.x, players[p].mo->y - spot.y);
+				if(player_distance < closest)
+					closest = player_distance;
+			}
+
+			if(closest > distance)
+			{
+				best = i;
+				distance = closest;
+			}
+		}
+
+		return &deathmatchStarts[best];
+	}
+
 	if(const PlayerSpawn *spawn = playerStarts.CheckKey(player))
 		return spawn;
 
@@ -552,6 +585,9 @@ void GameMap::SpawnThings()
 	playerStarts.Clear();
 	deathmatchStarts.Clear();
 
+	// Since vanilla didn't have deathmatch we can collect monster spawn points as a fallback.
+	TArray<PlayerSpawn> deathmatchFallbackStarts;
+
 	for(unsigned int i = 0;i < things.Size();++i)
 	{
 		Thing &thing = things[i];
@@ -578,6 +614,13 @@ void GameMap::SpawnThings()
 				printf("Unknown thing %s @ (%d, %d)\n", thing.type.GetChars(), thing.x>>FRACBITS, thing.y>>FRACBITS);
 			}
 
+			if(Net::NoMonsters() && (cls->GetDefault()->flags & FL_ISMONSTER))
+			{
+				PlayerSpawn spawn = {thing.x, thing.y, thing.angle};
+				deathmatchFallbackStarts.Push(spawn);
+				continue;
+			}
+
 			AActor *actor = AActor::Spawn(cls, thing.x, thing.y, thing.z, SPAWN_AllowReplacement|(thing.patrol ? SPAWN_Patrol : 0));
 			// This forumla helps us to avoid errors in roundoffs.
 			actor->angle = (thing.angle/45)*ANGLE_45 + (thing.angle%45)*ANGLE_1;
@@ -599,6 +642,28 @@ void GameMap::SpawnThings()
 
 				printf("%s at (%d, %d) has no frames\n", cls->GetName().GetChars(), thing.x>>FRACBITS, thing.y>>FRACBITS);
 			}
+		}
+	}
+
+	// If map doesn't have deathmatch starts and we require them find a fallback
+	if(deathmatchStarts.Size() == 0 && Net::InitVars.gameMode == Net::GM_Battle)
+	{
+		if(deathmatchFallbackStarts.Size() != 0)
+		{
+			deathmatchStarts = deathmatchFallbackStarts;
+			if(PlayerSpawn *spawn = playerStarts.CheckKey(0))
+			{
+				// Player 1 start should be a good candidate. Generally co-op
+				// starts are near to each other so no need to add the others
+				deathmatchStarts.Push(*spawn);
+			}
+		}
+		else
+		{
+			// If the map has no monsters and no deathmatch starts, use the co-op starts
+			TMap<unsigned int, PlayerSpawn>::Pair *pair;
+			for(TMap<unsigned int, PlayerSpawn>::Iterator iter(playerStarts);iter.NextPair(pair);)
+				deathmatchStarts.Push(pair->Value);
 		}
 	}
 }

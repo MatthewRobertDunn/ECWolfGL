@@ -36,6 +36,7 @@
 #include "a_playerpawn.h"
 #include "c_cvars.h"
 #include "g_mapinfo.h"
+#include "g_shared/a_keys.h"
 #include "thingdef/thingdef.h"
 #include "wl_agent.h"
 #include "wl_game.h"
@@ -162,6 +163,7 @@ void APlayerPawn::Die()
 		if(player->ReadyWeapon)
 			player->SetPSprite(player->ReadyWeapon->GetDownState(), player_t::ps_weapon);
 	}
+
 	Super::Die();
 }
 
@@ -173,8 +175,31 @@ AActor::DropList *APlayerPawn::GetStartInventory()
 	return NULL;
 }
 
+void APlayerPawn::GiveDeathmatchInventory()
+{
+	ClassDef::ClassIterator iter = ClassDef::GetClassIterator();
+	ClassDef::ClassPair *pair;
+	while(iter.NextPair(pair))
+	{
+		const ClassDef *cls = pair->Value;
+		if(cls->IsDescendantOf(NATIVE_CLASS(Key)))
+		{
+			if(((AKey *)cls->GetDefault())->KeyNumber != 0)
+			{
+				AKey *key = (AKey *)AActor::Spawn(cls, 0, 0, 0, 0);
+				key->RemoveFromWorld();
+				if(!key->CallTryPickup(this))
+					key->Destroy();
+			}
+		}
+	}
+}
+
 void APlayerPawn::GiveStartingInventory()
 {
+	if(Net::InitVars.gameMode == Net::GM_Battle)
+		GiveDeathmatchInventory();
+
 	if(!GetStartInventory())
 		return;
 

@@ -17,6 +17,7 @@
 #include "a_inventory.h"
 #include "a_keys.h"
 #include "wl_iwad.h"
+#include "wl_net.h"
 
 /*
 =============================================================================
@@ -415,7 +416,12 @@ void WolfStatusBar::DrawItems (void)
 void WolfStatusBar::DrawScore (void)
 {
 	if((viewsize == 21 && ingame) || !StatusBarConfig.Score.Enabled) return;
-	LatchNumber (StatusBarConfig.Score.X,StatusBarConfig.Score.Y,StatusBarConfig.Score.Digits,players[ConsolePlayer].score,mac);
+
+	int32_t score = players[ConsolePlayer].score;
+	if(Net::InitVars.gameMode == Net::GM_Battle)
+		score = players[ConsolePlayer].frags;
+
+	LatchNumber (StatusBarConfig.Score.X,StatusBarConfig.Score.Y,StatusBarConfig.Score.Digits,score,mac);
 }
 
 //===========================================================================

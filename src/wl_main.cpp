@@ -1106,6 +1106,10 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 				Net::InitVars.joinAddress = argv[i];
 			}
 		}
+		else IFARG("--battle")
+		{
+			Net::InitVars.gameMode = Net::GM_Battle;
+		}
 		else IFARG("--debugnet")
 		{
 			DebugNetwork = true;
@@ -1161,6 +1165,7 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 			" --host <number>        Sets up a network game with the given number of players.\n"
 			" --join <address>       Joins a network game coordinated by the given host.\n"
 			" --port <number>        Port number to use for network communications.\n"
+			" --battle               Player vs. player battle\n"
 			" --debugnet             Enable network debugging messages.\n"
 			" --foreignsave          Disable save game validity checking.\n"
 			, GetGameCaption(), defaultSampleRate

@@ -52,9 +52,16 @@ enum Mode
 	MODE_Client
 };
 
+enum GameMode
+{
+	GM_Cooperative,
+	GM_Battle
+};
+
 struct NetInit
 {
 	Mode mode;
+	GameMode gameMode;
 	uint16_t port;
 	byte numPlayers;
 	const char* joinAddress;
@@ -73,6 +80,11 @@ void PollControls();
 
 bool CheckAck(bool send);
 void StartAck(AckType type);
+
+// TODO: Redo these as proper options (and probably move to wl_game or something)
+static bool FriendlyFire() { return InitVars.gameMode == GM_Battle; }
+static bool RespawnItems() { return InitVars.gameMode == GM_Battle; }
+static bool NoMonsters() { return InitVars.gameMode == GM_Battle; }
 
 }
 

@@ -67,6 +67,7 @@ class APlayerPawn : public AActor
 		void		CheckWeaponSwitch(const ClassDef *ammo);
 		void		Die();
 		DropList	*GetStartInventory();
+		void		GiveDeathmatchInventory();
 		void		GiveStartingInventory();
 		AWeapon		*PickNewWeapon();
 		void		RemoveInventory(AInventory *item);

@@ -767,6 +767,9 @@ void DamageActor (AActor *ob, AActor *attacker, unsigned damage)
 {
 	if (ob->player)
 	{
+		if ((attacker && attacker->player) && !Net::FriendlyFire())
+			return;
+
 		ob->player->TakeDamage(damage, attacker);
 		return;
 	}
