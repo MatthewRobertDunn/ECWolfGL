@@ -869,6 +869,9 @@ void player_t::DeathFadeClear()
 		case GameInfo::TRANSITION_Fade:
 			V_SetBlend(0, 0, 0, 0);
 			break;
+
+		case GameInfo::TRANSITION_Fizzle:
+			break;
 	}
 }
 

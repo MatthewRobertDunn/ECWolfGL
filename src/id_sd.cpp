@@ -614,12 +614,13 @@ Mix_Chunk* SD_PrepareSound(int which)
 		return NULL;
 
 	FMemLump soundLump = Wads.ReadLump(which);
+	byte* soundData = (byte*)soundLump.GetMem();
 
 	// 0x2A is the size of the sound header. From what I can tell the csnds
 	// have mostly garbage filled headers (outside of what is precisely needed
 	// since the sample rate is hard coded). I'm not sure if the sounds are
 	// 8-bit or 16-bit, but it looks like the sample rate is coded to ~22050.
-	if(BigShort(*(WORD*)soundLump.GetMem()) == 1 && size > 0x2A)
+	if(size > 0x2A && BigShort(*(WORD*)soundData) == 1)
 	{
 		SDL_RWops *ops = SDL_AllocRW();
 		//ops->size = MacSound_Size;
@@ -628,17 +629,21 @@ Mix_Chunk* SD_PrepareSound(int which)
 		ops->write = NULL;
 		ops->close = MacSound_Close;
 		ops->type = 0;
-		ops->hidden.unknown.data1 = malloc(sizeof(MacSoundData));
-		((MacSoundData*)ops->hidden.unknown.data1)->data = (uint8_t*)malloc(size-0x2A);
-		((MacSoundData*)ops->hidden.unknown.data1)->size = size-0x2A;
-		((MacSoundData*)ops->hidden.unknown.data1)->pos = 0;
-		memcpy(((MacSoundData*)ops->hidden.unknown.data1)->data, ((char*)soundLump.GetMem())+0x2A, size-0x2A);
+
+		MacSoundData *macSndData = (MacSoundData*)malloc(sizeof(MacSoundData));
+		ops->hidden.unknown.data1 = macSndData;
+
+		macSndData->data = (uint8_t*)malloc(size-0x2A);
+		macSndData->size = size-0x2A;
+		macSndData->pos = 0;
+		memcpy(macSndData->data, soundData+0x2A, size-0x2A);
 		for(unsigned int i = size-0x2A;i-- > 0;)
-			((MacSoundData*)ops->hidden.unknown.data1)->data[i] = 0x80+((MacSoundData*)ops->hidden.unknown.data1)->data[i];
+			macSndData->data[i] = 0x80+macSndData->data[i];
+
 		return Mix_LoadWAV_RW(ops, 1);
 	}
 
-	return Mix_LoadWAV_RW(SDL_RWFromMem(soundLump.GetMem(), size), 1);
+	return Mix_LoadWAV_RW(SDL_RWFromMem(soundData, size), 1);
 }
 
 static int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChannel chan)

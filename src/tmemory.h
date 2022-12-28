@@ -265,6 +265,15 @@ class TSharedPtr
 	{
 		if(--r->shared == 0)
 		{
+			assert(r != &TSharedPtrRef::NullRef<void>::Null);
+#ifdef __GNUC__
+			// Static analysis sees the possibility of deleting a stack
+			// object, but if the code is written right the reference count
+			// should never drop to 0.
+			if(r == &TSharedPtrRef::NullRef<void>::Null)
+				__builtin_unreachable();
+#endif
+
 			(void)Deleter(p);
 
 			// All active SharedPtrs count as 1 weak reference in order to

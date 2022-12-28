@@ -97,7 +97,10 @@ static void FullFileName(const char* filename, char* dest)
 	ConvertName(fullpath, dest);
 #else
 	if(realpath(filename, dest) == NULL)
-		strncpy(dest, filename, MAX_PATH);
+	{
+		strncpy(dest, filename, MAX_PATH-1);
+		dest[MAX_PATH-1] = 0;
+	}
 #endif
 }
 

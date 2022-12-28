@@ -207,6 +207,10 @@ if( NOT HAS_VA_COPY )
 endif()
 
 if( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE )
+	if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0 )
+		# Remove after switching to C++11
+		target_compile_options(engine PRIVATE -Wno-class-memaccess)
+	endif()
 	if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0 )
 		target_compile_options(engine PRIVATE -Wno-implicit-fallthrough)
 	endif()

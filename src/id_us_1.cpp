@@ -568,7 +568,7 @@ bool US_LineInput(FFont *font, int x,int y,char *buf,const char *def,bool escok,
 				case sc_Delete:
 					if (s[cursor])
 					{
-						strcpy(s + cursor,s + cursor + 1);
+						memmove(s + cursor,s + cursor + 1,strlen(s + cursor + 1) + 1);
 					}
 					c = key_None;
 					cursormoved = true;

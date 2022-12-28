@@ -130,8 +130,12 @@ bool FGamemaps::Open(bool quiet)
 	mapheadReader->Read(&rlewTag, 2);
 	rlewTag = LittleShort(rlewTag);
 	mapheadReader->Read(offsets, NumPossibleMaps*4);
-	for(NumLumps = 0;NumLumps < NumPossibleMaps && offsets[NumLumps] != 0;++NumLumps)
+	for(NumLumps = 0;NumLumps < NumPossibleMaps;++NumLumps)
+	{
 		offsets[NumLumps] = LittleLong(offsets[NumLumps]);
+		if(offsets[NumLumps] == 0 || offsets[NumLumps] == 0xFFFFFFFFu)
+			break;
+	}
 
 	// We allocate 2 lumps per map so...
 	static const unsigned int NUM_MAP_LUMPS = 2;
