@@ -1,4 +1,5 @@
 #include "OpenGLUtils.h"
+#include <EGL/egl.h>
 #include <map>
 
 namespace touchcontrols
@@ -379,7 +380,9 @@ GLuint loadTextureFromPNG(std::string filename, int &width, int &height)
 	std::map<std::string, GLuint>::iterator it = tc_gl_textures.find(filename);
 	if(it != tc_gl_textures.end())
 	{
-		if(glIsTexture(it->second))
+		// If there's no context then always return the cached entry since
+		// glIsTexture will fail.
+		if(eglGetCurrentContext() == EGL_NO_CONTEXT || glIsTexture(it->second))
 		{
 			//element found;
 			LOGTOUCH("PNG %s is already loaded", filename.c_str());

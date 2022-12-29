@@ -22,5 +22,5 @@ target_compile_definitions(touchcontrols PRIVATE -DANDROID_NDK)
 target_include_directories(touchcontrols PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${LIBPNG_INCLUDE_DIR}")
 message("->${CMAKE_CURRENT_SOURCE_DIR} ->${LIBPNG_INCLUDE_DIR}")
 
-target_link_libraries(touchcontrols PUBLIC GLESv1_CM log sigc++ TinyXML ${LIBPNG_LIBRARY})
+target_link_libraries(touchcontrols PUBLIC EGL GLESv1_CM log sigc++ TinyXML ${LIBPNG_LIBRARY})
  
