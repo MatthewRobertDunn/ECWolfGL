@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="22" />
 
     <!-- OpenGL ES 2.0 -->
     <uses-feature android:glEsVersion="0x00020000" />
@@ -30,7 +30,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -40,6 +39,7 @@
         <activity
             android:name="com.beloko.wolf3d.EntryActivity"
             android:configChanges="orientation|keyboardHidden"
+            android:exported="true"
             android:label="@string/title_activity_entry"
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
@@ -60,7 +60,5 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         </activity>
     </application>
-
-    <uses-sdk android:minSdkVersion="14" />
 
 </manifest>
