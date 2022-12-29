@@ -22,7 +22,7 @@ set(ANDROID_SIGN_STOREPASS "" CACHE STRING "Keystore password for jarsigner")
 set(ANDROID_SIGN_KEYSTORE "" CACHE FILEPATH "Keystore name for jarsigner")
 set(ANDROID_SIGN_KEYNAME "" CACHE STRING "Key name for jarsigner")
 
-set(CMAKE_JAVA_COMPILE_FLAGS -target 1.6 -source 1.6 -Xlint:-options ${CMAKE_JAVA_COMPILE_FLAGS})
+set(CMAKE_JAVA_COMPILE_FLAGS -target 1.6 -source 1.6 -encoding UTF-8 -Xlint:-options ${CMAKE_JAVA_COMPILE_FLAGS})
 
 add_subdirectory(src)
 

@@ -358,7 +358,7 @@ build_mingw() {
 	declare SrcDir=/mnt
 
 	# Build native tools
-	build_ecwolf || return
+	build_ecwolf -DTOOLS_ONLY=ON || return
 
 	declare Arch
 	for Arch in i686 x86_64; do
@@ -430,7 +430,7 @@ build_android() {
 	declare SrcDir=/mnt
 
 	# Build native tools
-	build_ecwolf || return
+	build_ecwolf -DTOOLS_ONLY=ON || return
 
 	declare Arch
 	for Arch in x86 x86_64 armeabi-v7a arm64-v8a; do

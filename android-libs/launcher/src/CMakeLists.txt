@@ -48,9 +48,10 @@ add_jar(engine-android
 	org/libsdl/app/HIDDeviceManager.java
 	org/libsdl/app/HIDDeviceUSB.java
 	org/libsdl/app/SDL.java
-	org/libsdl/app/SDLAudioManager.java
 	org/libsdl/app/SDLActivity.java
+	org/libsdl/app/SDLAudioManager.java
 	org/libsdl/app/SDLControllerManager.java
+	org/libsdl/app/SDLSurface.java
 	INCLUDE_JARS
 		"${ANDROID_SDK_JAR}"
 		"${ANDROID_SUPPORT_V4_JAR}"
