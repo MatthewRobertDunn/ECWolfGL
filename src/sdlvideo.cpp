@@ -236,6 +236,11 @@ void I_InitGraphics ()
 		return;
 	}
 
+#ifdef __ANDROID__
+	extern void Android_InitGraphics();
+	Android_InitGraphics();
+#endif
+
 	Video = new SDLVideo (0);
 	if (Video == NULL)
 		I_FatalError ("Failed to initialize display");
@@ -693,8 +698,8 @@ SDLFB::SDLFB (int width, int height, bool fullscreen)
 	ResetSDLRenderer ();
 
 #ifdef __ANDROID__
-	extern void PostSDLInit(SDL_Window *);
-	PostSDLInit(Screen);
+	extern void PostSDLCreateRenderer(SDL_Window *);
+	PostSDLCreateRenderer(Screen);
 #endif
 
 	for (i = 0; i < 256; i++)
