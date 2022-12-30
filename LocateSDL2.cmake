@@ -133,6 +133,8 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 	sdl_modernize("${MODERN_TARGET}" ${LIB}_LIBRARIES ${LIB}_INCLUDE_DIRS)
 endfunction()
 
+option(INTERNAL_SDL_MIXER_CODECS "Build SDL_mixer with vendored codec libraries" OFF)
+
 find_sdl_library(SDL SDL2 SDL.h SDL2-static)
 find_sdl_library(SDL_mixer SDL2_mixer SDL_mixer.h SDL2_mixer)
 find_sdl_library(SDL_net SDL2_net SDL_net.h SDL2_net)
