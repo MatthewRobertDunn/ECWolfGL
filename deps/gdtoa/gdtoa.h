@@ -43,30 +43,28 @@ THIS SOFTWARE.
 #if defined(_M_X64) || defined(__MINGW64__)
 #define X64_bit_pointers
 #endif
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__ANDROID__)
 /* [BL] While generating the files may be easy, on OS X we have cross
  * compiling to deal with, which means we can't run the generation
  * program on the target.
  */
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
 #define IEEE_8087
 #define Arith_Kind_ASL 1
 #define Long int
 #define Intcast (int)(long)
 #define Double_Align
 #define X64_bit_pointers
-#elif defined(__i386__)
+#elif defined(__i386__) || defined(__arm__)
 #define IEEE_8087
 #define Arith_Kind_ASL 1
-#else
+#elif defined(__powerpc__) || defined(__ppc64__)
 #define IEEE_MC68k
 #define Arith_Kind_ASL 2
 #define Double_Align
+#else
+#error Unsupported architecture
 #endif
-#elif defined(__ANDROID__)
-// [BL] Android is also cross compiled.
-#define IEEE_8087
-#define Arith_Kind_ASL 1
 #else
 #include "arith.h"
 #endif
