@@ -28,8 +28,8 @@ struct TicCmd_t
 {
 	int controlx,controly, controlstrafe; // range from -100 to 100
 	int controlpanx, controlpany;
-	bool buttonstate[NUMBUTTONS], ambuttonstate[NUMAMBUTTONS];
-	bool buttonheld[NUMBUTTONS], ambuttonheld[NUMAMBUTTONS];
+	BYTE buttonstate[NUMBUTTONS], ambuttonstate[NUMAMBUTTONS];
+	BYTE buttonheld[NUMBUTTONS], ambuttonheld[NUMAMBUTTONS];
 };
 extern unsigned int ConsolePlayer;
 extern TicCmd_t control[MAXPLAYERS];

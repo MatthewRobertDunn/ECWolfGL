@@ -303,7 +303,7 @@ void PollMouseButtons (void)
 		if (controlScheme[i].mouse == -1)
 			continue;
 
-		bool &state = control[ConsolePlayer].buttonstate[controlScheme[i].button];
+		BYTE &state = control[ConsolePlayer].buttonstate[controlScheme[i].button];
 		switch(controlScheme[i].mouse)
 		{
 		case ControlScheme::MWheel_Left:

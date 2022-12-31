@@ -52,6 +52,7 @@
 
 #include <SDL.h>
 #include <SDL_net.h>
+#include <cassert>
 #include <climits>
 
 #define NET_DEFAULT_PORT 5029
@@ -110,6 +111,8 @@ struct RequestPacket
 	enum { Type = NET_RequestConnection };
 
 	BYTE type;
+
+	void ByteSwap() {}
 };
 
 struct StartPacket
@@ -126,6 +129,16 @@ struct StartPacket
 		DWORD host;
 		WORD port;
 	} clients[];
+
+	void ByteSwap()
+	{
+		rngseed = LittleLong(rngseed);
+		for(BYTE i = 0;i < numPlayers;++i)
+		{
+			clients[i].host = LittleLong(clients[i].host);
+			clients[i].port = LittleShort(clients[i].port);
+		}
+	}
 };
 
 struct NewGamePacket
@@ -137,6 +150,12 @@ struct NewGamePacket
 	PlayerClass playerClass;
 	BYTE difficulty;
 	char map[9];
+
+	void ByteSwap()
+	{
+		TimeCount = LittleLong(TimeCount);
+		playerClass.index = LittleLong(playerClass.index);
+	}
 };
 
 struct AckPacket
@@ -146,6 +165,11 @@ struct AckPacket
 	BYTE type;
 	BYTE ackedType;
 	int32_t TimeCount;
+
+	void ByteSwap()
+	{
+		TimeCount = LittleLong(TimeCount);
+	}
 };
 
 struct TicCmdPacket
@@ -154,11 +178,19 @@ struct TicCmdPacket
 
 	BYTE type;
 	int32_t TimeCount;
-	int controlx;
-	int controly;
-	int controlstrafe;
-	bool buttonstate[NUMBUTTONS];
-	bool buttonheld[NUMBUTTONS];
+	int32_t controlx;
+	int32_t controly;
+	int32_t controlstrafe;
+	BYTE buttonstate[NUMBUTTONS];
+	BYTE buttonheld[NUMBUTTONS];
+
+	void ByteSwap()
+	{
+		TimeCount = LittleLong(TimeCount);
+		controlx = LittleLong(controlx);
+		controly = LittleLong(controly);
+		controlstrafe = LittleLong(controlstrafe);
+	}
 };
 
 // Indicates that a player has temporarily left the playsim and other clients
@@ -169,6 +201,11 @@ struct BlockPlaysimPacket
 
 	BYTE type;
 	int32_t TimeCount;
+
+	void ByteSwap()
+	{
+		TimeCount = LittleLong(TimeCount);
+	}
 };
 
 // Waiting for some player to press a key
@@ -179,6 +216,12 @@ struct InAckPacket
 	BYTE type;
 	int32_t TimeCount;
 	uint32_t Number;
+
+	void ByteSwap()
+	{
+		TimeCount = LittleLong(TimeCount);
+		Number = LittleLong(Number);
+	}
 };
 
 struct DebugCmdPacket
@@ -190,6 +233,13 @@ struct DebugCmdPacket
 	int32_t CommandType;
 	int32_t ArgI;
 	char ArgS[256];
+
+	void ByteSwap()
+	{
+		TimeCount = LittleLong(TimeCount);
+		CommandType = LittleLong(CommandType);
+		ArgI = LittleLong(ArgI);
+	}
 
 	// Returns false if truncated
 	bool SetArgS(FString str)
@@ -206,6 +256,11 @@ struct EndGamePacket
 
 	BYTE type;
 	int32_t TimeCount;
+
+	void ByteSwap()
+	{
+		TimeCount = LittleLong(TimeCount);
+	}
 };
 #pragma pack()
 
@@ -285,7 +340,12 @@ static void DoEndGame()
 template<typename T>
 static bool CheckPacketType(const UDPpacket *packet)
 {
-	return packet->len >= (signed)sizeof(T) && ((T*)packet->data)->type == T::Type;
+	if(packet->len >= (signed)sizeof(T) && ((T*)packet->data)->type == T::Type)
+	{
+		((T*)packet->data)->ByteSwap();
+		return true;
+	}
+	return false;
 }
 
 // Sends an ACK packet to a given address
@@ -296,6 +356,7 @@ static void SendAck(IPaddress address, int32_t TimeCount)
 	ackData.type = AckPacket::Type;
 	ackData.ackedType = T::Type;
 	ackData.TimeCount = TimeCount;
+	ackData.ByteSwap();
 	UDPpacket packet = { -1, (Uint8*)&ackData, sizeof(AckPacket), sizeof(AckPacket), 0, address };
 
 	SDLNet_UDP_Send(Socket, -1, &packet);
@@ -425,6 +486,7 @@ static void ExchangePacket(T (&packets)[MAXPLAYERS])
 	UDPpacket outPacket = { -1, (Uint8*)&packets[ConsolePlayer], sizeof(T), sizeof(T), 0 };
 	packets[ConsolePlayer].type = T::Type;
 	packets[ConsolePlayer].TimeCount = gamestate.TimeCount;
+	packets[ConsolePlayer].ByteSwap();
 
 	// We need to keep an eye out for packets, but we also need to periodically
 	// resend our packet in case it got lost.
@@ -527,6 +589,7 @@ static void SendReliablePacket(T &packet)
 	UDPpacket outPacket = { -1, (Uint8*)&packet, sizeof(T), sizeof(T), 0 };
 	packet.type = T::Type;
 	packet.TimeCount = gamestate.TimeCount;
+	packet.ByteSwap();
 
 	// We need to keep an eye out for packets, but we also need to periodically
 	// resend our packet in case it got lost.
@@ -650,6 +713,7 @@ static void StartHost(InitStatusCallback callback)
 		startData->clients[i-1].host = Client[i].address.host;
 		startData->clients[i-1].port = Client[i].address.port;
 	}
+	startData->ByteSwap();
 
 	nextclient = 1;
 	while(nextclient != InitVars.numPlayers)
@@ -881,10 +945,14 @@ void PollControls()
 	ticcmdData.controlx = control[ConsolePlayer].controlx;
 	ticcmdData.controly = control[ConsolePlayer].controly;
 	ticcmdData.controlstrafe = control[ConsolePlayer].controlstrafe;
+	assert(sizeof(control[ConsolePlayer].buttonstate) == sizeof(ticcmdData.buttonstate));
 	memcpy(ticcmdData.buttonstate, control[ConsolePlayer].buttonstate, sizeof(control[ConsolePlayer].buttonstate));
 	memcpy(ticcmdData.buttonheld, control[ConsolePlayer].buttonheld, sizeof(control[ConsolePlayer].buttonheld));
 
 	ExchangePacket(ticcmdPackets);
+	// Undo the byte swapping of our own packet that ExchangePacket does
+	ticcmdData.ByteSwap();
+
 	if(playstate != ex_stillplaying)
 		return;
 
