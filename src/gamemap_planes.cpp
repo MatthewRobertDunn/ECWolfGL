@@ -812,8 +812,8 @@ void GameMap::ReadMacData()
 		wallsused[i].wallnum2 = walltexs[(i-1)*2+1]&0x3FFF;
 
 		char name[2][9];
-		sprintf(name[0], "WALL%04X", wallsused[i].wallnum1);
-		sprintf(name[1], "WALL%04X", wallsused[i].wallnum2);
+		mysnprintf(name[0], 9, "WALL%04X", wallsused[i].wallnum1);
+		mysnprintf(name[1], 9, "WALL%04X", wallsused[i].wallnum2);
 
 		Tile tile;
 		tile.texture[1] = tile.texture[3] =
@@ -829,8 +829,8 @@ void GameMap::ReadMacData()
 	for(unsigned int i = 0;i < 4;++i)
 	{
 		char name[2][9];
-		sprintf(name[0], "WALL%04X", walltexs[59+i]&0x3FFF);
-		sprintf(name[1], "WALL%04X", walltexs[63]&0x3FFF);
+		mysnprintf(name[0], 9, "WALL%04X", walltexs[59+i]&0x3FFF);
+		mysnprintf(name[1], 9, "WALL%04X", walltexs[63]&0x3FFF);
 
 		Tile tile1, tile2;
 		tile1.texture[1] = tile1.texture[3] =

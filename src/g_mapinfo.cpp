@@ -1397,7 +1397,7 @@ protected:
 static void SkipBlock(Scanner &sc)
 {
 	// Skip header
-	while(sc.GetNextToken() && sc->token != '{');
+	while(sc.GetNextToken() && sc->token != '{') {}
 	// Skip content
 	unsigned int level = 0;
 	while(sc.GetNextToken() && (level != 0 || sc->token != '}'))
@@ -1539,7 +1539,7 @@ void ParseMacMapList(int lumpnum)
 		floorNum = BigShort(floorNum);
 
 		LevelInfo info = defaultMap;
-		sprintf(info.MapName, "MAP%02d", i+1);
+		mysnprintf(info.MapName, countof(info.MapName), "MAP%02d", i+1);
 		info.NextMap.Format("MAP%02d", nextLevel+1);
 		info.NextSecret.Format("MAP%02d", nextSecret+1);
 		info.Par = parTime;

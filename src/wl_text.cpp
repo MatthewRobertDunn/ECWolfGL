@@ -265,7 +265,7 @@ static void HandleCommand (bool helphack)
 				fontcolor = 255;
 				const BYTE *colorname = (const BYTE *)(text);
 				textcolor = V_ParseFontColor(colorname, CR_UNTRANSLATED, CR_UNTRANSLATED+1);
-				while(*text++ != ']');
+				while(*text++ != ']') {}
 			}
 			else
 			{

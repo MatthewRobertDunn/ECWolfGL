@@ -397,13 +397,7 @@ static inline fixed FixedDiv(fixed a, fixed b)
 #ifndef _WIN32
 	static inline char* itoa(int value, char* string, int radix)
 	{
-		sprintf(string, "%d", value);
-		return string;
-	}
-
-	static inline char* ltoa(long value, char* string, int radix)
-	{
-		sprintf(string, "%ld", value);
+		snprintf(string, 13, "%d", value);
 		return string;
 	}
 #endif

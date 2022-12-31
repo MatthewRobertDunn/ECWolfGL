@@ -70,8 +70,8 @@ template<class T> struct TDefaultDelete<T[]>
 	{
 		// Array types can't be cast, so this will allow us to check if both
 		// types are arrays.
-		sizeof(Array);
-		sizeof(typename D::Array);
+		(void)sizeof(Array);
+		(void)sizeof(typename D::Array);
 		static_cast<Type*>((typename D::Type*)0);
 	}
 

@@ -571,7 +571,7 @@ static int MacSound_Read(SDL_RWops *ops, void *buffer, int size, int nmem)
 	Sint64 &pos = ((MacSoundData*)ops->hidden.unknown.data1)->pos;
 	if(pos < (Sint64)sizeof(WAV_HEADER))
 	{
-		size_t copysize = MIN<size_t>(totalsize, sizeof(WAV_HEADER)-pos);
+		size_t copysize = MIN<size_t>(totalsize, static_cast<size_t>(sizeof(WAV_HEADER)-pos));
 		memcpy(buffer, WAV_HEADER+pos, copysize);
 		pos += copysize;
 		buffer = ((char*)buffer)+copysize;
@@ -583,7 +583,7 @@ static int MacSound_Read(SDL_RWops *ops, void *buffer, int size, int nmem)
 	{
 		DWORD leSize = LittleLong(ssize);
 
-		size_t copysize = MIN<size_t>(totalsize, sizeof(leSize)+sizeof(WAV_HEADER)-pos);
+		size_t copysize = MIN<size_t>(totalsize, static_cast<size_t>(sizeof(leSize)+sizeof(WAV_HEADER)-pos));
 		memcpy(buffer, (char*)(&leSize)+(pos-sizeof(WAV_HEADER)), copysize);
 		pos += copysize;
 		buffer = ((char*)buffer)+copysize;
@@ -592,7 +592,7 @@ static int MacSound_Read(SDL_RWops *ops, void *buffer, int size, int nmem)
 			return nmem;
 	}
 
-	size_t copysize = MIN<size_t>(totalsize, ssize-(pos-sizeof(WAV_HEADER)-4));
+	size_t copysize = MIN<size_t>(totalsize, static_cast<size_t>(ssize-(pos-sizeof(WAV_HEADER)-4)));
 	memcpy(buffer, ((MacSoundData*)ops->hidden.unknown.data1)->data+pos-sizeof(WAV_HEADER)-4, copysize);
 
 	// Mac sound data is signed, we need unsigned

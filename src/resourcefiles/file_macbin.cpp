@@ -554,23 +554,23 @@ class FMacBin : public FResourceFile
 							if(refPtr->ref.resID >= 128 && refPtr->ref.resID < 128+countof(MacSoundNames))
 								strcpy(name, MacSoundNames[refPtr->ref.resID-128]);
 							else
-								sprintf(name, "SND%04X", refPtr->ref.resID);
+								mysnprintf(name, 9, "SND%04X", refPtr->ref.resID);
 						}
 						else if(music)
 						{
 							lump->Namespace = ns_music;
-							sprintf(name, "MUS_%04X", refPtr->ref.resID);
+							mysnprintf(name, 9, "MUS_%04X", refPtr->ref.resID);
 						}
 						else if(pict)
 						{
 							lump->Namespace = ns_graphics;
 							// TODO: Do something else with these
-							sprintf(name, "PICT%04X", refPtr->ref.resID);
+							mysnprintf(name, 9, "PICT%04X", refPtr->ref.resID);
 						}
 						else
 						{
 							lump->Namespace = ns_global;
-							sprintf(name, "%s%04X", type, refPtr->ref.resID);
+							mysnprintf(name, 9, "%s%04X", type, refPtr->ref.resID);
 						}
 
 						// Find special BRGR lumps
@@ -656,7 +656,7 @@ class FMacBin : public FResourceFile
 					if(refPtr->ref.resID >= mapbase && refPtr->ref.resID < mapbase+mapmax)
 					{
 						memset(lump->Name, 0, 8); // Some code requires 0-filled
-						sprintf(lump->Name, "MAP%02u", refPtr->ref.resID-mapbase+1);
+						mysnprintf(lump->Name, countof(lump->Name), "MAP%02u", refPtr->ref.resID-mapbase+1);
 					}
 				}
 			}
@@ -691,7 +691,7 @@ class FMacBin : public FResourceFile
 					{
 						if((walllist[i]&0x3FFF) == refPtr->ref.resID)
 						{
-							sprintf(lump->Name, "WALL%04X", refPtr->ref.resID);
+							mysnprintf(lump->Name, countof(lump->Name), "WALL%04X", refPtr->ref.resID);
 							lump->Compressed = FMacResLump::MODE_Compressed;
 							lump->CompressedSize = lump->LumpSize;
 							lump->LumpSize = 0x4000;

@@ -164,7 +164,7 @@ void Config::SaveConfig()
 					intLength++;
 
 				char* value = new char[intLength + 7];
-				sprintf(value, " = %d;\n", data->GetInteger());
+				mysnprintf(value, intLength + 7, " = %d;\n", data->GetInteger());
 				fwrite(value, 1, strlen(value), stream);
 				delete[] value;
 				if(ferror(stream))
@@ -183,7 +183,7 @@ void Config::SaveConfig()
 				FString str = data->GetString(); // Make a non const copy of the string.
 				Scanner::Escape(str);
 				char* value = new char[str.Len() + 8];
-				sprintf(value, " = \"%s\";\n", str.GetChars());
+				mysnprintf(value, str.Len() + 8, " = \"%s\";\n", str.GetChars());
 				fwrite(value, 1, str.Len() + 7, stream);
 				delete[] value;
 				if(ferror(stream))

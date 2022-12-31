@@ -84,7 +84,7 @@ void
 US_PrintUnsigned(longword n)
 {
 	char	buffer[32];
-	sprintf(buffer, "%lu", static_cast<long unsigned int> (n));
+	mysnprintf(buffer, 32, "%lu", static_cast<long unsigned int> (n));
 
 	US_Print(SmallFont, buffer);
 }
@@ -99,7 +99,7 @@ US_PrintSigned(int32_t n)
 {
 	char	buffer[32];
 
-	US_Print(SmallFont, ltoa(n,buffer,10));
+	US_Print(SmallFont, itoa(n,buffer,10));
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -1106,7 +1106,7 @@ void Menu::show()
 	WaitKeyUp();
 
 	int item = 0;
-	while((item = handle()) != -1);
+	while((item = handle()) != -1) {}
 
 	if(!Menu::areMenusClosed())
 		MenuFadeOut ();

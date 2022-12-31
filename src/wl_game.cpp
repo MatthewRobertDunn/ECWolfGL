@@ -657,10 +657,6 @@ void PlayDemo (int demonumber)
 
 void Died (void)
 {
-	float   fangle;
-	int32_t dx,dy;
-	angle_t iangle;
-
 	if (screenfaded)
 	{
 		ThreeDRefresh ();

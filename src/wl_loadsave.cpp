@@ -679,7 +679,7 @@ bool Save(const FString &filename, const FString &title)
 	M_AppendPNGText(fileh, "ECWolf Save Version", GetSaveSignature());
 	{
 		char saveprodver[11];
-		sprintf(saveprodver, "%u", SAVEPRODVER);
+		mysnprintf(saveprodver, 11, "%u", SAVEPRODVER);
 		M_AppendPNGText(fileh, "ECWolf Save Product Version", saveprodver);
 	}
 	M_AppendPNGText(fileh, "Title", title);
