@@ -149,7 +149,7 @@ bool FGamemaps::Open(bool quiet)
 		// Hey we don't need to use a temporary name here!
 		// First map is MAP01 and so forth.
 		char lumpname[14];
-		sprintf(lumpname, "MAP%02d", i+1);
+		mysnprintf(lumpname, 14, "MAP%02d", i+1);
 		markerLump.Owner = this;
 		markerLump.LumpNameSetup(lumpname);
 		markerLump.Namespace = ns_global;

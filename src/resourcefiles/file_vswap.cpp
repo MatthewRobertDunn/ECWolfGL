@@ -200,7 +200,7 @@ class FVSwap : public FResourceFile
 			for(unsigned int i = 0;i < soundStart;i++)
 			{
 				char lumpname[9];
-				sprintf(lumpname, "VSP%05d", i);
+				mysnprintf(lumpname, 9, "VSP%05d", i);
 
 				Lumps[i].Owner = this;
 				Lumps[i].LumpNameSetup(lumpname);
@@ -231,7 +231,7 @@ class FVSwap : public FResourceFile
 				}
 
 				char lumpname[9];
-				sprintf(lumpname, "VSP%05d", i+soundStart);
+				mysnprintf(lumpname, 9, "VSP%05d", i+soundStart);
 				SoundLumps[i] = new FVSwapSound(end-start);
 				SoundLumps[i]->Owner = this;
 				SoundLumps[i]->LumpNameSetup(lumpname);

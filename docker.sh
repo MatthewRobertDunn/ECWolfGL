@@ -140,7 +140,7 @@ main() {
 
 dockerfile_ubuntu_minimum() {
 	cat <<-'EOF'
-		FROM ubuntu:16.04
+		FROM docker.io/ubuntu:18.04
 
 		RUN apt-get update && \
 		apt-get install g++ cmake git pax-utils lintian sudo \
@@ -149,17 +149,18 @@ dockerfile_ubuntu_minimum() {
 			libflac-dev libogg-dev libvorbis-dev libopus-dev libopusfile-dev libmodplug-dev libfluidsynth-dev \
 			zlib1g-dev libbz2-dev libgtk-3-dev -y && \
 		useradd -rm ecwolf && \
-		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install" >> /etc/sudoers && \
+		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install/strip" >> /etc/sudoers && \
 		mkdir /home/ecwolf/results && \
 		chown ecwolf:ecwolf /home/ecwolf/results && \
 		ln -s /home/ecwolf/results /results
 
 		USER ecwolf
+		RUN git config --global --add safe.directory /mnt
 	EOF
 }
 
 dockerfile_ubuntu_minimum_i386() {
-	dockerfile_ubuntu_minimum | sed 's,FROM ,FROM i386/,'
+	dockerfile_ubuntu_minimum | sed 's,FROM docker.io/,FROM docker.io/i386/,'
 }
 
 # Performs a build of ECWolf. Extra CMake args can be passed as args.
@@ -192,7 +193,7 @@ test_build_ecwolf_cfg() {
 	(( PIPESTATUS[0] == 0 )) || return "${PIPESTATUS[0]}"
 
 	cd ~/build &&
-	sudo make install 2>&1 | tee "/results/installlog-$BuildCfg.log"
+	sudo make install/strip 2>&1 | tee "/results/installlog-$BuildCfg.log"
 	(( PIPESTATUS[0] == 0 )) || return "${PIPESTATUS[0]}"
 
 	lddtree /usr/games/ecwolf | tee "/results/lddtree-$BuildCfg.txt"
@@ -221,7 +222,7 @@ export -f test_build_ecwolf
 declare -A ConfigUbuntuMinimum=(
 	[dockerfile]=dockerfile_ubuntu_minimum
 	[dockerimage]='ecwolf-ubuntu'
-	[dockertag]=4
+	[dockertag]=5
 	[entrypoint]=test_build_ecwolf
 	[prereq]=''
 	[type]=test
@@ -230,8 +231,8 @@ declare -A ConfigUbuntuMinimum=(
 # shellcheck disable=SC2034
 declare -A ConfigUbuntuMinimumI386=(
 	[dockerfile]=dockerfile_ubuntu_minimum_i386
-	[dockerimage]='i386/ecwolf-ubuntu'
-	[dockertag]=4
+	[dockerimage]='ecwolf-ubuntu-i386'
+	[dockertag]=5
 	[entrypoint]=test_build_ecwolf
 	[prereq]=''
 	[type]=test
@@ -245,18 +246,18 @@ dockerfile_ubuntu_package() {
 	# Packaging requires CMake 3.11 or newer
 	cat <<-'EOF'
 		RUN cd ~ && \
-		curl https://cmake.org/files/v3.15/cmake-3.15.3.tar.gz | tar xz && \
-		cd cmake-3.15.3 && \
-		./configure --parallel="$(nproc)" && \
+		curl https://cmake.org/files/v3.25/cmake-3.25.1.tar.gz | tar xz && \
+		cd cmake-3.25.1 && \
+		./configure --parallel="$(nproc)" --prefix=/usr && \
 		make -j "$(nproc)" && \
-		sudo make install && \
+		sudo make install/strip && \
 		cd .. && \
-		rm -rf cmake-3.15.3
+		rm -rf cmake-3.25.1
 	EOF
 }
 
 dockerfile_ubuntu_package_i386() {
-	dockerfile_ubuntu_package | sed 's,FROM ,FROM i386/,'
+	dockerfile_ubuntu_package | sed 's,FROM docker.io/,FROM docker.io/i386/,'
 }
 
 package_ecwolf() {
@@ -275,7 +276,7 @@ export -f package_ecwolf
 declare -A ConfigUbuntuPackage=(
 	[dockerfile]=dockerfile_ubuntu_package
 	[dockerimage]='ecwolf-ubuntu-package'
-	[dockertag]=4
+	[dockertag]=5
 	[entrypoint]=package_ecwolf
 	[prereq]=ConfigUbuntuMinimum
 	[type]=build
@@ -284,8 +285,8 @@ declare -A ConfigUbuntuPackage=(
 # shellcheck disable=SC2034
 declare -A ConfigUbuntuPackageI386=(
 	[dockerfile]=dockerfile_ubuntu_package_i386
-	[dockerimage]='i386/ecwolf-ubuntu-package'
-	[dockertag]=4
+	[dockerimage]='ecwolf-ubuntu-package-i386'
+	[dockertag]=5
 	[entrypoint]=package_ecwolf
 	[prereq]=ConfigUbuntuMinimumI386
 	[type]=build
@@ -295,7 +296,7 @@ declare -A ConfigUbuntuPackageI386=(
 
 dockerfile_clang() {
 	cat <<-'EOF'
-		FROM ubuntu:16.04
+		FROM ubuntu:18.04
 
 		RUN apt-get update && \
 		apt-get install clang-4.0 libc++-dev cmake git pax-utils lintian sudo \
@@ -303,12 +304,13 @@ dockerfile_clang() {
 			libflac-dev libogg-dev libvorbis-dev libopus-dev libopusfile-dev libmodplug-dev libfluidsynth-dev \
 			zlib1g-dev libbz2-dev libgtk-3-dev -y && \
 		useradd -rm ecwolf && \
-		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install" >> /etc/sudoers && \
+		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install/strip" >> /etc/sudoers && \
 		mkdir /home/ecwolf/results && \
 		chown ecwolf:ecwolf /home/ecwolf/results && \
 		ln -s /home/ecwolf/results /results
 
 		USER ecwolf
+		RUN git config --global --add safe.directory /mnt
 	EOF
 }
 
@@ -318,7 +320,7 @@ clang_build_ecwolf() {
 	(( PIPESTATUS[0] == 0 )) || return "${PIPESTATUS[0]}"
 
 	cd ~/build &&
-	sudo make install 2>&1 | tee "/results/installlog.log"
+	sudo make install/strip 2>&1 | tee "/results/installlog.log"
 	(( PIPESTATUS[0] == 0 )) || return "${PIPESTATUS[0]}"
 
 	lddtree /usr/games/ecwolf | tee "/results/lddtree.txt"
@@ -329,7 +331,7 @@ export -f clang_build_ecwolf
 declare -A ConfigClang=(
 	[dockerfile]=dockerfile_clang
 	[dockerimage]='ecwolf-clang'
-	[dockertag]=4
+	[dockertag]=5
 	[entrypoint]=clang_build_ecwolf
 	[prereq]=''
 	[type]=test
@@ -345,12 +347,13 @@ dockerfile_mingw() {
 		apt-get install g++ cmake git g++-mingw-w64-i686 g++-mingw-w64-x86-64 \
 			libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev -y && \
 		useradd -rm ecwolf && \
-		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install" >> /etc/sudoers && \
+		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install/strip" >> /etc/sudoers && \
 		mkdir /home/ecwolf/results && \
 		chown ecwolf:ecwolf /home/ecwolf/results && \
 		ln -s /home/ecwolf/results /results
 
 		USER ecwolf
+		RUN git config --global --add safe.directory /mnt
 	EOF
 }
 
@@ -406,7 +409,7 @@ dockerfile_android() {
 			libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev -y && \
 		rm -rf /var/lib/apt/lists/* && \
 		useradd -rm ecwolf && \
-		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install" >> /etc/sudoers && \
+		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install/strip" >> /etc/sudoers && \
 		mkdir /home/ecwolf/results && \
 		chown ecwolf:ecwolf /home/ecwolf/results && \
 		ln -s /home/ecwolf/results /results && \
@@ -423,6 +426,7 @@ dockerfile_android() {
 		keytool -genkey -keystore untrusted.keystore -storepass untrusted -keypass untrusted -alias untrusted -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Untrusted,OU=Untrusted,O=Untrusted,L=Untrusted,S=Untrusted,C=US" -noprompt
 
 		USER ecwolf
+		RUN git config --global --add safe.directory /mnt
 	EOF
 }
 

@@ -830,7 +830,7 @@ void FArchive::WriteName (const char *name)
 
 const char *FArchive::ReadName ()
 {
-	BYTE id;
+	BYTE id = 0;
 
 	operator<< (id);
 	if (id == NIL_NAME)
@@ -1157,7 +1157,7 @@ FArchive &FArchive::WriteObject (DObject *obj)
 
 FArchive &FArchive::ReadObject (DObject* &obj, const ClassDef *wanttype)
 {
-	BYTE objHead;
+	BYTE objHead = 0;
 	const ClassDef *type;
 	BYTE playerNum;
 	DWORD index;

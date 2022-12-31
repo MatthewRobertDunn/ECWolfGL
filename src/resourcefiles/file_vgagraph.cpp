@@ -229,7 +229,7 @@ class FVGAGraph : public FResourceFile
 			{
 				// Give the lump a temporary name.
 				char lumpname[9];
-				sprintf(lumpname, "VGA%05d", i);
+				mysnprintf(lumpname, 9, "VGA%05d", i);
 				lumps[i].Owner = this;
 				lumps[i].LumpNameSetup(lumpname);
 
