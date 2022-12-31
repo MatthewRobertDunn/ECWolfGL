@@ -219,7 +219,7 @@ THIS SOFTWARE.
 #define ldus_QNAN2 0x0
 #define ldus_QNAN3 0xc000
 #define ldus_QNAN4 0xffff
-#elif defined(__powerpc__) || defined(__ppc64__)
+#elif defined(__ppc__) || defined(__ppc64__)
 #define f_QNAN 0xffc00000
 #define d_QNAN0 0xfff80000
 #define d_QNAN1 0x0

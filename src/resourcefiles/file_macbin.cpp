@@ -453,7 +453,7 @@ class FMacBin : public FResourceFile
 			// Get the types and the number of chunks within each
 			unsigned int numTotalResources = 0;
 			Reader->Seek(resTypeListOffset, SEEK_SET);
-			*Reader >> numTypes;
+			Reader->Read(&numTypes, sizeof(numTypes));
 			numTypes = BigShort(numTypes)+1;
 			TUniquePtr<FResType[]> resTypes(new FResType[numTypes]);
 			for(unsigned int i = 0;i < numTypes;++i)
@@ -594,16 +594,17 @@ class FMacBin : public FResourceFile
 						lump->Owner = this;
 
 						Reader->Seek(lump->Position - 4, SEEK_SET);
-						*Reader >> length;
+						Reader->Read(&length, sizeof(length));
 						lump->LumpSize = BigLong(length);
 
 						if(csnd)
 							lump->Compressed = FMacResLump::MODE_CSound;
 						if(lump->Compressed != FMacResLump::MODE_Uncompressed)
 						{
-							*Reader >> length;
 							lump->CompressedSize = lump->LumpSize-4;
 							lump->Position += 4;
+
+							Reader->Read(&length, sizeof(length));
 							lump->LumpSize = BigLong(length);
 						}
 						// Sprites. It may be tempting to consider anything
@@ -616,7 +617,7 @@ class FMacBin : public FResourceFile
 							*Reader >> csize;
 							lump->CompressedSize = lump->LumpSize-2;
 							lump->Position += 2;
-							lump->LumpSize = LittleShort(csize);
+							lump->LumpSize = csize;
 							lump->Namespace = ns_sprites;
 
 							strcpy(name, MacSpriteNames[refPtr->ref.resID-428]);
@@ -634,7 +635,8 @@ class FMacBin : public FResourceFile
 			if(lists[LIST_Maps] && lists[LIST_Maps]->LumpSize >= 4)
 			{
 				Reader->Seek(lists[LIST_Maps]->Position, SEEK_SET);
-				*Reader >> mapmax >> mapbase;
+				Reader->Read(&mapmax, sizeof(mapmax));
+				Reader->Read(&mapbase, sizeof(mapbase));
 				mapmax = BigShort(mapmax);
 				mapbase = BigShort(mapbase);
 			}

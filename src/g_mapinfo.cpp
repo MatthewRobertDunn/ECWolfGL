@@ -1517,14 +1517,19 @@ void ParseMacMapList(int lumpnum)
 	FWadLump lump = Wads.OpenLumpNum(lumpnum);
 
 	WORD numMaps;
-	lump >> numMaps;
+	lump.Read(&numMaps, sizeof(numMaps));
 	lump.Seek(2, SEEK_CUR);
 	numMaps = BigShort(numMaps);
 
 	for(unsigned int i = 0;i < numMaps;++i)
 	{
 		WORD nextLevel, nextSecret, parTime, scenarioNum, floorNum;
-		lump >> nextLevel >> nextSecret >> parTime >> scenarioNum >> floorNum;
+		lump.Read(&nextLevel, sizeof(nextLevel));
+		lump.Read(&nextSecret, sizeof(nextSecret));
+		lump.Read(&parTime, sizeof(parTime));
+		lump.Read(&scenarioNum, sizeof(scenarioNum));
+		lump.Read(&floorNum, sizeof(floorNum));
+
 		nextLevel = BigShort(nextLevel);
 		nextSecret = BigShort(nextSecret);
 		parTime = BigShort(parTime);

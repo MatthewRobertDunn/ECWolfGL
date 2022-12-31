@@ -581,8 +581,10 @@ static int MacSound_Read(SDL_RWops *ops, void *buffer, int size, int nmem)
 	}
 	if(pos < (Sint64)sizeof(WAV_HEADER)+4)
 	{
-		size_t copysize = MIN<size_t>(totalsize, sizeof(ssize)+sizeof(WAV_HEADER)-pos);
-		memcpy(buffer, (char*)(&ssize)+(pos-sizeof(WAV_HEADER)), copysize);
+		DWORD leSize = LittleLong(ssize);
+
+		size_t copysize = MIN<size_t>(totalsize, sizeof(leSize)+sizeof(WAV_HEADER)-pos);
+		memcpy(buffer, (char*)(&leSize)+(pos-sizeof(WAV_HEADER)), copysize);
 		pos += copysize;
 		buffer = ((char*)buffer)+copysize;
 		totalsize -= copysize;

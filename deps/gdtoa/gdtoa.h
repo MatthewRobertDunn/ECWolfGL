@@ -58,7 +58,7 @@ THIS SOFTWARE.
 #elif defined(__i386__) || defined(__arm__)
 #define IEEE_8087
 #define Arith_Kind_ASL 1
-#elif defined(__powerpc__) || defined(__ppc64__)
+#elif defined(__ppc__) || defined(__ppc64__)
 #define IEEE_MC68k
 #define Arith_Kind_ASL 2
 #define Double_Align

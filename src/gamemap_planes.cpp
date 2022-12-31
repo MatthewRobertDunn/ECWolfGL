@@ -781,8 +781,6 @@ void GameMap::ReadMacData()
 
 	WORD numSpawn, spawnListOfs;
 	lump >> numSpawn >> spawnListOfs;
-	numSpawn = LittleShort(numSpawn);
-	spawnListOfs = LittleShort(spawnListOfs);
 	// Followed by 2 more WORDs for numNodes and nodeListOfs. If we had a BSP
 	// renderer, we'd care about those.
 
