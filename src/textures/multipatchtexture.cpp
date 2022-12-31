@@ -939,7 +939,7 @@ void FTextureManager::AddTexturesLump (const void *lumpdata, int lumpsize, int d
 
 		// There is bizzarely a Doom editing tool that writes to the
 		// first two elements of columndirectory, so I can't check those.
-		if (SAFESHORT(tex->patchcount) < 0 ||
+		if ((short)SAFESHORT(tex->patchcount) < 0 ||
 			tex->columndirectory[2] != 0 ||
 			tex->columndirectory[3] != 0)
 		{
@@ -1409,11 +1409,11 @@ void FMultiPatchTexture::ResolvePatches()
 				TArray<FTextureID> list;
 				TexMan.ListTextures(Inits[i].TexName, list, true);
 				// ListTextures should give the newest texture first. Could probably skip zero here, but why micro-optimize?
-				for (unsigned int i = 0; i < list.Size(); ++i)
+				for (unsigned int ii = 0; ii < list.Size(); ++ii)
 				{
-					if (list[i] != id && !TexMan[list[i]]->bMultiPatch)
+					if (list[ii] != id && !TexMan[list[ii]]->bMultiPatch)
 					{
-						texno = list[i];
+						texno = list[ii];
 						break;
 					}
 				}

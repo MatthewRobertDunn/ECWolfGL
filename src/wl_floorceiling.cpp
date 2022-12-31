@@ -19,8 +19,8 @@ static void R_DrawPlane(byte *vbuf, unsigned vbufPitch, int min_wallheight, int 
 	fixed tex_step;                            // global step per one screen pixel
 	fixed gu, gv, du, dv;                      // global texture coordinates
 	const byte *tex = NULL;
-	int texwidth, texheight;
-	fixed texxscale, texyscale;
+	int texwidth = 0, texheight = 0;
+	fixed texxscale = 0, texyscale = 0;
 	FTextureID lasttex;
 	byte *tex_offset;
 	bool useOptimized = false;

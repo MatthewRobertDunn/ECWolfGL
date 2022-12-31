@@ -59,6 +59,8 @@ public:
 	{
 	}
 
+	virtual ~MapInfoBlockParser() {}
+
 	void Parse()
 	{
 		ParseHeader();

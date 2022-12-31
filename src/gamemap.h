@@ -116,6 +116,10 @@ class GameMap
 			Tile() : offsetVertical(false), offsetHorizontal(false),
 				mapped(0), dontOverlay(false)
 			{
+				texture[0].SetInvalid();
+				texture[1].SetInvalid();
+				texture[2].SetInvalid();
+				texture[3].SetInvalid();
 				overhead.SetInvalid();
 				sideSolid[0] = sideSolid[1] = sideSolid[2] = sideSolid[3] = true;
 			}
@@ -133,6 +137,12 @@ class GameMap
 		};
 		struct Sector
 		{
+			Sector()
+			{
+				texture[0].SetInvalid();
+				texture[1].SetInvalid();
+			}
+
 			enum Flat { Floor, Ceiling };
 			FTextureID	texture[2];
 		};

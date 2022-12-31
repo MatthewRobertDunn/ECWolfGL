@@ -276,6 +276,7 @@ void AutoMap::ClipTile(TArray<FVector2> &points) const
 			bool Ein, Sin;
 			switch(i)
 			{
+				default:
 				case 0: // Left
 					Ein = e.X > amx;
 					Sin = s->X > amx;
