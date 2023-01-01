@@ -443,7 +443,7 @@ MIDI_IRQService(void)
 		return;
 	}
 
-	midiDeltaTime = midiDeltaTime * midiTimeScale;
+	midiDeltaTime = static_cast<longword>(midiDeltaTime * midiTimeScale);
 }
 
 // MIDI startup code

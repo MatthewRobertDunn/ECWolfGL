@@ -384,7 +384,7 @@ void APlayerPawn::Tick()
 		}
 	}
 	else if(player->attackheld)
-		player->attackheld = cmd.buttonstate[bt_attack]|cmd.buttonstate[bt_altattack];
+		player->attackheld = !!(cmd.buttonstate[bt_attack]|cmd.buttonstate[bt_altattack]);
 
 	// Reload
 	if((player->flags & player_t::PF_WEAPONRELOADOK) && cmd.buttonstate[bt_reload])
