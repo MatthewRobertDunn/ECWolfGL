@@ -672,6 +672,7 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 		static const CommercialGameDir steamDirs[] =
 		{
 			{FileSys::APP_Wolfenstein3D, PATH_SEPARATOR "base"},
+			{FileSys::APP_Wolfenstein3D, PATH_SEPARATOR "base" PATH_SEPARATOR "m1"},
 			{FileSys::APP_SpearOfDestiny, PATH_SEPARATOR "base"},
 			{FileSys::APP_NoahsArk, ""},
 #if defined(__APPLE__)
