@@ -677,11 +677,23 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 			{FileSys::APP_NoahsArk, ""},
 #if defined(__APPLE__)
 			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone AOG.app/Contents/Resources/BlakestoneAOG"},
-			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone PS.app/Contents/Resources/BlakestonePS"}
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone PS.app/Contents/Resources/BlakestonePS"},
+			// Note: There's also a Rise of the triad EX app but the DARKWAR.RTL is different in it, both have Extreme Rise of the Triad data in them anyway
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Rise of the triad.app/Contents/Resources/ROTT"},
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "Blake Stone AOG.app/Contents/Resources/BlakestoneAOG"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "Blake Stone PS.app/Contents/Resources/BlakestonePS"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "Rise of the triad.app/Contents/Resources/ROTT"},
 #else
 			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone"},
-			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Planet Strike"}
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Planet Strike"},
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Rise of the Triad"},
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "Blake Stone - Aliens of Gold"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "Blake Stone - Planet Strike"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "Rise of the Triad - Dark War"},
 #endif
+			// TODO: Corridor 7 isn't unpacked
+			//{FileSys::APP_Corridor7, PATH_SEPARATOR "cd"},
+			{FileSys::APP_OperationBodyCount, PATH_SEPARATOR "C" PATH_SEPARATOR "BCCD"}
 		};
 		for(unsigned int i = 0;i < countof(steamDirs);++i)
 			LookForGameData(datawadRes, basefiles, FileSys::GetSteamPath(steamDirs[i].app) + steamDirs[i].dir);
@@ -689,7 +701,25 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 		static const CommercialGameDir gogDirs[] = 
 		{
 			{FileSys::APP_Wolfenstein3D, ""},
-			{FileSys::APP_SpearOfDestiny, PATH_SEPARATOR "M1"}
+			{FileSys::APP_Wolfenstein3D, PATH_SEPARATOR "m1"},
+			{FileSys::APP_SpearOfDestiny, PATH_SEPARATOR "M1"},
+			{FileSys::APP_NoahsArk, ""},
+#if defined(_WIN32)
+			{FileSys::APP_AliensOfGold, ""},
+			{FileSys::APP_PlanetStrike, ""},
+			{FileSys::APP_RiseOfTheTriad, ""},
+#elif defined(__APPLE__)
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "Contents/Resources/game/Blake Stone Aliens of Gold.app/Contents/Resources/Blake Stone Aliens of Gold.boxer/C Blake Stone Aliens of Gold.harddisk"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "Contents/Resources/game/Blake Stone Planet Strike.app/Contents/Resources/Blake Stone Planet Strike.boxer/C Blake Stone Planet Strike.harddisk"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "Contents/Resources/game/Rise of the Triad Dark War.app/Contents/Resources/Rise of the Triad Dark-War.boxer/C Rise of The Triad.harddisk"},
+#else
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "data"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "data"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "data"},
+#endif
+			// TODO: Corridor 7 isn't unpacked
+			//{FileSys::APP_Corridor7, PATH_SEPARATOR "cd"},
+			{FileSys::APP_OperationBodyCount, PATH_SEPARATOR "C" PATH_SEPARATOR "BCCD"}
 		};
 		for(unsigned int i = 0;i < countof(gogDirs);++i)
 		{

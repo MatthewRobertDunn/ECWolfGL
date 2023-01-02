@@ -368,7 +368,12 @@ FString GetSteamPath(ESteamApp game)
 		{"Wolfenstein 3D", 2270},
 		{"Spear of Destiny", 9000},
 		{"The Apogee Throwback Pack", 238050},
-		{"Super 3-D Noah's Ark", 371180}
+		{"Super 3-D Noah's Ark", 371180},
+		{"Blake Stone Aliens of Gold", 358190},
+		{"Blake Stone Planet Strike", 358310},
+		{"Rise of the Triad Dark War", 358410},
+		{"Corridor 7", 1341890},
+		{"Operation Body Count", 1627120}
 	};
 
 	// Linux and OS X actually allow the user to install to any location, so
@@ -399,16 +404,27 @@ FString GetGOGPath(ESteamApp game)
 {
 	static struct SteamAppInfo
 	{
-		const char* const AppID;
+		const char* const AppID[3]; // NULL terminated list of up to two ids
+		const char* const MacFolder;
+		const char* const LinuxFolder;
+		const char* const LinuxXdgApp;
 	} AppInfo[NUM_STEAM_APPS] =
 	{
-		{"1441705046"}, // Wolfenstein 3D
-		{"1441705126"}, // Spear of Destiny
-		{NULL}, // Throwback Pack
-		{NULL} // Super 3D Noah's Ark
+		// Wolfenstein 3D
+		// 1778410505 = New release with Spear of Destiny
+		// 1441705046 = Old stand-alone release
+		{{"1778420505", "1441705046"}, NULL, NULL, NULL},
+		{{"1441705126"}, NULL, NULL, NULL}, // Spear of Destiny
+		{{NULL}, NULL, NULL, NULL}, // Throwback Pack
+		{{"1672565562"}, NULL, NULL, NULL}, // Super 3D Noah's Ark
+		{{"1207658728"}, "Blake Stone - Aliens of Gold.app", "Blake Stone Aliens of Gold", "gog_com-Blake_Stone_Aliens_of_Gold_1.desktop"}, // Blake Stone: Aliens of Gold
+		{{"1207658729"}, "Blake Stone Planet Strike.app", "Blake Stone Planet Strike", "gog_com-Blake_Stone_Planet_Strike_1.desktop"}, // Blake Stone: Planet Strike
+		{{"1207658732"}, "Rise of the Triad Dark War.app", "Rise of the Triad Dark War", "gog_com-Rise_of_the_Triad_Dark_War_1.desktop"}, // Rise of the Triad: Dark War
+		{{"2147483140"}, "Corridor 7 Alien Invasion", NULL, NULL}, // Corridor 7: Alien Invasion
+		{{"1718217391"}, "Operation Body Count", NULL, NULL} // Operation Body Count
 	};
 
-	if(AppInfo[game].AppID == NULL)
+	if(AppInfo[game].AppID[0] == NULL)
 		return FString();
 
 #if defined(_WIN32)
@@ -435,10 +451,37 @@ FString GetGOGPath(ESteamApp game)
 	FString gogregistrypath = "Software\\GOG.com\\Games";
 #endif
 
-	if(QueryPathKey(HKEY_LOCAL_MACHINE, gogregistrypath + PATH_SEPARATOR + AppInfo[game].AppID, "Path", path))
-		return path;
+	for(const char* const* id = AppInfo[game].AppID; *id; ++id)
+	{
+		if(QueryPathKey(HKEY_LOCAL_MACHINE, gogregistrypath + PATH_SEPARATOR + *id, "Path", path))
+			return path;
+	}
+	return FString();
+#elif defined(__APPLE__)
+	/* The GOG macOS installers don't register themselves with pkgutil and they
+	 * prompt the user to pick an install location in the postintall script. The
+	 * only realistic way to find them would be to look in ~/Documents (the
+	 * default location it prompts to) and /Applications.
+	 *
+	 * If the user is using GOG Galaxy, the installation information is stored in
+	 * a sqlite database. /Users/Shared/GOG.com/Galaxy/config.json has the
+	 * storagePath key and the galaxy-2.0.db file has the application id and path
+	 * in the InstalledBaseProducts table.
+	 *
+	 * This is not yet implemented as the games available on macOS are not yet
+	 * supported so not worth writing the detection code at this time.
+	 */
 	return FString();
 #else
+	/* On Linux GOG uses MojoSetup which doesn't have any central database. The
+	 * default install location is "~/GOG Games". If the user chooses to install
+	 * the menu item, then the XDG desktop file will be installed in the user's
+	 * XDG applications directory. This could be used to trace a non-default
+	 * location.
+	 *
+	 * This is not yet implemented as the games available for Linux are not yet
+	 * supported so not worth writing the detection code at this time.
+	 */
 	return FString();
 #endif
 }
