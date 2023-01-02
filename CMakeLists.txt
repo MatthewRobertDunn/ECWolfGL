@@ -61,7 +61,7 @@ if(UNIX AND NOT APPLE)
 	endif()
 	# GNUInstallDirs doesn't provide this, but we could use share/product_name
 	set(CMAKE_INSTALL_DATAPRODUCTDIR "${CMAKE_INSTALL_DATADIR}/${PRODUCT_DIRECTORY}")
-elseif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+else()
 	# CMAKE_ prefix used here to match the variable set by GNUInstallDirs.
 	# Value currently doesn't matter outside of Linux these are more or less
 	# to keep the script working where values are expected.
@@ -86,6 +86,9 @@ elseif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 		set(CMAKE_INSTALL_DATAPRODUCTDIR ".")
 		set(CMAKE_INSTALL_DOCDIR ".")
 	endif()
+
+	# Vendored libraries might include GNUInstallDirs so do so now
+	include(GNUInstallDirs)
 endif()
 
 # Support cross compiling
