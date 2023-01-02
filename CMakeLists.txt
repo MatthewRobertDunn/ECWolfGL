@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0...3.21.0)
+cmake_minimum_required(VERSION 3.5.0...3.25.0)
 project(ECWolf)
 
 if(POLICY CMP0054)
@@ -22,7 +22,8 @@ endif()
 
 if(USE_CPACK)
 	set(CPACK_PACKAGE_CONTACT "First Last <example@example.com>" CACHE STRING "Contact info for archive maintainer.")
-	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Advanced source port of the Wolfenstein 3D engine.\n Provides enhanced game engine for playing Wolfenstein 3D, Spear of Destiny, and\n Super 3-D Noah's Ark. Requires the original game data files.")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Advanced source port of the Wolfenstein 3D engine.")
+	set(CPACK_PACKAGE_DESCRIPTION "Provides enhanced game engine for playing Wolfenstein 3D, Spear of Destiny, and\nSuper 3-D Noah's Ark. Requires the original game data files.")
 	string(TOLOWER "${PRODUCT_NAME}" CPACK_PACKAGE_NAME)
 	# Use same prefix for packaging for consistency
 	set(CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
