@@ -41,6 +41,11 @@
 #include "wl_net.h"
 #include "id_sd.h"
 
+// Introduced in SDL_mixer 2.0.2
+#ifndef SDL_MIXER_VERSION_ATLEAST
+#define SDL_MIXER_VERSION_ATLEAST(X, Y, Z) (SDL_VERSIONNUM(SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL) >= SDL_VERSIONNUM(X, Y, Z))
+#endif
+
 // For AdLib sounds & music:
 #define MUSIC_RATE 700	// Must be a multiple of SOUND_RATE
 #define SOUND_RATE 140	// Also affects PC Speaker sounds
@@ -214,7 +219,6 @@ extern const int oplChip = 0;
 
 #if !SDL_MIXER_VERSION_ATLEAST(2,6,0)
 #warning SDL_mixer version lacks music position support
-static int Mix_SetMusicPosition(double) { return -1; }
 static double Mix_GetMusicPosition(Mix_Music*) { return 0.0; }
 #endif
 
