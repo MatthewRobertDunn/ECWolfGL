@@ -659,7 +659,7 @@ void Scanner::MustGetToken(char token)
 	if(!CheckToken(token))
 	{
 		ExpandState();
-		if(state.token == TK_NoToken)
+		if(state.token == static_cast<char>(TK_NoToken))
 			ScriptMessage(Scanner::ERROR, "Unexpected end of script.");
 		else if(token < TK_NumSpecialTokens && state.token < TK_NumSpecialTokens)
 			ScriptMessage(Scanner::ERROR, "Expected '%s' but got '%s' instead.", TokenNames[(int)token], TokenNames[(int)state.token]);

@@ -23,7 +23,7 @@ check_environment() {
 	if ! docker image inspect "$DockerTag" &> /dev/null; then
 		declare Dockerfile=$(mktemp -p .)
 		"${Config[dockerfile]}" > "${Dockerfile}"
-		docker build -t "$DockerTag" -f "$Dockerfile" . || {
+		docker build --arch "${Config[dockerarch]}" -t "$DockerTag" -f "$Dockerfile" . || {
 			rm "$Dockerfile"
 			echo 'Failed to create build environment' >&2
 			return 1
@@ -57,7 +57,7 @@ run_config() {
 	check_environment_prereq "$ConfigName" || return
 
 	declare Container
-	Container=$(docker create -i -v "$(pwd):/mnt:ro" "${Config[dockerimage]}:${Config[dockertag]}" bash -s --) || return
+	Container=$(docker create -i -v "$(pwd):/mnt:ro" --arch "${Config[dockerarch]}" "${Config[dockerimage]}:${Config[dockertag]}" bash -s --) || return
 	{
 		declare -fx
 		echo "\"${Config[entrypoint]}\" \"\$@\""
@@ -163,6 +163,14 @@ dockerfile_ubuntu_minimum_i386() {
 	dockerfile_ubuntu_minimum | sed 's,FROM docker.io/,FROM docker.io/i386/,'
 }
 
+dockerfile_ubuntu_minimum_armhf() {
+	dockerfile_ubuntu_minimum | sed 's,FROM docker.io/,FROM docker.io/arm32v7/,'
+}
+
+dockerfile_ubuntu_minimum_arm64() {
+	dockerfile_ubuntu_minimum | sed 's,FROM docker.io/,FROM docker.io/arm64v8/,'
+}
+
 # Performs a build of ECWolf. Extra CMake args can be passed as args.
 build_ecwolf() {
 	declare SrcDir=/mnt
@@ -223,6 +231,7 @@ declare -A ConfigUbuntuMinimum=(
 	[dockerfile]=dockerfile_ubuntu_minimum
 	[dockerimage]='ecwolf-ubuntu'
 	[dockertag]=5
+	[dockerarch]=amd64
 	[entrypoint]=test_build_ecwolf
 	[prereq]=''
 	[type]=test
@@ -233,6 +242,29 @@ declare -A ConfigUbuntuMinimumI386=(
 	[dockerfile]=dockerfile_ubuntu_minimum_i386
 	[dockerimage]='ecwolf-ubuntu-i386'
 	[dockertag]=5
+	[dockerarch]=i386
+	[entrypoint]=test_build_ecwolf
+	[prereq]=''
+	[type]=test
+)
+
+# shellcheck disable=SC2034
+declare -A ConfigUbuntuMinimumArmHf=(
+	[dockerfile]=dockerfile_ubuntu_minimum_armhf
+	[dockerimage]='ecwolf-ubuntu-armhf'
+	[dockertag]=1
+	[dockerarch]=arm
+	[entrypoint]=test_build_ecwolf
+	[prereq]=''
+	[type]=test
+)
+
+# shellcheck disable=SC2034
+declare -A ConfigUbuntuMinimumArm64=(
+	[dockerfile]=dockerfile_ubuntu_minimum_arm64
+	[dockerimage]='ecwolf-ubuntu-arm64'
+	[dockertag]=1
+	[dockerarch]=arm64
 	[entrypoint]=test_build_ecwolf
 	[prereq]=''
 	[type]=test
@@ -241,7 +273,9 @@ declare -A ConfigUbuntuMinimumI386=(
 # Ubuntu packaging -------------------------------------------------------------
 
 dockerfile_ubuntu_package() {
-	echo "FROM ${ConfigUbuntuMinimum[dockerimage]}:${ConfigUbuntuMinimum[dockertag]}"
+	declare -n PrereqConfig=${Config[prereq]}
+
+	echo "FROM ${PrereqConfig[dockerimage]}:${PrereqConfig[dockertag]}"
 
 	# Packaging requires CMake 3.11 or newer
 	cat <<-'EOF'
@@ -258,6 +292,14 @@ dockerfile_ubuntu_package() {
 
 dockerfile_ubuntu_package_i386() {
 	dockerfile_ubuntu_package | sed 's,FROM docker.io/,FROM docker.io/i386/,'
+}
+
+dockerfile_ubuntu_package_armhf() {
+	dockerfile_ubuntu_package | sed 's,FROM docker.io/,FROM docker.io/arm32v7/,'
+}
+
+dockerfile_ubuntu_package_arm64() {
+	dockerfile_ubuntu_package | sed 's,FROM docker.io/,FROM docker.io/arm64v8/,'
 }
 
 package_ecwolf() {
@@ -277,6 +319,7 @@ declare -A ConfigUbuntuPackage=(
 	[dockerfile]=dockerfile_ubuntu_package
 	[dockerimage]='ecwolf-ubuntu-package'
 	[dockertag]=5
+	[dockerarch]=amd64
 	[entrypoint]=package_ecwolf
 	[prereq]=ConfigUbuntuMinimum
 	[type]=build
@@ -287,8 +330,31 @@ declare -A ConfigUbuntuPackageI386=(
 	[dockerfile]=dockerfile_ubuntu_package_i386
 	[dockerimage]='ecwolf-ubuntu-package-i386'
 	[dockertag]=5
+	[dockerarch]=i386
 	[entrypoint]=package_ecwolf
 	[prereq]=ConfigUbuntuMinimumI386
+	[type]=build
+)
+
+# shellcheck disable=SC2034
+declare -A ConfigUbuntuPackageArmHf=(
+	[dockerfile]=dockerfile_ubuntu_package_armhf
+	[dockerimage]='ecwolf-ubuntu-package-armhf'
+	[dockertag]=1
+	[dockerarch]=arm
+	[entrypoint]=package_ecwolf
+	[prereq]=ConfigUbuntuMinimumArmHf
+	[type]=build
+)
+
+# shellcheck disable=SC2034
+declare -A ConfigUbuntuPackageArm64=(
+	[dockerfile]=dockerfile_ubuntu_package_arm64
+	[dockerimage]='ecwolf-ubuntu-package-arm64'
+	[dockertag]=1
+	[dockerarch]=arm64
+	[entrypoint]=package_ecwolf
+	[prereq]=ConfigUbuntuMinimumArm64
 	[type]=build
 )
 
@@ -299,7 +365,7 @@ dockerfile_clang() {
 		FROM ubuntu:18.04
 
 		RUN apt-get update && \
-		apt-get install clang-4.0 libc++-dev cmake git pax-utils lintian sudo \
+		apt-get install clang-10 libc++-10-dev libc++abi-10-dev cmake git pax-utils lintian sudo \
 			libsdl2-dev libsdl2-net-dev \
 			libflac-dev libogg-dev libvorbis-dev libopus-dev libopusfile-dev libmodplug-dev libfluidsynth-dev \
 			zlib1g-dev libbz2-dev libgtk-3-dev -y && \
@@ -316,7 +382,7 @@ dockerfile_clang() {
 
 # Test that ECWolf is buildable with Clang and libc++
 clang_build_ecwolf() {
-	CC=clang-4.0 CXX=clang++-4.0 build_ecwolf -DCMAKE_CXX_FLAGS="-stdlib=libc++" 2>&1 | tee "/results/buildlog.log"
+	CC=clang-10 CXX=clang++-10 build_ecwolf -DCMAKE_CXX_FLAGS="-stdlib=libc++" 2>&1 | tee "/results/buildlog.log"
 	(( PIPESTATUS[0] == 0 )) || return "${PIPESTATUS[0]}"
 
 	cd ~/build &&
@@ -331,7 +397,8 @@ export -f clang_build_ecwolf
 declare -A ConfigClang=(
 	[dockerfile]=dockerfile_clang
 	[dockerimage]='ecwolf-clang'
-	[dockertag]=5
+	[dockertag]=6
+	[dockerarch]=amd64
 	[entrypoint]=clang_build_ecwolf
 	[prereq]=''
 	[type]=test
@@ -341,11 +408,11 @@ declare -A ConfigClang=(
 
 dockerfile_mingw() {
 	cat <<-'EOF'
-		FROM ubuntu:18.04
+		FROM ubuntu:22.04
 
 		RUN apt-get update && \
 		apt-get install g++ cmake git g++-mingw-w64-i686 g++-mingw-w64-x86-64 \
-			libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev -y && \
+			zlib1g-dev libbz2-dev -y && \
 		useradd -rm ecwolf && \
 		echo "ecwolf ALL=(ALL) NOPASSWD: /usr/bin/make install/strip" >> /etc/sudoers && \
 		mkdir /home/ecwolf/results && \
@@ -390,7 +457,8 @@ export -f build_mingw
 declare -A ConfigMinGW=(
 	[dockerfile]=dockerfile_mingw
 	[dockerimage]='ecwolf-mingw'
-	[dockertag]=2
+	[dockertag]=3
+	[dockerarch]=amd64
 	[entrypoint]=build_mingw
 	[prereq]=''
 	[type]=build
@@ -471,6 +539,7 @@ declare -A ConfigAndroid=(
 	[dockerfile]=dockerfile_android
 	[dockerimage]='ecwolf-android'
 	[dockertag]=4
+	[dockerarch]=amd64
 	[entrypoint]=build_android
 	[prereq]=''
 	[type]=build
@@ -484,8 +553,12 @@ declare -A ConfigList=(
 	[mingw]=ConfigMinGW
 	[ubuntumin]=ConfigUbuntuMinimum
 	[ubuntumini386]=ConfigUbuntuMinimumI386
+	[ubuntuminarmhf]=ConfigUbuntuMinimumArmHf
+	[ubuntuminarm64]=ConfigUbuntuMinimumArm64
 	[ubuntupkg]=ConfigUbuntuPackage
 	[ubuntupkgi386]=ConfigUbuntuPackageI386
+	[ubuntupkgarmhf]=ConfigUbuntuPackageArmHf
+	[ubuntupkgarm64]=ConfigUbuntuPackageArm64
 )
 
 main "$@"; exit

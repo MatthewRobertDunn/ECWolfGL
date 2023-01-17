@@ -683,7 +683,7 @@ void Victory (bool fromIntermission)
 	{
 		static const unsigned int RATIOX = 22, RATIOY = 14, TIMEX = 14, TIMEY = 8;
 		int min, sec;
-		char tempstr[8];
+		char tempstr[13];
 
 		VWB_DrawGraphic (TexMan("L_BJWINS"), 8, 4);
 
