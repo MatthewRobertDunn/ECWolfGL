@@ -856,8 +856,10 @@ class AWeaponGiver : public AWeapon
 						// Main weapon picked up!
 						GoAwayAndDie();
 
-						// PendingWeapon may be a copy
-						if(toucher->player->PendingWeapon->GetClass() == weap->GetClass())
+						AWeapon *pending = toucher->player->PendingWeapon;
+						// The second part can't be "pending == weap"
+						// because pending might be a copy.
+						if(pending == WP_NOCHANGE || pending->GetClass() == weap->GetClass())
 							switchTo = toucher->player->PendingWeapon;
 					}
 				}
