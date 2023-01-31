@@ -376,6 +376,7 @@ void InitPalette (const char* defpalname)
 	GPalette.SetPalette (pal);
 	GPalette.MakeGoodRemap ();
 	ColorMatcher.SetPalette ((DWORD *)GPalette.BaseColors);
+	FTexture::InitGrayMap ();
 
 	// The BUILD engine already has a transparent color, so it doesn't need any remapping.
 	if (!usingBuild)
