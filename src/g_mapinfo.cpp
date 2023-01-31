@@ -891,9 +891,9 @@ protected:
 
 static TMap<unsigned int, ClusterInfo> clusters;
 
-ClusterInfo::ClusterInfo() : ExitTextType(ClusterInfo::EXIT_STRING),
-	TextFont(SmallFont), TextAlignment(TS_Left), TextAnchor(TS_Middle),
-	TextColor(CR_UNTRANSLATED)
+ClusterInfo::ClusterInfo() : EnterTextType(ClusterInfo::EXIT_STRING),
+	ExitTextType(ClusterInfo::EXIT_STRING), TextFont(SmallFont),
+	TextAlignment(TS_Left), TextAnchor(TS_Middle), TextColor(CR_UNTRANSLATED)
 {
 }
 
