@@ -1,3 +1,13 @@
+ecwolf (1.4.1) stable; urgency=high
+
+  * Fixed crash when picking up Chaingun while already holding a Chaingun.
+  * Fake Hitler actor can no longer open doors, no longer erroneously backs away
+    from the player, and continues to "dodge" when out of sight.
+  * Fixed support for gray scale PNGs.
+  * Added support for 32:9 aspect ratio displays and additional resolutions.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Thu, 02 Feb 2023 00:00:00 -0500
+
 ecwolf (1.4.0) stable; urgency=low
 
   * LAN multiplayer for up to 11 players.
