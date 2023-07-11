@@ -464,14 +464,13 @@ void File::init(FString filename)
 			directory = true;
 
 			// Populate a base list.
-			DIR *direct = opendir(filename);
-			if(direct != NULL)
+			if(DIR *direct = opendir(filename))
 			{
 				dirent *file = NULL;
 				while((file = readdir(direct)) != NULL)
 					files.Push(file->d_name);
+				closedir(direct);
 			}
-			closedir(direct);
 		}
 
 		// Check writable

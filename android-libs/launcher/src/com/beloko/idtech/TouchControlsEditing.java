@@ -118,7 +118,7 @@ public class TouchControlsEditing {
 
 			name.setText(ci.tag);
 			hidden.setChecked(!ci.hidden);
-			hidden.setTag(new Integer(position));
+			hidden.setTag(Integer.valueOf(position));
 
 			hidden.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 

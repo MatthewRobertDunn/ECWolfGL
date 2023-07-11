@@ -102,6 +102,11 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 						add_library("${MODERN_TARGET}" ALIAS ${INTERNAL_TARGET})
 					endif()
 					set(TARGET_TYPE "internal")
+
+					if(ANDROID)
+						# SDL requires C99 or newer for SDL_android.c
+						set_target_properties(${INTERNAL_TARGET} PROPERTIES C_STANDARD 99)
+					endif()
 				else()
 					string(TOLOWER "${LIB}" CONF_NAME)
 					message(SEND_ERROR "Please set ${LIB}_DIR to the location of ${CONF_NAME}-config.cmake.")
