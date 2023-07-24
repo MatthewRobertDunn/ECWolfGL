@@ -253,7 +253,8 @@ void FFizzleFader::FadeToColor(int red, int green, int blue)
 	srcptr = srcbuf;
 
 	int color = ColorMatcher.Pick(red,green,blue);
-	for(unsigned y = y1; y < height; ++y)
+	unsigned yend = y1 + height;
+	for(unsigned y = y1; y < yend; ++y)
 		memset(srcptr.Get() +  (y * SCREENPITCH) + x1, color, width);
 }
 
@@ -273,6 +274,7 @@ bool FFizzleFader::Update()
 	unsigned p = pixcovered;
 	pixcovered = (width * height) * (SDL_GetTicks() - startms) / fadems;
 
+	unsigned yend = y1 + height;
 	bool complete = true;
 	for(; p < pixcovered; p++)
 	{
@@ -289,7 +291,7 @@ bool FFizzleFader::Update()
 
 		rndval = (rndval >> 1) ^ (rndval & 1 ? 0 : rndmask);
 
-		if(x >= width || y >= height)
+		if(x >= width || y >= yend)
 		{
 			if(rndval == 0)     // entire sequence has been completed
 				goto finished;
@@ -314,7 +316,7 @@ finished:
 	{
 		for (unsigned pixel = (y * SCREENPITCH) + x1, pend = pixel + width; pixel < pend; ++pixel)
 		{
-			if (destptr[pixel])// || fizzlein)
+			if (destptr[pixel])
 				vbuf[pixel] = destptr[pixel];
 		}
 	}

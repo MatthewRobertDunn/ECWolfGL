@@ -990,10 +990,16 @@ void player_t::Serialize(FArchive &arc)
 	else
 		frags = 0;
 
+	if(GameSave::SaveVersion > 1690159133)
+		arc << RespawnEligible;
+	else
+		RespawnEligible = -1;
+
 	if(arc.IsLoading())
 	{
 		mo->SetupWeaponSlots();
 		CalcProjection(mo->radius);
+		DeathFadeClear();
 	}
 }
 

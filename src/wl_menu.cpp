@@ -664,7 +664,7 @@ void US_ControlPanel (ScanCode scancode)
 		mainMenu[mainMenu.countItems()-2]->setText(language["STR_BG"]);
 		mainMenu[mainMenu.countItems()-2]->setEnabled(true);
 		mainMenu[mainMenu.countItems()-2]->setHighlighted(true);
-		mainMenu[3]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer);
+		mainMenu[3]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer && players[ConsolePlayer].state != player_t::PST_DEAD);
 	}
 	else
 	{
@@ -770,6 +770,12 @@ int CP_CheckQuick (ScanCode scancode)
 				return 1;
 			break;
 
+		// Disable save if dead
+		case sc_F2:
+			if(players[ConsolePlayer].state == player_t::PST_DEAD)
+				return 1;
+			break;
+
 		//
 		// END GAME
 		//
@@ -785,7 +791,8 @@ int CP_CheckQuick (ScanCode scancode)
 		// QUICKSAVE
 		//
 		case sc_F8:
-			GameSave::QuickLoadOrSave(false);
+			if(players[ConsolePlayer].state != player_t::PST_DEAD)
+				GameSave::QuickLoadOrSave(false);
 			return 1;
 
 		//
