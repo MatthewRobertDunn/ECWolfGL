@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5.0 )
+cmake_minimum_required( VERSION 3.6.0...3.27.0 )
 
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG" )
 
