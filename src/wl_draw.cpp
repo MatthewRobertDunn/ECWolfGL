@@ -240,6 +240,10 @@ inline float FixedToFloat(fixed x) {
 	return result;
 }
 
+inline float AngleToFloat(angle_t x) {
+	return ((float)x / (float)0xFFFFFFFF) * 2 * PI;
+}
+
 inline fixed FloatToFixed(float x) {
 
 	float whole;
@@ -713,8 +717,8 @@ void AsmRefresh()
 	longword xpartial=0,ypartial=0;
 	MapSpot focalspot = map->GetSpot(focaltx, focalty, 0);
 	bool playerInPushwallBackTile = focalspot->pushAmount != 0;
-	MatGl::Renderer->Render(map, FixedToFloat(viewx), FixedToFloat(viewy), FixedToFloat(viewangle));
-	MatGl::Surface->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), FixedToFloat(viewangle));
+	MatGl::Renderer->Render(map, FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
+	MatGl::Surface->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
 	
 
 	for(pixx=0;pixx<viewwidth;pixx++)

@@ -50,7 +50,7 @@ namespace MatGl {
 	void OpenGlSurface::Render(void* texture)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, texture);
 		//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
 	}
@@ -59,7 +59,7 @@ namespace MatGl {
 	{
 
 		glm::vec3 standingAt = glm::vec3(playerX, playerY, 0.0f);
-		glm::vec3 direction = glm::vec3(cos(glm::radians(playerAngle)), sin(glm::radians(playerAngle)), 0.0);
+		glm::vec3 direction = glm::vec3(cos(playerAngle), sin(playerAngle), 0.0);
 		glm::vec3 lookingAt = glm::normalize(direction) + standingAt;
 
 

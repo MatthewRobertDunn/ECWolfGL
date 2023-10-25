@@ -1,6 +1,34 @@
 #include "OpenGLRenderer.h"
+#include <array>
 
 namespace MatGl {
+
+	const float WALL_HEIGHT = 1.0f;
+	const float WALL_WIDTH = 1.0f;
+
+	std::array<float, 12> CreateSouthWall(float x, float y) {
+		return std::array<float, 12> {
+			0.0f + x, 0.0f + y, WALL_HEIGHT,
+				0.0f + x, 0.0f + y, 0.0f,
+				WALL_WIDTH + x, 0.0f + y, WALL_HEIGHT,
+				WALL_WIDTH + x, 0.0f + y, 0.0f,
+		};
+	}
+
+	std::array<float, 12> CreateNorthWall(float x, float y) {
+		return std::array<float, 12> {
+			WALL_WIDTH + x, 0.0f + y, WALL_HEIGHT,
+				WALL_WIDTH + x, 0.0f + y, 0.0f,
+				0.0f + x, 0.0f + y, WALL_HEIGHT,
+				0.0f + x, 0.0f + y, 0.0f,
+		};
+	}
+
+	std::array<float, 9> GetTriangle(float playerX, float playerY) {
+		return std::array<float, 9> { 0.0f + playerX, 1.0f + playerY, 1.0f,
+			0.0f + playerX, -1.0f + playerY, 1.0f,
+			20.0f + playerX, 0.0f + playerY, 1.0f };
+	}
 
 
 	OpenGlRenderer::OpenGlRenderer()
@@ -29,20 +57,9 @@ namespace MatGl {
 		//map->GetSpot(2,4,0);
 
 
+		auto points = CreateSouthWall(playerX, playerY - 5.0);
 
-
-		/*
-		float points[] = { -1.0f, -1.0f, 0.0f,
-				   1.0f, -1.0f, 0.0f,
-				   0.0f,  1.0f, 0.0f };
-
-		*/
-
-		float points[] = { 0.0f + playerX, 1.0f + playerY, 1.0f ,
-						0.0f + playerX , -1.0f + playerY, 1.0f ,
-						20.0f + playerX,  0.0f + playerY, 1.0f };
-
-		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points.data(), GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 	}
