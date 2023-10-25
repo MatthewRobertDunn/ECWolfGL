@@ -5,6 +5,12 @@ namespace MatGl {
 
 	OpenGlRenderer::OpenGlRenderer()
 	{
+		//vertex array
+		glGenVertexArrays(1, &this->vertexArrayObject);
+		glBindVertexArray(this->vertexArrayObject);
+		//Create a buffer
+		glGenBuffers(1, &triangle);
+		glBindBuffer(GL_ARRAY_BUFFER, triangle);
 	}
 
 	//Right is 0 degrees
@@ -22,16 +28,21 @@ namespace MatGl {
 
 		//map->GetSpot(2,4,0);
 
-		glGenVertexArrays(1, &this->vertexArrayObject);
-		glBindVertexArray(this->vertexArrayObject);
 
+
+
+		/*
 		float points[] = { -1.0f, -1.0f, 0.0f,
 				   1.0f, -1.0f, 0.0f,
 				   0.0f,  1.0f, 0.0f };
 
-		glGenBuffers(1, &triangle);
-		glBindBuffer(GL_ARRAY_BUFFER, triangle);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+		*/
+
+		float points[] = { 0.0f + playerX, 1.0f + playerY, 1.0f ,
+						0.0f + playerX , -1.0f + playerY, 1.0f ,
+						20.0f + playerX,  0.0f + playerY, 1.0f };
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 	}

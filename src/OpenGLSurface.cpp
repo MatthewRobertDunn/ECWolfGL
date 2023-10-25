@@ -57,11 +57,29 @@ namespace MatGl {
 
 	void OpenGlSurface::SetCamera(float playerX, float playerY, float playerAngle)
 	{
-		glm::mat4 trans = glm::mat4(1.0f);
-		trans = glm::translate(trans, glm::vec3(playerY, 0.0f, playerX));
+
+		glm::vec3 standingAt = glm::vec3(playerX, playerY, 0.0f);
+		glm::vec3 direction = glm::vec3(cos(glm::radians(playerAngle)), sin(glm::radians(playerAngle)), 0.0);
+		glm::vec3 lookingAt = glm::normalize(direction) + standingAt;
+
+
+
+		glm::mat4 view;
+		view = glm::lookAt(standingAt,
+							lookingAt, 
+							glm::vec3(0.0f, 0.0f, 1.0f)); //up is (0,0,1.0)
+
+		
+		//45 degree perspective view, 0 is near, 100 is far, cutoff 8:6 ratio
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.00f, 100.0f);
+		
+		//Combine into one transform.
+		glm::mat4 mvp = projection * view;
+
 		//Get the variable that represents our shader uniform
 		unsigned int transformLoc = glGetUniformLocation(this->shader->ID, "mvp");
-		//set it to our translation matrix
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+		//pass our matrix to shader
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 	}
 }
