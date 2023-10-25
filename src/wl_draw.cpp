@@ -27,6 +27,8 @@
 #include "wl_state.h"
 #include "a_inventory.h"
 #include "thingdef/thingdef.h"
+#include <cmath>
+#include <OpenGlMain.h>
 
 /*
 =============================================================================
@@ -232,10 +234,36 @@ void TransformActor (AActor *ob)
 ====================
 */
 
+inline float FixedToFloat(fixed x) {
+	
+	float result = (float)(x >> 16) + (float)(x & 0xFFFF) / 0xFFFF;
+	return result;
+}
+
+inline fixed FloatToFixed(float x) {
+
+	float whole;
+	float fractional = std::modf(x, &whole);
+
+	whole = whole * 0x10000; //Shift whole up to the top 16 bits position
+	fractional = fractional * 0xFFFF;
+
+	fixed result = ((fixed)whole & 0xFFFF0000) + ((fixed)fractional & 0xFFFF);
+	return result;
+}
+
 int CalcHeight()
 {
-	fixed z = FixedMul(xintercept - viewx, viewcos)
-		- FixedMul(yintercept - viewy, viewsin);
+	float fuck = FixedToFloat(viewx);
+	fixed fuck2 = FloatToFixed(fuck);
+
+	float xstep = FixedToFloat(xintercept) - FixedToFloat(viewx);
+	float ystep = FixedToFloat(yintercept) - FixedToFloat(viewy);
+	
+	fixed z = FloatToFixed(xstep * FixedToFloat(viewcos) - ystep*FixedToFloat(viewsin));
+	
+	//fixed z = FloatToFixed(sqrt(xstep * xstep + ystep * ystep));
+
 	if(z < MINDIST) z = MINDIST;
 	int height = (heightnumerator << 8) / z;
 	if(height < min_wallheight) min_wallheight = height;
@@ -304,6 +332,7 @@ void ScalePost()
 	while(yoffs <= yendoffs)
 	{
 		vbuf[yendoffs] = col;
+		//vbuf[yendoffs] = 0;
 		ywcount -= texyscale;
 		if(ywcount <= 0)
 		{
@@ -684,6 +713,9 @@ void AsmRefresh()
 	longword xpartial=0,ypartial=0;
 	MapSpot focalspot = map->GetSpot(focaltx, focalty, 0);
 	bool playerInPushwallBackTile = focalspot->pushAmount != 0;
+	MatGl::Renderer->Render(map, FixedToFloat(viewx), FixedToFloat(viewy), FixedToFloat(viewangle));
+	MatGl::Surface->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), FixedToFloat(viewangle));
+	
 
 	for(pixx=0;pixx<viewwidth;pixx++)
 	{
@@ -1200,8 +1232,8 @@ void R_RenderView()
 	if(GetFeatureFlags() & FF_STARSKY)
 		DrawStarSky(vbuf, vbufPitch);
 #endif
-
 	WallRefresh ();
+
 
 	DrawParallax(vbuf, vbufPitch);
 #if 0 // USE_CLOUDSKY
