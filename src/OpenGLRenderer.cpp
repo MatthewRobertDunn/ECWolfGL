@@ -3,15 +3,16 @@
 
 namespace MatGl {
 
-	const float WALL_HEIGHT = 1.0f;
+	const float WALL_HEIGHT = 1.0f * 1.193f;
 	const float WALL_WIDTH = 1.0f;
+	const float FLOOR_HEIGHT = -0.1;
 
 	std::array<float, 12> CreateSouthWall(float x, float y) {
 		return std::array<float, 12> {
-			0.0f + x, 0.0f + y, WALL_HEIGHT,
-				0.0f + x, 0.0f + y, 0.0f,
-				WALL_WIDTH + x, 0.0f + y, WALL_HEIGHT,
-				WALL_WIDTH + x, 0.0f + y, 0.0f,
+			0.0f + x, 0.0f + y, FLOOR_HEIGHT + WALL_HEIGHT,
+				0.0f + x, 0.0f + y, FLOOR_HEIGHT,
+				WALL_WIDTH + x, 0.0f + y, FLOOR_HEIGHT + WALL_HEIGHT,
+				WALL_WIDTH + x, 0.0f + y, FLOOR_HEIGHT,
 		};
 	}
 
@@ -57,7 +58,7 @@ namespace MatGl {
 		//map->GetSpot(2,4,0);
 
 
-		auto points = CreateSouthWall(playerX, playerY - 5.0);
+		auto points = CreateSouthWall(28.0, 58.0);
 
 		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points.data(), GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
