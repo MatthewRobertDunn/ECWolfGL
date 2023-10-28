@@ -1,7 +1,7 @@
 #include "OpenGLRenderer.h"
 #include <array>
 #include "WallGenerator.h"
-
+#include <random>
 namespace MatGl {
 	using namespace glm;
 	OpenGlRenderer::OpenGlRenderer()
@@ -34,23 +34,31 @@ namespace MatGl {
 		for (int x = tileX - 10; x < tileX + 10; x++)
 			for (int y = tileY - 10; y < tileY + 10; y++)
 			{
-				auto spot = map->GetSpot(tileX, tileY, 0);
+				srand(x * y);
+				double r = (double)rand() / ((double)RAND_MAX + 1);
+				double g = (double)rand() / ((double)RAND_MAX + 1);
+				double b = (double)rand() / ((double)RAND_MAX + 1);
+
+
+				auto spot = map->GetSpot(x, y, 0);
 
 				if (spot->sideSolid[SOUTH]) {
-					auto wall = CreateSouthWall(vec2(x, y + 1), vec4(0.0, 0.0, 1.0, 0.5), vec3());
-					walls.insert(walls.end(), walls.begin(), walls.end());
+					auto wall = CreateSouthWall(vec2(x, y + 1), vec4(r, g, b, 1.0), vec3());
+					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 
+				/*
 				if (spot->sideSolid[NORTH]) {
-					auto wall = CreateSouthWall(vec2(x, y - 1), vec4(0.0, 0.0, 1.0, 0.5), vec3());
-					walls.insert(walls.end(), walls.begin(), walls.end());
+					auto wall = CreateSouthWall(vec2(x, y), vec4(r, g, b, 1.0), vec3());
+					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
+				*/
 			}
 
 
 		auto model = Model3d
 		{
-			TriangleStrip,
+			Triangle,
 			walls
 		};
 

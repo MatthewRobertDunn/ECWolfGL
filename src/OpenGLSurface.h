@@ -14,6 +14,7 @@ namespace MatGl {
 		SDL_GLContext  glContext;
 		GLuint framebuffer = 0;
 		GLuint glTexture = 0;
+		GLuint depthBuffer = 0;
 		Shader* shader = nullptr;
 		int width = 0;
 		int height = 0;

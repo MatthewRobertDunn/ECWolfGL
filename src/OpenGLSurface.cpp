@@ -11,7 +11,8 @@ namespace MatGl {
 		this->height = height;
 
 		this->glContext = SDL_GL_CreateContext(window);
-
+		
+		
 		//glewExperimental = true;
 		GLenum err = glewInit();
 		if (err != GLEW_OK) {
@@ -25,6 +26,10 @@ namespace MatGl {
 		glGenFramebuffers(1, &framebuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
+		glGenRenderbuffers(1, &depthBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 		glGenTextures(1, &glTexture);
 		glBindTexture(GL_TEXTURE_2D, glTexture);
@@ -46,6 +51,8 @@ namespace MatGl {
 
 		this->SetCamera(0.0, 0.0, 0.0);
 
+		glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_SM);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -73,7 +80,7 @@ namespace MatGl {
 
 		
 		//45 degree perspective view, 0 is near, 100 is far, cutoff 8:6 ratio
-		glm::mat4 projection = glm::perspective(glm::radians(58.0f), (float)width/(float)height, 0.00f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(58.0f), (float)width/(float)height, 0.001f, 15.0f);
 		
 		//Combine into one transform.
 		glm::mat4 mvp =  projection * view * scale;
