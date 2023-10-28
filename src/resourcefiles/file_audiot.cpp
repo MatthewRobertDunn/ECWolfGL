@@ -55,7 +55,7 @@ class FAudiot : public FUncompressedFile
 			FString audiohedFile = FString("audiohed.") + extension;
 			if(Wads.CheckIfWadLoaded(path.Left(lastSlash)) == -1)
 			{
-				File directory(path.Len() > 0 ? path : ".");
+				File directory(path.Len() > 0 ? path : (FString)".");
 				audiohedFile = path + directory.getInsensitiveFile(audiohedFile, true);
 
 				audiohedReader = new FileReader();

@@ -75,7 +75,7 @@ FGamemaps::FGamemaps(const char* filename, FileReader *file) : FResourceFile(fil
 	FString mapheadFile = FString("maphead.") + extension;
 	if(Wads.CheckIfWadLoaded(path.Left(lastSlash)) == -1)
 	{
-		File directory(path.Len() > 0 ? path : ".");
+		File directory(path.Len() > 0 ? path : (FString)".");
 		mapheadFile = path + directory.getInsensitiveFile(mapheadFile, true);
 
 		mapheadReader = new FileReader();

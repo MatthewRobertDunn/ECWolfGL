@@ -3,40 +3,10 @@
 #include "WallGenerator.h"
 
 namespace MatGl {
-
-	std::array<float, 12> CreateSouthWall2(float x, float y) {
-		return std::array<float, 12> {
-			0.0f + x, 0.0f + y, FLOOR_HEIGHT + WALL_HEIGHT,
-				0.0f + x, 0.0f + y, FLOOR_HEIGHT,
-				WALL_WIDTH + x, 0.0f + y, FLOOR_HEIGHT + WALL_HEIGHT,
-				WALL_WIDTH + x, 0.0f + y, FLOOR_HEIGHT,
-		};
-	}
-
-	std::array<float, 12> CreateNorthWall2(float x, float y) {
-		return std::array<float, 12> {
-			WALL_WIDTH + x, 0.0f + y, WALL_HEIGHT,
-				WALL_WIDTH + x, 0.0f + y, 0.0f,
-				0.0f + x, 0.0f + y, WALL_HEIGHT,
-				0.0f + x, 0.0f + y, 0.0f,
-		};
-	}
-
-	std::array<float, 9> GetTriangle2(float playerX, float playerY) {
-		return std::array<float, 9> { 0.0f + playerX, 1.0f + playerY, 1.0f,
-			0.0f + playerX, -1.0f + playerY, 1.0f,
-			20.0f + playerX, 0.0f + playerY, 1.0f };
-	}
-
-
+	using namespace glm;
 	OpenGlRenderer::OpenGlRenderer()
 	{
-		//vertex array
-		glGenVertexArrays(1, &this->vertexArrayObject);
-		glBindVertexArray(this->vertexArrayObject);
-		//Create a buffer
-		glGenBuffers(1, &triangle);
-		glBindBuffer(GL_ARRAY_BUFFER, triangle);
+		this->renderUnit = new OpenGlRenderUnit();
 	}
 
 	//Right is 0 degrees
@@ -56,20 +26,35 @@ namespace MatGl {
 
 		//auto wall = CreateSouthWall(28.0, 58.0);
 
+		int tileX = floorf(playerX);
+		int tileY = floorf(playerY);
 
-		auto wall = CreateSouthWall(vec2(28.0, 58.0), vec4(0.0, 0.0, 1.0, 0.5), vec3());
+		VertexList walls;
 
-		//Perform work required to load a VertexList + attributes
+		for (int x = tileX - 10; x < tileX + 10; x++)
+			for (int y = tileY - 10; y < tileY + 10; y++)
+			{
+				auto spot = map->GetSpot(tileX, tileY, 0);
 
-		int bufferInBytes = wall.size() * sizeof(Vertex);
-		int stride = sizeof(Vertex);  //We stride a whole vertex at a time
-		
-		glBufferData(GL_ARRAY_BUFFER, bufferInBytes, wall.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0); //position
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3))); //color
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3) + sizeof(vec4))); //texture
-		glEnableVertexAttribArray(2);
+				if (spot->sideSolid[SOUTH]) {
+					auto wall = CreateSouthWall(vec2(x, y + 1), vec4(0.0, 0.0, 1.0, 0.5), vec3());
+					walls.insert(walls.end(), walls.begin(), walls.end());
+				}
+
+				if (spot->sideSolid[NORTH]) {
+					auto wall = CreateSouthWall(vec2(x, y - 1), vec4(0.0, 0.0, 1.0, 0.5), vec3());
+					walls.insert(walls.end(), walls.begin(), walls.end());
+				}
+			}
+
+
+		auto model = Model3d
+		{
+			TriangleStrip,
+			walls
+		};
+
+		this->renderUnit->Load(model);
+		this->renderUnit->Render();
 	}
 }

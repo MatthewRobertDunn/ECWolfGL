@@ -29,7 +29,7 @@ struct FRemapTable
 	~FRemapTable();
 
 	FRemapTable &operator= (const FRemapTable &o);
-	bool operator==(const FRemapTable &o);
+	bool operator==(const FRemapTable &o) const;
 	void MakeIdentity();
 	bool IsIdentity() const;
 	void Serialize(FArchive &ar);

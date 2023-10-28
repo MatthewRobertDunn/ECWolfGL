@@ -20,7 +20,7 @@ namespace MatGl {
 	/// Render unit encapsulates everything that is required to render a 3d model, vertices textures + shaders etc
 	/// It shouldn't contain opengl specific stuff
 	/// </summary>
-	struct RenderUnit
+	struct Model3d
 	{
 		ShapeType ShapeType;
 		std::vector<Vertex> Vertices;

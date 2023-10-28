@@ -163,7 +163,7 @@ class FVGAGraph : public FResourceFile
 			FString vgaheadFile = FString("vgahead.") + extension;
 			if(Wads.CheckIfWadLoaded(path.Left(lastSlash)) == -1)
 			{
-				File directory(path.Len() > 0 ? path : ".");
+				File directory(path.Len() > 0 ? path : (FString)".");
 				FString vgadictFile = path + directory.getInsensitiveFile(FString("vgadict.") + extension, true);
 				FString vgaheadFile = path + directory.getInsensitiveFile(FString("vgahead.") + extension, true);
 
