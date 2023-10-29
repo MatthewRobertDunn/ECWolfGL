@@ -8,9 +8,10 @@ namespace MatGl {
 	class OpenGlRenderer
 	{
 	public:
-		OpenGlRenderer();
+		OpenGlRenderer(GameCamera* camera);
 		void Render(GameMap* map, float playerX, float playerY, float playerAngle);
 	private:
 		OpenGlRenderUnit* renderUnit = nullptr;
+		GameCamera* camera = nullptr;
 	};
 }

@@ -9,13 +9,11 @@ namespace MatGl {
 	public:
 		OpenGlSurface(SDL_Window* window, int width, int height);
 		void Render(void* texture);
-		void SetCamera(float playerX, float playerY, float playerAngle);
 	private:
 		SDL_GLContext  glContext;
 		GLuint framebuffer = 0;
 		GLuint glTexture = 0;
 		GLuint depthBuffer = 0;
-		Shader* shader = nullptr;
 		int width = 0;
 		int height = 0;
 	};

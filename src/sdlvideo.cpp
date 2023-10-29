@@ -1152,7 +1152,8 @@ void SDLFB::ResetSDLRenderer()
 		OpenGlTexture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING , Width, Height);
 		SDL_SetTextureBlendMode(OpenGlTexture, SDL_BLENDMODE_BLEND);
 		MatGl::Surface = new MatGl::OpenGlSurface(Screen, Width, Height);
-		MatGl::Renderer = new MatGl::OpenGlRenderer();
+		MatGl::Camera = new MatGl::GameCamera(Width, Height);
+		MatGl::Renderer = new MatGl::OpenGlRenderer(MatGl::Camera);
 		{
 			NotPaletted = true;
 

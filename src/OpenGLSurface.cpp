@@ -1,9 +1,7 @@
 #include "OpenGLSurface.h"
 #include <SDL.h>
 #include <iostream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 namespace MatGl {
 	OpenGlSurface::OpenGlSurface(SDL_Window* window, int width, int height)
 	{
@@ -45,12 +43,6 @@ namespace MatGl {
 			printf("failed to make complete framebuffer object %x", status);
 		}
 
-		this->shader = new Shader("./shader.vert", "./shader.frag");
-				
-		this->shader->use();
-
-		this->SetCamera(0.0, 0.0, 0.0);
-
 		glEnable(GL_DEPTH_TEST);
 		//glDepthFunc(GL_SM);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -60,35 +52,5 @@ namespace MatGl {
 	{
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, texture);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-
-	void OpenGlSurface::SetCamera(float playerX, float playerY, float playerAngle)
-	{
-
-		glm::vec3 standingAt = glm::vec3(playerX, playerY, 0.5f);
-		glm::vec3 direction = glm::vec3(cos(playerAngle), -sin(playerAngle), 0.0);
-		glm::vec3 lookingAt = glm::normalize(direction) + standingAt;
-
-
-
-		glm::mat4 view = glm::lookAt(standingAt,
-							lookingAt, 
-							glm::vec3(0.0f, 0.0f, -1.0f)); //up is (0,0,1.0)
-
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-
-
-		
-		//45 degree perspective view, 0 is near, 100 is far, cutoff 8:6 ratio
-		glm::mat4 projection = glm::perspective(glm::radians(58.0f), (float)width/(float)height, 0.001f, 15.0f);
-		
-		//Combine into one transform.
-		glm::mat4 mvp =  projection * view * scale;
-
-		//Get the variable that represents our shader uniform
-		unsigned int transformLoc = glGetUniformLocation(this->shader->ID, "mvp");
-
-		//pass our matrix to shader
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 	}
 }
