@@ -107,14 +107,14 @@ namespace MatGl {
 		int numLayers = 2;
 
 		// Specify the number of layers (textures) in the array
-		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA, width, height, numLayers);
-
+		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, numLayers);
+		checkGLErrors();
 		// Attach imageData1 to layer 0
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, 1, GL_BGR, GL_UNSIGNED_BYTE, texture1->pixels);
-
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture1->pixels);
+		checkGLErrors();
 		// Attach imageData2 to layer 1
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, width, height, 1, GL_BGR, GL_UNSIGNED_BYTE, texture2->pixels);
-
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture2->pixels);
+		checkGLErrors();
 		// Bind the texture array to a texture unit
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);

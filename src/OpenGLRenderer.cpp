@@ -51,7 +51,7 @@ namespace MatGl {
 
 				
 				if (spot->sideSolid[NORTH]) {
-					auto wall = CreateSouthWall(vec2(x, y), vec4(1.0, 0.0, 0.0, 0.5), 0.0);
+					auto wall = CreateSouthWall(vec2(x, y), vec4(1.0, 0.0, 0.0, 0.5), 1.0);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 
@@ -61,7 +61,7 @@ namespace MatGl {
 				}
 
 				if (spot->sideSolid[WEST]) {
-					auto wall = CreateWestWall(vec2(x+1, y), vec4(0.0, 0.0, 1.0, 0.5), 0.0);
+					auto wall = CreateWestWall(vec2(x+1, y), vec4(0.0, 0.0, 1.0, 0.5), 1.0);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 			}

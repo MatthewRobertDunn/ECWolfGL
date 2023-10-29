@@ -7,13 +7,13 @@ layout (location = 2) in vec3 texture;
 uniform mat4 mvp; 
 
 //These are outputs from the vertex shader and inputs to the fragment shader
-out vec4 vertexColor; 
-out vec3 vertexTexture; 
+out vec4 VertexColor; 
+out vec3 TextureCoords; 
 
 
 void main()
 {
     gl_Position =  mvp * vec4(position, 1.0);  //perspective transform on position
-    vertexColor = color;
-    vertexTexture = texture;
+    VertexColor = color;
+    TextureCoords = texture;
 }
