@@ -4,12 +4,28 @@
 #include <random>
 namespace MatGl {
 	using namespace glm;
+
+	GameMap::Plane::Map* GetSpot(GameMap* map, int x, int y)
+	{
+		if (x < 0 || y < 0)
+			return nullptr;
+
+		if (!map->IsValidTileCoordinate(x, y, 0)) {
+			return nullptr;
+		}
+
+		return map->GetSpot(x, y, 0);
+	}
+
+
+
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera)
 	{
 		this->renderUnit = new OpenGlRenderUnit(camera);
 		this->camera = camera;
 	}
 
+	
 	//Right is 0 degrees
 	//Up is 90 degrees
 	//Positive x is right
@@ -41,8 +57,9 @@ namespace MatGl {
 				//double b = (double)rand() / ((double)RAND_MAX + 1);
 
 
-				auto spot = map->GetSpot(x, y, 0);
-
+				auto spot = GetSpot(map, x, y);
+				if (!spot)
+					continue;
 				
 				if (spot->sideSolid[SOUTH]) {
 					auto wall = CreateSouthWall(vec2(x, y + 1), vec4(0.0, 1.0, 0.0, 0.5), 0.0);

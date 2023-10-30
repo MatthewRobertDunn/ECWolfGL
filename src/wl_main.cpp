@@ -46,6 +46,7 @@
 #include "filesys.h"
 #include "g_conversation.h"
 #include "g_intermission.h"
+#include "OpenGlMain.h"
 
 #include <clocale>
 
@@ -519,6 +520,12 @@ static void InitGame()
 // Finish signon screen
 //
 	VL_SetVGAPlaneMode();
+
+	printf("Loading OpenGL Textures");
+	MatGl::TextureManager = new MatGl::OpenGlTextureManager();
+	MatGl::TextureManager->LoadTextures(&TexMan);
+
+
 	if(DrawStartupConsole("Initialization complete"))
 	{
 		if (!param_nowait)

@@ -4,16 +4,9 @@
 #include "OpenGlTextureLoader.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <stdexcept>
+#include <OpenGlErrors.h>
 
 namespace MatGl {
-
-	void checkGLErrors() {
-		GLenum error = glGetError();
-		if (error != GL_NO_ERROR) {
-			throw std::runtime_error("OpenGL Error: " + std::to_string(error));
-		}
-	}
-
 	using namespace glm;
 	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(GameCamera* camera)
 	{
@@ -38,7 +31,7 @@ namespace MatGl {
 		this->shader = new Shader("./shader.vert", "./shader.frag");
 		this->shader->use();
 
-		checkGLErrors();
+		CheckGlErrors();
 
 		this->LoadTextures(Model3d());
 	}
@@ -69,7 +62,7 @@ namespace MatGl {
 			break;
 		}
 
-		checkGLErrors();
+		CheckGlErrors();
 	}
 
 	void MatGl::OpenGlRenderUnit::Render()
@@ -108,18 +101,18 @@ namespace MatGl {
 
 		// Specify the number of layers (textures) in the array
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, numLayers);
-		checkGLErrors();
+		CheckGlErrors();
 		// Attach imageData1 to layer 0
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture1->pixels);
-		checkGLErrors();
+		CheckGlErrors();
 		// Attach imageData2 to layer 1
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture2->pixels);
-		checkGLErrors();
+		CheckGlErrors();
 		// Bind the texture array to a texture unit
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
 
-		checkGLErrors();
+		CheckGlErrors();
 	}
 
 }

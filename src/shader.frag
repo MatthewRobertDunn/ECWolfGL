@@ -15,7 +15,7 @@ float far  = 15.0;
 
 void main()
 {
-    FragColor = texture(textureArray,TextureCoords) * VertexColor;
+    FragColor = texture(textureArray,TextureCoords);
     //FragColor = VertexColor;
 
     //FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
