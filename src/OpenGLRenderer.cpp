@@ -22,11 +22,11 @@ namespace MatGl {
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
 	{
 		this->textureManager = textureManager;
-		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->WallTextureArray);
+		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray("WALL"));
 		this->camera = camera;
 	}
 
-	
+
 	//Right is 0 degrees
 	//Up is 90 degrees
 	//Positive x is right
@@ -61,25 +61,43 @@ namespace MatGl {
 				auto spot = GetSpot(map, x, y);
 				if (!spot)
 					continue;
-				
+
+				vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+
+				if (spot->tile)
+				{
+					if (spot->tile->offsetHorizontal || spot->tile->offsetVertical)
+					{
+						float max1 = std::max(spot->slideAmount[NORTH], spot->slideAmount[SOUTH]);
+						float max2 = std::max(spot->slideAmount[EAST], spot->slideAmount[WEST]);
+						float dooropen = std::max(max1, max2) / 65535.0f;
+						//The more the door is open, the more transparent we get
+						color = vec4(1.0, 1.0, 1.0, 1.0 - dooropen);
+					}
+				}
+
+
 				if (spot->sideSolid[SOUTH]) {
-					auto wall = CreateSouthWall(vec2(x, y + 1), vec4(0.0, 1.0, 0.0, 0.5), 0.0);
+					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[SOUTH]);
+					auto wall = CreateSouthWall(vec2(x, y + 1), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 
-				
 				if (spot->sideSolid[NORTH]) {
-					auto wall = CreateSouthWall(vec2(x, y), vec4(1.0, 0.0, 0.0, 0.5), 8.0);
+					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[NORTH]);
+					auto wall = CreateSouthWall(vec2(x, y), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 
 				if (spot->sideSolid[EAST]) {
-					auto wall = CreateEastWall(vec2(x, y), vec4(0.0, 0.0, 1.0, 0.5), 16.0);
+					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[EAST]);
+					auto wall = CreateEastWall(vec2(x, y), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 
 				if (spot->sideSolid[WEST]) {
-					auto wall = CreateWestWall(vec2(x+1, y), vec4(0.0, 0.0, 1.0, 0.5), 32.0);
+					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[WEST]);
+					auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 			}

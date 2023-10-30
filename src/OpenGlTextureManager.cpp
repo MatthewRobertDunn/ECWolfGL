@@ -6,18 +6,7 @@
 #include <OpenGlTextureLoader.h>
 namespace MatGl {
 
-	void Fucky(int layer) {
-		
-			// Load two textures
-			auto texture1 = LoadTexture("bark.bmp");
-			int width = 64;
-			int height = 64;
-			// Attach imageData2 to layer 1
-			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture1->pixels);
-			CheckGlErrors();
-	}
-
-	MatGl::OpenGlTextureManager::OpenGlTextureManager()
+	OpenGlTextureManager::OpenGlTextureManager()
 	{
 		//Create texture array
 		glGenTextures(1, &this->WallTextureArray);
@@ -57,6 +46,7 @@ namespace MatGl {
 			FBitmap bmp((BYTE*)(&openGlTextureData), width * 4, width, height);
 			currentTexture->CopyTrueColorPixels(&bmp, 0, 0, 0, &inf);
 			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void*)(&openGlTextureData));
+			this->wallMap.insert(std::pair<FTextureID, int>(currentTexture->id, layer));
 			layer++;
 			CheckGlErrors();
 		};
@@ -65,5 +55,13 @@ namespace MatGl {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, WallTextureArray);
 		CheckGlErrors();
+	}
+	GLuint OpenGlTextureManager::GetTextureArray(std::string texturePack)
+	{
+		return WallTextureArray;
+	}
+	int OpenGlTextureManager::GetTextureArrayIndexForWolf(std::string texturePack, FTextureID wolfId)
+	{
+		return this->wallMap[wolfId];
 	}
 }

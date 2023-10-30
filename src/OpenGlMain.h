@@ -7,5 +7,5 @@ namespace MatGl{
 	inline OpenGlRenderer* Renderer;
 	inline GameCamera* Camera;
 	inline OpenGlSurface* Surface;
-	inline OpenGlTextureManager* TextureManager;
+	inline MatGlTextureManager* TextureManager;
 }
