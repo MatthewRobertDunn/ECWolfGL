@@ -19,9 +19,10 @@ namespace MatGl {
 
 
 
-	OpenGlRenderer::OpenGlRenderer(GameCamera* camera)
+	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
 	{
-		this->renderUnit = new OpenGlRenderUnit(camera);
+		this->textureManager = textureManager;
+		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->WallTextureArray);
 		this->camera = camera;
 	}
 
@@ -68,17 +69,17 @@ namespace MatGl {
 
 				
 				if (spot->sideSolid[NORTH]) {
-					auto wall = CreateSouthWall(vec2(x, y), vec4(1.0, 0.0, 0.0, 0.5), 1.0);
+					auto wall = CreateSouthWall(vec2(x, y), vec4(1.0, 0.0, 0.0, 0.5), 8.0);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 
 				if (spot->sideSolid[EAST]) {
-					auto wall = CreateEastWall(vec2(x, y), vec4(0.0, 0.0, 1.0, 0.5), 0.0);
+					auto wall = CreateEastWall(vec2(x, y), vec4(0.0, 0.0, 1.0, 0.5), 16.0);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 
 				if (spot->sideSolid[WEST]) {
-					auto wall = CreateWestWall(vec2(x+1, y), vec4(0.0, 0.0, 1.0, 0.5), 1.0);
+					auto wall = CreateWestWall(vec2(x+1, y), vec4(0.0, 0.0, 1.0, 0.5), 32.0);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
 			}

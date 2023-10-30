@@ -8,9 +8,10 @@
 
 namespace MatGl {
 	using namespace glm;
-	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(GameCamera* camera)
+	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(GameCamera* camera, GLuint textureArray)
 	{
 		this->camera = camera;
+		this->textureArray = textureArray;
 
 		//vertex array
 		glGenVertexArrays(1, &this->vertexArray);
@@ -19,21 +20,11 @@ namespace MatGl {
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-		//Create texture array
-		// Create a sampler2DArray and bind textures to it
-		glGenTextures(1, &this->textureArray);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-
-		// Set texture parameters
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 		this->shader = new Shader("./shader.vert", "./shader.frag");
 		this->shader->use();
 
 		CheckGlErrors();
 
-		this->LoadTextures(Model3d());
 	}
 
 	void MatGl::OpenGlRenderUnit::Load(Model3d renderUnit)
@@ -85,34 +76,9 @@ namespace MatGl {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, this->textureArray);
 
+		CheckGlErrors();
+
 
 		glDrawArrays(this->mode, 0, this->vertexCount);
 	}
-
-	void OpenGlRenderUnit::LoadTextures(Model3d renderUnit)
-	{
-		// Load two textures
-		auto texture1 = LoadTexture("bark.bmp");
-		auto texture2 = LoadTexture("bricks.bmp");
-			
-		int width = texture1->w;
-		int height = texture2->h;
-		int numLayers = 2;
-
-		// Specify the number of layers (textures) in the array
-		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, numLayers);
-		CheckGlErrors();
-		// Attach imageData1 to layer 0
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture1->pixels);
-		CheckGlErrors();
-		// Attach imageData2 to layer 1
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture2->pixels);
-		CheckGlErrors();
-		// Bind the texture array to a texture unit
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-
-		CheckGlErrors();
-	}
-
 }

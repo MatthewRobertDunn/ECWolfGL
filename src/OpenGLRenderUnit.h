@@ -7,11 +7,10 @@ namespace MatGl {
 	class OpenGlRenderUnit
 	{
 	public:
-		OpenGlRenderUnit(GameCamera* camera);
+		OpenGlRenderUnit(GameCamera* camera, GLuint textureArray);
 		void Load(Model3d model);
 		void Render();
 	private:
-		void LoadTextures(Model3d renderUnit);
 		Shader* shader = nullptr;
 		GLuint vertexArray = {};
 		GLuint textureArray = {};

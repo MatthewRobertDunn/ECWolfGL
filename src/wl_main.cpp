@@ -524,6 +524,7 @@ static void InitGame()
 	printf("Loading OpenGL Textures");
 	MatGl::TextureManager = new MatGl::OpenGlTextureManager();
 	MatGl::TextureManager->LoadTextures(&TexMan);
+	MatGl::Renderer = new MatGl::OpenGlRenderer(MatGl::Camera, MatGl::TextureManager);
 
 
 	if(DrawStartupConsole("Initialization complete"))
