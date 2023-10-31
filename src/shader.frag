@@ -15,6 +15,7 @@ float far  = 15.0;
 
 void main()
 {
+    //FragColor = vec4(1.0,0.0,0.0,1.0) * VertexColor;
     FragColor = texture(textureArray,TextureCoords) * VertexColor;
     //FragColor = VertexColor;
 

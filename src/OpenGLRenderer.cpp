@@ -22,7 +22,7 @@ namespace MatGl {
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
 	{
 		this->textureManager = textureManager;
-		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray("WALL"));
+		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES));
 		this->camera = camera;
 	}
 
@@ -76,30 +76,34 @@ namespace MatGl {
 					}
 				}
 
+				//North things are flipped
+				//West things are flipped
+				auto textureArray = OpenGlTextureManager::WALL_TEXTURES;
 
-				if (spot->sideSolid[SOUTH]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[SOUTH]);
+				if (spot->sideSolid[MapTile::South]) {
+					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::South]);
 					auto wall = CreateSouthWall(vec2(x, y + 1), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
-
-				if (spot->sideSolid[NORTH]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[NORTH]);
-					auto wall = CreateSouthWall(vec2(x, y), color, texture);
+				
+				if (spot->sideSolid[MapTile::North]) {
+					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::North]);
+					auto wall = CreateNorthWall(vec2(x, y), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
-
-				if (spot->sideSolid[EAST]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[EAST]);
+				
+				if (spot->sideSolid[MapTile::East]) {
+					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::East]);
 					auto wall = CreateEastWall(vec2(x, y), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
-
-				if (spot->sideSolid[WEST]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf("WALL", spot->texture[WEST]);
+				
+				if (spot->sideSolid[MapTile::West]) {
+					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::West]);
 					auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
 					walls.insert(walls.end(), wall.begin(), wall.end());
 				}
+				
 			}
 
 		auto model = Model3d

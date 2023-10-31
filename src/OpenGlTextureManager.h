@@ -3,10 +3,38 @@
 #include "glew.h"
 #include <map>
 #include <string>
+#include <vector>
 namespace MatGl {
+	struct Vec2dInt {
+		Vec2dInt(int x, int y) {
+			this->x = x;
+			this->y = y;
+		}
+		int x;
+		int y;
+
+		bool const operator==(const Vec2dInt& o) const {
+			return x == o.x && y == o.y;
+		}
+
+		bool const operator<(const Vec2dInt& o) const {
+			return x < o.x || (x == o.x && y < o.y);
+		}
+	};
+	
+	typedef std::vector<FTexture*> WolfTextureList;
+	typedef std::map<FTextureID, int> TextureLayerMap;
+
+	struct MatGlTextureArray {
+		GLuint TextureArray;
+		TextureLayerMap TextureLayerMap;
+	};
+	typedef std::map<std::string, MatGlTextureArray> TextureArrayMap;
+
 	class MatGlTextureManager
 	{
 	public:
+		static const std::string WALL_TEXTURES;
 		virtual void LoadTextures(FTextureManager* wolfTextures) = 0; //pure virtual method
 	};
 
@@ -23,7 +51,6 @@ namespace MatGl {
 			int GetTextureArrayIndexForWolf(std::string texturePack, FTextureID wolfId);
 
 		private:
-			GLuint WallTextureArray = {};
-			std::map<FTextureID, int> wallMap;
+			TextureArrayMap textureMap;
 	};
 }

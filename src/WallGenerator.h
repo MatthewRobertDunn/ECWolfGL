@@ -3,7 +3,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 namespace MatGl {
-	const float WALL_HEIGHT = 1.0f * 1.193f;
+	const float WALL_HEIGHT = 1.0f * 1.2039f;
 	const float WALL_WIDTH = 1.0f;
 	const float FLOOR_HEIGHT = -0.1;
 	typedef std::vector<Vertex> VertexList;

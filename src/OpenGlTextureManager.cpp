@@ -4,17 +4,19 @@
 #include <vector>
 #include <OpenGlErrors.h>
 #include <OpenGlTextureLoader.h>
+#include <format>
+#include <memory>
 namespace MatGl {
+	//prototypes of private functions
+	std::map<Vec2dInt, WolfTextureList> GroupTextures(FTextureManager* wolfTextures);
+	GLuint CreateTextureArray();
+
+	//Texture to use when rendering walls.
+	const std::string OpenGlTextureManager::WALL_TEXTURES = "wolf/64/64";
 
 	OpenGlTextureManager::OpenGlTextureManager()
 	{
-		//Create texture array
-		glGenTextures(1, &this->WallTextureArray);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, this->WallTextureArray);
 
-		// Set texture parameters
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 
 	void MatGl::OpenGlTextureManager::LoadTextures(FTextureManager* wolfTextures)
@@ -23,45 +25,89 @@ namespace MatGl {
 		int width = 64;
 		int height = 64;
 
-		std::vector<int> wallTextures;
-		//Count all the wall textures
-		for (int i = 1; i < totalTextures; i++) {
-			auto currentTexture = wolfTextures->ByIndex(i);
-			//We are only loading 64x64 textures atm
-			if (currentTexture->GetWidth() != 64 || currentTexture->GetHeight() != 64)
-				continue;
-			wallTextures.push_back(i);
-		};
+		//Get map of all textures and their count
+		auto groupedTextures = GroupTextures(wolfTextures);
 
-		// Specify the number of layers (textures) in the array
-		BYTE openGlTextureData[64 * 64 * 4]; //opengl texture data in rgba format
-		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, wallTextures.size());
-		CheckGlErrors();
+		//Initialize an opengl TextureArray for each one
+		for (const auto& p : groupedTextures)
+		{
+			auto size = p.first;
+			auto textures = p.second;
+			//Figure out key for our texture dictionary
+			std::string key = std::format("wolf/{}/{}", size.x, size.y);
 
-		int layer = 0;
-		for (auto& i : wallTextures) {
-			auto currentTexture = wolfTextures->ByIndex(i);
-			std::cout << currentTexture->Name << ",";
-			FCopyInfo inf = { OP_OVERWRITE, BLEND_NONE, {0}, 0, 0 };
-			FBitmap bmp((BYTE*)(&openGlTextureData), width * 4, width, height);
-			currentTexture->CopyTrueColorPixels(&bmp, 0, 0, 0, &inf);
-			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void*)(&openGlTextureData));
-			this->wallMap.insert(std::pair<FTextureID, int>(currentTexture->id, layer));
-			layer++;
+			std::cout << "Loading textures " << key << std::endl;
+			//Create a texture array
+			MatGlTextureArray newTextureArray = { CreateTextureArray(), TextureLayerMap() };
+			//Allocate storage.
+			glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, size.x, size.y, textures.size());
 			CheckGlErrors();
-		};
 
-		// Bind the texture array to a texture unit
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, WallTextureArray);
-		CheckGlErrors();
+			//Load all textures into the array
+			const int bufferSize = size.x * size.y * 4;
+			std::vector<uint8_t> openGlTextureData(bufferSize); //opengl texture data in rgba (32bit) format.
+			int layer = 0;
+			for (auto& currentTexture : p.second) {
+				std::cout << currentTexture->Name << ",";
+				FCopyInfo inf = { OP_OVERWRITE, BLEND_NONE, {0}, 0, 0 };
+				FBitmap bmp((BYTE*)(openGlTextureData.data()), size.x * 4, size.x, size.y);
+				currentTexture->CopyTrueColorPixels(&bmp, 0, 0, 0, &inf);
+				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, size.x, size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE, openGlTextureData.data());
+				newTextureArray.TextureLayerMap.insert(std::pair<FTextureID, int>(currentTexture->id, layer));
+				layer++;
+				CheckGlErrors();
+			};
+
+			std::cout << std::endl;
+
+			this->textureMap[key] = newTextureArray;
+		}
 	}
+
 	GLuint OpenGlTextureManager::GetTextureArray(std::string texturePack)
 	{
-		return WallTextureArray;
+		return this->textureMap[WALL_TEXTURES].TextureArray;
 	}
 	int OpenGlTextureManager::GetTextureArrayIndexForWolf(std::string texturePack, FTextureID wolfId)
 	{
-		return this->wallMap[wolfId];
+		return this->textureMap[WALL_TEXTURES].TextureLayerMap[wolfId];
+	}
+
+	//Group all textures by their width and height
+	std::map<Vec2dInt, WolfTextureList> GroupTextures(FTextureManager* wolfTextures) {
+		
+		std::map<Vec2dInt, WolfTextureList> result;
+		
+		const int totalTextures = wolfTextures->NumTextures();
+
+		for (int i = 1; i < totalTextures; i++) {
+			auto currentTexture = wolfTextures->ByIndex(i);
+
+			//Skip any textures without pixel data for some reason
+			if (currentTexture->GetPixels() == nullptr)
+			{
+				continue;
+			}
+
+			auto key = Vec2dInt(currentTexture->GetWidth(), currentTexture->GetHeight());
+			result[key].push_back(currentTexture);
+		}
+
+		return result;
+	}
+
+
+	GLuint CreateTextureArray() {
+		//Create texture array
+		GLuint textureArray;
+
+		glGenTextures(1, &textureArray);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+
+		// Set texture parameters
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		return textureArray;
 	}
 }
