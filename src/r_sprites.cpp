@@ -631,6 +631,7 @@ void Scale3DSprite(AActor *actor, const Frame *frame, unsigned height)
 	}
 }
 
+
 void R_DrawPlayerSprite(AActor *actor, const Frame *frame, fixed offsetX, fixed offsetY)
 {
 	if(frame->spriteInf == SPR_NONE || loadedSprites[frame->spriteInf].numFrames == 0)
@@ -776,4 +777,24 @@ void R_DrawZoomer(FTextureID texID)
 		CalcTics();
 	}
 	while(true);
+}
+
+FTexture* MatGl::GetActorSprite(AActor* actor)
+{
+	auto frame = actor->state;
+	bool flip = false;
+	const Sprite& spr = spriteFrames[loadedSprites[actor->sprite].frames + frame->frame];
+	FTexture* tex;
+	if (spr.rotations == 0)
+		tex = TexMan[spr.texture[0]];
+	else
+	{
+		const unsigned int rot = CalcRotate(actor);
+		tex = TexMan[spr.texture[rot]];
+		flip = (spr.mirror >> rot) & 1;
+	}
+	if (tex == NULL)
+		return nullptr;
+
+	return tex;
 }

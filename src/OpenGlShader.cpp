@@ -59,6 +59,11 @@ namespace MatGl {
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
+
+    Shader::~Shader()
+    {
+        glDeleteProgram(ID);
+    }
     // activate the shader
 
     void Shader::use()

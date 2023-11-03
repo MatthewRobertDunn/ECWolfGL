@@ -2,6 +2,10 @@
 #include <array>
 #include "WallGenerator.h"
 #include <random>
+#include "actor.h"
+#include <r_sprites.h>
+#include "MatGlMath.h"
+#include <format>
 namespace MatGl {
 	using namespace glm;
 
@@ -22,8 +26,10 @@ namespace MatGl {
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
 	{
 		this->textureManager = textureManager;
-		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES));
+		this->wallShader = new Shader("./shader.vert", "./shader.frag");
+		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES),wallShader);
 		this->camera = camera;
+		
 	}
 
 
@@ -33,17 +39,51 @@ namespace MatGl {
 	//Negative y is up
 	void OpenGlRenderer::Render(GameMap* map, float playerX, float playerY, float playerAngle)
 	{
-		//TODO: iterate through all cells in viewing frustrum
-		//Update the camera matrix with playerX,playerY and playerAngle
-		//Check tile for what walls are enabled
-		//For each enabled wall
-		//make two triangles in the right place or maybe apply a rotation + translation matrix to a premade wall probs
-		//Put color or texture on there
+		this->RenderWalls(map,playerX,playerY,playerAngle);
 
-		//map->GetSpot(2,4,0);
+		std::map<std::string,VertexList> quads;
 
-		//auto wall = CreateSouthWall(28.0, 58.0);
+		for (AActor::Iterator iter = AActor::GetIterator(); iter.Next();)
+		{
+			AActor* actor = iter;
 
+			FTexture* texture = GetActorSprite(actor);
+			if (!texture || texture->GetID().GetIndex() <= 1) {
+				continue;
+			}
+
+			//Figure out key for our texture dictionary
+			std::string textureArray = std::format("wolf/{}/{}", texture->GetWidth(), texture->GetHeight());
+
+					
+			float x = FixedToFloat(actor->x);
+			float y = FixedToFloat(actor->y);
+
+			int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, texture->GetID());
+			auto quad = GetQuad(vec2(x, y), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, 0.2);
+			auto list = &quads[textureArray];
+			list->insert(list->end(), quad.begin(), quad.end());
+		}
+
+		for (const auto& quad : quads) {
+			auto spriteUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(quad.first), wallShader);
+			auto model = Model3d
+			{
+				Triangle,
+				quad.second
+			};
+
+			spriteUnit->Load(model);
+			spriteUnit->Render();
+			delete spriteUnit;
+		}
+	}
+
+
+
+
+	void OpenGlRenderer::RenderWalls(GameMap* map, float playerX, float playerY, float playerAngle)
+	{
 		int tileX = floorf(playerX);
 		int tileY = floorf(playerY);
 
@@ -52,58 +92,11 @@ namespace MatGl {
 		for (int x = tileX - 10; x < tileX + 10; x++)
 			for (int y = tileY - 10; y < tileY + 10; y++)
 			{
-				//srand(x * y);
-				//double r = (double)rand() / ((double)RAND_MAX + 1);
-				//double g = (double)rand() / ((double)RAND_MAX + 1);
-				//double b = (double)rand() / ((double)RAND_MAX + 1);
-
-
 				auto spot = GetSpot(map, x, y);
 				if (!spot)
 					continue;
 
-				vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-
-				if (spot->tile)
-				{
-					if (spot->tile->offsetHorizontal || spot->tile->offsetVertical)
-					{
-						float max1 = std::max(spot->slideAmount[NORTH], spot->slideAmount[SOUTH]);
-						float max2 = std::max(spot->slideAmount[EAST], spot->slideAmount[WEST]);
-						float dooropen = std::max(max1, max2) / 65535.0f;
-						//The more the door is open, the more transparent we get
-						color = vec4(1.0, 1.0, 1.0, 1.0 - dooropen);
-					}
-				}
-
-				//North things are flipped
-				//West things are flipped
-				auto textureArray = OpenGlTextureManager::WALL_TEXTURES;
-
-				if (spot->sideSolid[MapTile::South]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::South]);
-					auto wall = CreateSouthWall(vec2(x, y + 1), color, texture);
-					walls.insert(walls.end(), wall.begin(), wall.end());
-				}
-				
-				if (spot->sideSolid[MapTile::North]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::North]);
-					auto wall = CreateNorthWall(vec2(x, y), color, texture);
-					walls.insert(walls.end(), wall.begin(), wall.end());
-				}
-				
-				if (spot->sideSolid[MapTile::East]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::East]);
-					auto wall = CreateEastWall(vec2(x, y), color, texture);
-					walls.insert(walls.end(), wall.begin(), wall.end());
-				}
-				
-				if (spot->sideSolid[MapTile::West]) {
-					int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::West]);
-					auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
-					walls.insert(walls.end(), wall.begin(), wall.end());
-				}
-				
+				RenderMapSpot(spot, walls);
 			}
 
 		auto model = Model3d
@@ -114,5 +107,53 @@ namespace MatGl {
 
 		this->renderUnit->Load(model);
 		this->renderUnit->Render();
+	}
+
+	//Renders a single cube of tiles
+	void OpenGlRenderer::RenderMapSpot(GameMap::Plane::Map* spot, VertexList& walls)
+	{
+		int x = spot->GetX();
+		int y = spot->GetY();
+		vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+		
+		if (spot->tile)
+		{
+			if (spot->tile->offsetHorizontal || spot->tile->offsetVertical)
+			{
+				float max1 = std::max(spot->slideAmount[NORTH], spot->slideAmount[SOUTH]);
+				float max2 = std::max(spot->slideAmount[EAST], spot->slideAmount[WEST]);
+				float dooropen = std::max(max1, max2) / 65535.0f;
+				//The more the door is open, the more transparent we get
+				color = vec4(1.0, 1.0, 1.0, 1.0 - dooropen);
+			}
+		}
+
+		//North things are flipped
+		//West things are flipped
+		auto textureArray = OpenGlTextureManager::WALL_TEXTURES;
+
+		if (spot->sideSolid[MapTile::South]) {
+			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::South]);
+			auto wall = CreateSouthWall(vec2(x, y + 1), color, texture);
+			walls.insert(walls.end(), wall.begin(), wall.end());
+		}
+
+		if (spot->sideSolid[MapTile::North]) {
+			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::North]);
+			auto wall = CreateNorthWall(vec2(x, y), color, texture);
+			walls.insert(walls.end(), wall.begin(), wall.end());
+		}
+
+		if (spot->sideSolid[MapTile::East]) {
+			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::East]);
+			auto wall = CreateEastWall(vec2(x, y), color, texture);
+			walls.insert(walls.end(), wall.begin(), wall.end());
+		}
+
+		if (spot->sideSolid[MapTile::West]) {
+			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::West]);
+			auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
+			walls.insert(walls.end(), wall.begin(), wall.end());
+		}
 	}
 }

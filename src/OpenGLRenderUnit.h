@@ -7,7 +7,8 @@ namespace MatGl {
 	class OpenGlRenderUnit
 	{
 	public:
-		OpenGlRenderUnit(GameCamera* camera, GLuint textureArray);
+		OpenGlRenderUnit(GameCamera* camera, GLuint textureArray, Shader* shader);
+		~OpenGlRenderUnit();
 		void Load(Model3d model);
 		void Render();
 	private:

@@ -8,7 +8,7 @@
 
 namespace MatGl {
 	using namespace glm;
-	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(GameCamera* camera, GLuint textureArray)
+	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(GameCamera* camera, GLuint textureArray, Shader* shader)
 	{
 		this->camera = camera;
 		this->textureArray = textureArray;
@@ -20,16 +20,26 @@ namespace MatGl {
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-		this->shader = new Shader("./shader.vert", "./shader.frag");
-		this->shader->use();
-
+		this->shader = shader;
 		CheckGlErrors();
+	}
 
+	OpenGlRenderUnit::~OpenGlRenderUnit()
+	{
+		if(this->vertexArray)
+			glDeleteVertexArrays(1, &this->vertexArray);
+
+		if(this->buffer)
+			glDeleteBuffers(1, &this->buffer);
 	}
 
 	void MatGl::OpenGlRenderUnit::Load(Model3d renderUnit)
 	{
 		//Perform work required to load a VertexList + attributes
+
+		//Activate current vertex array;
+		glBindVertexArray(this->vertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, this->buffer);
 
 		int bufferInBytes = renderUnit.Vertices.size() * sizeof(Vertex);
 		int stride = sizeof(Vertex);  //We stride a whole vertex at a time
@@ -58,6 +68,12 @@ namespace MatGl {
 
 	void MatGl::OpenGlRenderUnit::Render()
 	{
+		//Activate shader
+		this->shader->use();
+
+		//Activate current vertex array;
+		glBindVertexArray(this->vertexArray);
+
 		//Camera stuff
 		//Get the variable that represents our shader uniform
 		unsigned int transformLoc = glGetUniformLocation(this->shader->ID, "mvp");

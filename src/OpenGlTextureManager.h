@@ -4,24 +4,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "MatGlMath.h"
 namespace MatGl {
-	struct Vec2dInt {
-		Vec2dInt(int x, int y) {
-			this->x = x;
-			this->y = y;
-		}
-		int x;
-		int y;
-
-		bool const operator==(const Vec2dInt& o) const {
-			return x == o.x && y == o.y;
-		}
-
-		bool const operator<(const Vec2dInt& o) const {
-			return x < o.x || (x == o.x && y < o.y);
-		}
-	};
-	
 	typedef std::vector<FTexture*> WolfTextureList;
 	typedef std::map<FTextureID, int> TextureLayerMap;
 

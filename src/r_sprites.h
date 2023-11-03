@@ -82,4 +82,8 @@ public:
 
 void R_DrawZoomer(FTextureID texID);
 
+namespace MatGl {
+	FTexture* GetActorSprite(AActor* actor);
+}
+
 #endif

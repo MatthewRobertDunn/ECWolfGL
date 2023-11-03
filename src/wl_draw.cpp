@@ -1248,7 +1248,7 @@ void R_RenderView()
 //
 // draw all the scaled images
 //
-	DrawScaleds();                  // draw scaled stuff
+	//DrawScaleds();                  // draw scaled stuff
 
 #if 0 // USE_RAIN
 	if(GetFeatureFlags() & FF_RAIN)

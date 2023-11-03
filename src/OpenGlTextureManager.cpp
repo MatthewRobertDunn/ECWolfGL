@@ -66,11 +66,11 @@ namespace MatGl {
 
 	GLuint OpenGlTextureManager::GetTextureArray(std::string texturePack)
 	{
-		return this->textureMap[WALL_TEXTURES].TextureArray;
+		return this->textureMap[texturePack].TextureArray;
 	}
 	int OpenGlTextureManager::GetTextureArrayIndexForWolf(std::string texturePack, FTextureID wolfId)
 	{
-		return this->textureMap[WALL_TEXTURES].TextureLayerMap[wolfId];
+		return this->textureMap[texturePack].TextureLayerMap[wolfId];
 	}
 
 	//Group all textures by their width and height
