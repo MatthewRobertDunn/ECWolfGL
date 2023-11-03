@@ -6,6 +6,8 @@
 #include <r_sprites.h>
 #include "MatGlMath.h"
 #include <format>
+#include <chrono>
+#include <iostream>
 namespace MatGl {
 	using namespace glm;
 
@@ -27,6 +29,7 @@ namespace MatGl {
 	{
 		this->textureManager = textureManager;
 		this->wallShader = new Shader("./shader.vert", "./shader.frag");
+		this->spriteShader = new Shader("./shader.vert", "./sprites.frag");
 		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES), wallShader);
 		this->camera = camera;
 
@@ -39,10 +42,15 @@ namespace MatGl {
 	//Negative y is up
 	void OpenGlRenderer::Render(GameMap* map, float playerX, float playerY, float playerAngle)
 	{
+		auto start_time = std::chrono::high_resolution_clock::now();
 		this->RenderWalls(map, playerX, playerY, playerAngle);
+		auto end_time = std::chrono::high_resolution_clock::now();
+		auto millisecs = (end_time - start_time) / std::chrono::milliseconds(1);
+		std::cout << millisecs << std::endl;
+
+		start_time = std::chrono::high_resolution_clock::now();
 
 		std::map<std::string, VertexList> quads;
-
 		for (AActor::Iterator iter = AActor::GetIterator(); iter.Next();)
 		{
 			AActor* actor = iter;
@@ -69,8 +77,8 @@ namespace MatGl {
 		}
 
 		for (const auto& quad : quads) {
-			auto spriteUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(quad.first), wallShader);
-			spriteUnit->DepthMaskEnabled = GL_FALSE;
+			auto spriteUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(quad.first), this->spriteShader);
+			//spriteUnit->DepthMaskEnabled = GL_TRUE;
 			auto model = Model3d
 			{
 				Triangle,
@@ -81,6 +89,9 @@ namespace MatGl {
 			spriteUnit->Render();
 			delete spriteUnit;
 		}
+
+		end_time = std::chrono::high_resolution_clock::now();
+		millisecs = (end_time - start_time) / std::chrono::milliseconds(1);
 	}
 
 
@@ -119,7 +130,7 @@ namespace MatGl {
 		int x = spot->GetX();
 		int y = spot->GetY();
 		vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-
+		
 		if (spot->tile)
 		{
 			if (spot->tile->offsetHorizontal || spot->tile->offsetVertical)

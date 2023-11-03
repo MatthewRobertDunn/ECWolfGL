@@ -122,7 +122,7 @@ namespace MatGl {
 		pos = pos + vec2(0.5, 0.0);
 		auto quad = GetBasicQuad(color, layer);
 		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
+		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
 		auto transform = translateMatrix * scaleMatrix;
 		Transform(transform, quad);
 		return quad;
@@ -134,8 +134,8 @@ namespace MatGl {
 		pos = pos + vec2(0.5, 0.0);
 		auto quad = GetBasicQuad(color, layer);
 		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
-		auto const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
+		auto static const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		auto transform = translateMatrix * scaleMatrix * rotateMatrix;
 		Transform(transform, quad);
 		return quad;
@@ -145,8 +145,8 @@ namespace MatGl {
 		pos = pos + vec2(0.0, 0.5f);
 		auto quad = GetBasicQuad(color, layer);
 		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
-		auto const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
+		auto static const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		auto transform = translateMatrix * scaleMatrix * rotateMatrix;
 		Transform(transform, quad);
 		return quad;
@@ -156,8 +156,8 @@ namespace MatGl {
 		pos = pos + vec2(0.0, 0.5f);
 		auto quad = GetBasicQuad(color, layer);
 		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
-		auto const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
+		auto static const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		auto transform = translateMatrix * scaleMatrix * rotateMatrix;
 		Transform(transform, quad);
 		return quad;

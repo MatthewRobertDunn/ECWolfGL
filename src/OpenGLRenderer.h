@@ -19,5 +19,6 @@ namespace MatGl {
 		OpenGlRenderUnit* renderUnit = nullptr;
 		GameCamera* camera = nullptr;
 		Shader* wallShader = nullptr;
+		Shader* spriteShader = nullptr;
 	};
 }
