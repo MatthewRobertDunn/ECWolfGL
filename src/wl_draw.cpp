@@ -719,7 +719,7 @@ void AsmRefresh()
 	bool playerInPushwallBackTile = focalspot->pushAmount != 0;
 	MatGl::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
 	MatGl::Renderer->Render(map, FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-
+	//return;
 	for(pixx=0;pixx<viewwidth;pixx++)
 	{
 		short angl=midangle+pixelangle[pixx];

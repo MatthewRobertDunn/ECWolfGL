@@ -7,7 +7,7 @@ namespace MatGl {
 	const float WALL_WIDTH = 1.0f;
 	const float FLOOR_HEIGHT = -0.1;
 	typedef std::vector<Vertex> VertexList;
-	VertexList GetQuad(glm::vec2 pos, glm::vec4 color, float layer, float scale);
+	VertexList CreateSprite(glm::vec2 pos, glm::vec4 color, float layer, glm::vec3 cameraPos,  glm::vec2 scale);
 	VertexList CreateSouthWall(glm::vec2 pos, glm::vec4 color, float layer);
 	VertexList CreateNorthWall(glm::vec2 pos, glm::vec4 color, float layer);
 	VertexList CreateEastWall(glm::vec2 pos, glm::vec4 color, float layer);

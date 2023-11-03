@@ -27,9 +27,9 @@ namespace MatGl {
 	{
 		this->textureManager = textureManager;
 		this->wallShader = new Shader("./shader.vert", "./shader.frag");
-		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES),wallShader);
+		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES), wallShader);
 		this->camera = camera;
-		
+
 	}
 
 
@@ -39,9 +39,9 @@ namespace MatGl {
 	//Negative y is up
 	void OpenGlRenderer::Render(GameMap* map, float playerX, float playerY, float playerAngle)
 	{
-		this->RenderWalls(map,playerX,playerY,playerAngle);
+		this->RenderWalls(map, playerX, playerY, playerAngle);
 
-		std::map<std::string,VertexList> quads;
+		std::map<std::string, VertexList> quads;
 
 		for (AActor::Iterator iter = AActor::GetIterator(); iter.Next();)
 		{
@@ -55,18 +55,22 @@ namespace MatGl {
 			//Figure out key for our texture dictionary
 			std::string textureArray = std::format("wolf/{}/{}", texture->GetWidth(), texture->GetHeight());
 
-					
+
 			float x = FixedToFloat(actor->x);
 			float y = FixedToFloat(actor->y);
 
+			float scaleX = (texture->GetWidth() / 64.0f) * 1.10f;
+			float scaleY = (texture->GetHeight() / 64.0f) * 1.10f;
+
 			int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, texture->GetID());
-			auto quad = GetQuad(vec2(x, y), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, 0.2);
+			auto quad = CreateSprite(vec2(x, y), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, this->camera->CameraPosition, vec2(scaleX, scaleY));
 			auto list = &quads[textureArray];
 			list->insert(list->end(), quad.begin(), quad.end());
 		}
 
 		for (const auto& quad : quads) {
 			auto spriteUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(quad.first), wallShader);
+			spriteUnit->DepthMaskEnabled = GL_FALSE;
 			auto model = Model3d
 			{
 				Triangle,
@@ -115,7 +119,7 @@ namespace MatGl {
 		int x = spot->GetX();
 		int y = spot->GetY();
 		vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-		
+
 		if (spot->tile)
 		{
 			if (spot->tile->offsetHorizontal || spot->tile->offsetVertical)

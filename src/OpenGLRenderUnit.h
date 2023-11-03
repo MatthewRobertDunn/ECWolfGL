@@ -9,6 +9,7 @@ namespace MatGl {
 	public:
 		OpenGlRenderUnit(GameCamera* camera, GLuint textureArray, Shader* shader);
 		~OpenGlRenderUnit();
+		GLboolean DepthMaskEnabled = GL_TRUE;
 		void Load(Model3d model);
 		void Render();
 	private:
