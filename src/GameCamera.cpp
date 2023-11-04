@@ -13,8 +13,8 @@ MatGl::GameCamera::GameCamera(int width, int height)
 void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngle)
 {
 	glm::vec3 standingAt = glm::vec3(playerX, playerY, 0.5f);
-	glm::vec3 direction = glm::vec3(cos(playerAngle), -sin(playerAngle), 0.0);
-	glm::vec3 lookingAt = glm::normalize(direction) + standingAt;
+	glm::vec3 direction = glm::normalize(glm::vec3(cos(playerAngle), -sin(playerAngle), 0.0));
+	glm::vec3 lookingAt = direction + standingAt;
 
 
 
@@ -34,4 +34,5 @@ void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngl
 	this->Projection = projection;
 	this->View = view;
 	this->CameraPosition = standingAt;
+	this->Direction = direction;
 }

@@ -88,15 +88,15 @@ namespace MatGl {
 	}
 
 
-	VertexList CreateSprite(vec2 pos, vec4 color, float layer, vec3 cameraPos, vec2 scale) {
+	VertexList CreateSprite(vec2 pos, vec4 color, float layer, vec3 lookAt, vec2 scale) {
 		vec3 up = vec3(0, 0, 1);
 		vec3 spritePosition = vec3(pos, 0.0f);
 
 
 		//Get plane that always faces the camera
-		//auto rightVector = glm::cross(cameraPos - spritePosition, up);
-		auto diff = cameraPos - spritePosition;
-		auto rightVector = vec3(diff.y, -diff.x, 0);
+		auto rightVector = glm::cross(up, lookAt);
+		//auto diff = cameraPos - spritePosition;
+		//auto rightVector = vec3(diff.y, -diff.x, 0);
 
 		scale.y = scale.y * WALL_HEIGHT;
 		//auto quad = GetBasicQuad(color, layer);

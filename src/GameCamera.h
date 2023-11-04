@@ -10,6 +10,7 @@ namespace MatGl {
 		glm::mat4 View;
 		glm::mat4 Projection;
 		glm::vec3 CameraPosition;
+		glm::vec3 Direction;
 
 		int width, height;
 	};
