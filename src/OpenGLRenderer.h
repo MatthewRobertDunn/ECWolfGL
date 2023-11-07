@@ -6,6 +6,7 @@
 #include "OpenGLRenderUnit.h"
 #include <OpenGlTextureManager.h>
 #include <WallGenerator.h>
+#include <ViewFrustrum.h>
 namespace MatGl {
 	class OpenGlRenderer
 	{
@@ -20,5 +21,6 @@ namespace MatGl {
 		GameCamera* camera = nullptr;
 		Shader* wallShader = nullptr;
 		Shader* spriteShader = nullptr;
+		ViewFrustrum* viewFrustrum = nullptr;
 	};
 }

@@ -1,22 +1,21 @@
 #pragma once
 #include <wl_def.h>
 #include <cmath>
+#include "glm/glm.hpp"
 namespace MatGl
 {
-	struct Vec2dInt {
-		Vec2dInt(int x, int y) {
-			this->x = x;
-			this->y = y;
-		}
-		int x;
-		int y;
+	// Custom comparison function for glm::ivec2
+	struct IVec2Compare {
+		inline bool operator()(const glm::ivec2& lhs, const glm::ivec2& rhs) const {
+			return lhs.x < rhs.x || (lhs.x == rhs.x && lhs.y < rhs.y);
+		};
+	};
 
-		bool const operator==(const Vec2dInt& o) const {
-			return x == o.x && y == o.y;
-		}
-
-		bool const operator<(const Vec2dInt& o) const {
-			return x < o.x || (x == o.x && y < o.y);
+	struct IVec3Compare
+	{
+		inline bool operator()(const glm::ivec3& lhs, const glm::ivec3& rhs) const
+		{
+			return lhs.x < rhs.x || (lhs.x == rhs.x && (lhs.y < rhs.y || (lhs.y == rhs.y && lhs.z < rhs.z)));
 		}
 	};
 

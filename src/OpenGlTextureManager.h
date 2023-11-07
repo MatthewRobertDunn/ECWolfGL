@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "MatGlMath.h"
+#include "glm/glm.hpp"
 namespace MatGl {
 	typedef std::vector<FTexture*> WolfTextureList;
 	typedef std::map<FTextureID, int> TextureLayerMap;

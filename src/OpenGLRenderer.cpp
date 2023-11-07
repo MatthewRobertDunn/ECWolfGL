@@ -20,6 +20,7 @@ namespace MatGl {
 		this->spriteShader = new Shader("./shader.vert", "./sprites.frag");
 		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES), wallShader);
 		this->camera = camera;
+		this->viewFrustrum = new ViewFrustrum(20.0);
 
 	}
 
@@ -34,7 +35,7 @@ namespace MatGl {
 		this->RenderWalls(map, playerX, playerY, playerAngle);
 		auto end_time = std::chrono::high_resolution_clock::now();
 		auto millisecs = (end_time - start_time) / std::chrono::milliseconds(1);
-
+		std::cout << millisecs << std::endl;
 		start_time = std::chrono::high_resolution_clock::now();
 
 		std::map<std::string, VertexList> quads;
@@ -42,10 +43,15 @@ namespace MatGl {
 		{
 			AActor* actor = iter;
 
+			if (actor->sprite == SPR_NONE)
+				continue;
+
 			FTexture* texture = GetActorSprite(actor);
+
 			if (!texture || texture->GetID().GetIndex() <= 1) {
 				continue;
 			}
+
 
 			//Figure out key for our texture dictionary
 			std::string textureArray = std::format("wolf/{}/{}", texture->GetWidth(), texture->GetHeight());
@@ -91,8 +97,9 @@ namespace MatGl {
 
 		VertexList walls;
 
-		for (int x = tileX - 10; x < tileX + 10; x++)
-			for (int y = tileY - 10; y < tileY + 10; y++)
+		/*
+		for (int x = tileX - 20; x < tileX + 20; x++)
+			for (int y = tileY - 20; y < tileY + 20; y++)
 			{
 				auto spot = GetSpot(map, x, y);
 				if (!spot)
@@ -100,6 +107,18 @@ namespace MatGl {
 
 				RenderMapSpot(spot, walls);
 			}
+			*/
+
+		vec2 playerPos = vec2(playerX, playerY) - 2.0f * vec2(camera->Direction);
+		this->viewFrustrum->RenderCells(playerAngle - 0.90f, playerAngle + 0.90f,
+			[this, map, &walls, playerPos](ivec2 pos) -> void {
+				auto wallPos = playerPos + vec2(pos);
+				auto spot = GetSpot(map, wallPos.x, wallPos.y);
+				if (spot)
+				{
+					RenderMapSpot(spot, walls);
+				}
+			});
 
 		auto model = Model3d
 		{
@@ -117,7 +136,7 @@ namespace MatGl {
 		int x = spot->GetX();
 		int y = spot->GetY();
 		vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-		
+
 
 		float max1 = std::max(spot->slideAmount[NORTH], spot->slideAmount[SOUTH]);
 		float max2 = std::max(spot->slideAmount[EAST], spot->slideAmount[WEST]);

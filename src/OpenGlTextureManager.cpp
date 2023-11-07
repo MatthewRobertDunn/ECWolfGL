@@ -6,9 +6,12 @@
 #include <OpenGlTextureLoader.h>
 #include <format>
 #include <memory>
+#include <glm/glm.hpp>
+#include <MatGlMath.h>
+using namespace glm;
 namespace MatGl {
 	//prototypes of private functions
-	std::map<Vec2dInt, WolfTextureList> GroupTextures(FTextureManager* wolfTextures);
+	std::map<ivec2, WolfTextureList, IVec2Compare> GroupTextures(FTextureManager* wolfTextures);
 	GLuint CreateTextureArray();
 
 	//Texture to use when rendering walls.
@@ -74,9 +77,9 @@ namespace MatGl {
 	}
 
 	//Group all textures by their width and height
-	std::map<Vec2dInt, WolfTextureList> GroupTextures(FTextureManager* wolfTextures) {
+	std::map<ivec2, WolfTextureList, IVec2Compare> GroupTextures(FTextureManager* wolfTextures) {
 		
-		std::map<Vec2dInt, WolfTextureList> result;
+		std::map<ivec2, WolfTextureList, IVec2Compare> result;
 		
 		const int totalTextures = wolfTextures->NumTextures();
 
@@ -89,7 +92,7 @@ namespace MatGl {
 				continue;
 			}
 
-			auto key = Vec2dInt(currentTexture->GetWidth(), currentTexture->GetHeight());
+			auto key = ivec2(currentTexture->GetWidth(), currentTexture->GetHeight());
 			result[key].push_back(currentTexture);
 		}
 
