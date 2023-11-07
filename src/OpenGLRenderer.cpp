@@ -8,21 +8,9 @@
 #include <format>
 #include <chrono>
 #include <iostream>
+#include "MapCleaner.h"
 namespace MatGl {
 	using namespace glm;
-
-	GameMap::Plane::Map* GetSpot(GameMap* map, int x, int y)
-	{
-		if (x < 0 || y < 0)
-			return nullptr;
-
-		if (!map->IsValidTileCoordinate(x, y, 0)) {
-			return nullptr;
-		}
-
-		return map->GetSpot(x, y, 0);
-	}
-
 
 
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)

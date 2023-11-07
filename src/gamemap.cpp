@@ -53,6 +53,7 @@
 #include "doomerrors.h"
 #include "m_random.h"
 #include "g_mapinfo.h"
+#include "MapCleaner.h"
 
 const FName SpecialThingNames[SMT_NumThings] = {
 	"$Player1Start",
@@ -477,6 +478,8 @@ void GameMap::LoadMap(bool loadingSave)
 
 	if(!loadingSave)
 		ScanTiles();
+
+	MatGl::CleanMap(this);
 }
 
 GameMap::Plane &GameMap::NewPlane()
