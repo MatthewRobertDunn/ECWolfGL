@@ -11,6 +11,7 @@
 #include "MapCleaner.h"
 namespace MatGl {
 	using namespace glm;
+	using namespace std::chrono;
 
 
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
@@ -31,10 +32,10 @@ namespace MatGl {
 	//Negative y is up
 	void OpenGlRenderer::Render(GameMap* map, float playerX, float playerY, float playerAngle)
 	{
-		auto start_time = std::chrono::high_resolution_clock::now();
+		auto start_time = high_resolution_clock::now();
 		this->RenderWalls(map, playerX, playerY, playerAngle);
-		auto end_time = std::chrono::high_resolution_clock::now();
-		auto millisecs = (end_time - start_time) / std::chrono::milliseconds(1);
+		auto end_time = high_resolution_clock::now();
+		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
 		std::cout << millisecs << std::endl;
 		start_time = std::chrono::high_resolution_clock::now();
 
@@ -83,8 +84,8 @@ namespace MatGl {
 			delete spriteUnit;
 		}
 
-		end_time = std::chrono::high_resolution_clock::now();
-		millisecs = (end_time - start_time) / std::chrono::milliseconds(1);
+		end_time = high_resolution_clock::now();
+		millisecs = (end_time - start_time) / milliseconds(1);
 	}
 
 

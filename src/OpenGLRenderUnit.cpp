@@ -94,7 +94,6 @@ namespace MatGl {
 
 		CheckGlErrors();
 
-		glDepthMask(this->DepthMaskEnabled);
 		glDrawArrays(this->mode, 0, this->vertexCount);
 	}
 }

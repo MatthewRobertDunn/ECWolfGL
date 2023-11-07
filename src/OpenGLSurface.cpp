@@ -54,7 +54,7 @@ namespace MatGl {
 	void OpenGlSurface::Render(void* texture)
 	{
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, texture);
-		glDepthMask(GL_TRUE);
+		//glDepthMask(GL_TRUE);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 }

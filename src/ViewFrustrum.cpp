@@ -10,6 +10,7 @@ namespace MatGl {
 
 	MatGl::ViewFrustrum::ViewFrustrum(float renderDistance)
 	{
+		this->cells.resize(NumberRadials);
 		for (int x = -renderDistance; x < renderDistance; x++)
 			for (int y = -renderDistance; y < renderDistance; y++) {
 				vec2 cell = vec2(x, y);
@@ -48,10 +49,10 @@ namespace MatGl {
 					throw std::runtime_error("Overwrote cell");
 				}
 
-				radialList->at(index) = ivec2(x, -y); //Put this cell on this radial.
+				radialList->at(index) = vec2(x, -y); //Put this cell on this radial.
 			}
 	}
-	void ViewFrustrum::RenderCells(float minAngle, float floatMaxAngle, std::function<void(glm::ivec2)> func)
+	void ViewFrustrum::RenderCells(float minAngle, float floatMaxAngle, std::function<void(glm::vec2)> func)
 	{
 		int startRadial = (int)((minAngle / (2 * pi)) * NumberRadials);
 		int endRadial = (int)((floatMaxAngle / (2 * pi)) * NumberRadials);
@@ -63,7 +64,7 @@ namespace MatGl {
 				if (radial < 0) {
 					radial = radial + NumberRadials;
 				}
-				if (!this->cells.contains(radial)) {
+				if (this->cells[radial].empty()) {
 					continue;
 				}
 				auto cell = this->cells[radial][distance];

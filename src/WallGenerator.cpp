@@ -4,6 +4,13 @@
 namespace MatGl {
 	using namespace glm;
 
+	const vec3 UP = vec3(0, 0, 1.0f);
+	const vec2 WALL_SCALE = vec2(1.0, WALL_HEIGHT);
+	const vec3 EAST = vec3(0.0f, 1.0f, 0.0f);
+	const vec3 WEST = vec3(0.0f, -1.0f, 0.0f);
+	const vec3 NORTH = vec3(-1.0f, 0.0f, 0.0f);
+	const vec3 SOUTH = vec3(1.0f, 0.0f, 0.0f);
+
 	VertexList GetBasicQuad(vec4 color, float layer) {
 		VertexList wall{
 			//Triangle 1
@@ -41,38 +48,38 @@ namespace MatGl {
 		return wall;
 	}
 
-	VertexList GetBasicQuad(vec4 color, float layer, vec3 up, vec3 right, vec2 scale) {
+	VertexList GetBasicQuad(vec4 color, float layer, vec3 up, vec3 right, vec2 scale, vec3 pos = vec3(0.0f)) {
 		up = 0.5f * up * scale.y;
 		right = 0.5f * right * scale.x;
 		VertexList wall{
 			//Triangle 1
 			Vertex{
-					up - right,  //TL
+					(up - right) + pos,  //TL
 					color,
 					vec3(0.0,1.0,layer),
 				},
 			Vertex{
-					-up - right,		//BL
+					(-up - right) + pos,		//BL
 					color,
 					vec3(0.0,0.0,layer),
 				},
 			Vertex{
-					up + right, //TR
+					(up + right) + pos, //TR
 					color,
 					vec3(1.0,1.0,layer),
 				},
 			Vertex{	//Triangle 2
-					up + right, //TR
+					(up + right) + pos, //TR
 					color,
 					vec3(1.0,1.0,layer),
 				},
 			Vertex{
-					-up - right,		//BL
+					(-up - right) + pos,		//BL
 					color,
 					vec3(0.0,0.0,layer),
 				},
 			Vertex{
-					-up + right, //BR
+					(-up + right) + pos, //BR
 					color,
 					vec3(1.0,0.0,layer),
 				}
@@ -119,47 +126,24 @@ namespace MatGl {
 
 
 	VertexList CreateSouthWall(vec2 pos, vec4 color, float layer) {
-		pos = pos + vec2(0.5, 0.0);
-		auto quad = GetBasicQuad(color, layer);
-		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
-		auto transform = translateMatrix * scaleMatrix;
-		Transform(transform, quad);
-		return quad;
+		vec3 wallPos = vec3(pos.x + 0.5f, pos.y, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		return GetBasicQuad(color, layer, UP, SOUTH, WALL_SCALE, wallPos);
 	}
-
-
 
 	VertexList CreateNorthWall(vec2 pos, vec4 color, float layer) {
-		pos = pos + vec2(0.5, 0.0);
-		auto quad = GetBasicQuad(color, layer);
-		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
-		auto static const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		auto transform = translateMatrix * scaleMatrix * rotateMatrix;
-		Transform(transform, quad);
-		return quad;
+		vec3 wallPos = vec3(pos.x + 0.5f, pos.y, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		return GetBasicQuad(color, layer, UP, NORTH, WALL_SCALE, wallPos);
 	}
+
 	VertexList CreateEastWall(glm::vec2 pos, glm::vec4 color, float layer)
 	{
-		pos = pos + vec2(0.0, 0.5f);
-		auto quad = GetBasicQuad(color, layer);
-		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
-		auto static const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		auto transform = translateMatrix * scaleMatrix * rotateMatrix;
-		Transform(transform, quad);
-		return quad;
+		vec3 wallPos = vec3(pos.x, pos.y + 0.5f, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		return GetBasicQuad(color, layer, UP, EAST, WALL_SCALE, wallPos);
 	}
+
 	VertexList CreateWestWall(glm::vec2 pos, glm::vec4 color, float layer)
 	{
-		pos = pos + vec2(0.0, 0.5f);
-		auto quad = GetBasicQuad(color, layer);
-		auto const translateMatrix = glm::translate(glm::mat4(1.0f), vec3(pos, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT));
-		auto static const scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(1.0, 1.0, WALL_HEIGHT));
-		auto static const rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(270.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		auto transform = translateMatrix * scaleMatrix * rotateMatrix;
-		Transform(transform, quad);
-		return quad;
+		vec3 wallPos = vec3(pos.x, pos.y + 0.5f, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		return GetBasicQuad(color, layer, UP, WEST, WALL_SCALE, wallPos);
 	}
 }
