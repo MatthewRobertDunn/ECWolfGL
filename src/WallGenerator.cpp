@@ -4,6 +4,13 @@
 namespace MatGl {
 	using namespace glm;
 
+	const float WALL_HEIGHT = 1.0f;
+	const float WALL_WIDTH = 1.0f;
+	const float HALF_WIDTH = WALL_WIDTH * 0.5f;
+	const float HALF_HEIGHT = WALL_HEIGHT * 0.5f;
+	const float FLOOR_HEIGHT = 0.0f;
+
+
 	const vec3 UP = vec3(0, 0, 1.0f);
 	const vec2 WALL_SCALE = vec2(1.0, WALL_HEIGHT);
 	const vec3 EAST = vec3(0.0f, 1.0f, 0.0f);
@@ -96,27 +103,16 @@ namespace MatGl {
 
 
 	VertexList CreateSprite(vec2 pos, vec4 color, float layer, vec3 lookAt, vec2 scale, vec2 offset) {
-		scale = scale * 1.10f; //Not sure why we need this.
+		//scale = scale * 1.10f; //Not sure why we need this.
 		vec3 spritePosition = vec3(pos, 0.0f);
 
 
 		//Get plane that always faces the camera
 		auto cameraRight = glm::cross(UP, lookAt);
-		//auto diff = cameraPos - spritePosition;
-		//auto rightVector = vec3(diff.y, -diff.x, 0);
 
-		scale.y = scale.y * WALL_HEIGHT;
-		//auto quad = GetBasicQuad(color, layer);
 		auto quad = GetBasicQuad(color, layer, UP, glm::normalize(cameraRight), scale);
 
-		//Scale the sprite
-		//auto scaleMatrix = glm::scale(glm::mat4(1.0f), vec3(scale.x, 1.0, scale.y * WALL_HEIGHT));
-		//Transform(scaleMatrix, quad);
-
-		//figure out how high we are off the floor
-		float aboveFloorBy = WALL_HEIGHT * 0.5 + FLOOR_HEIGHT;
 		auto standingAt = vec3(pos, FLOOR_HEIGHT);
-		vec2 wallNormal = vec2(0.0, 1.0);
 
 		//Calculate offset of sprite in terms of our camera basis vectors
 		auto cameraOffset = -cameraRight * offset.x + UP * offset.y * WALL_HEIGHT;
@@ -129,35 +125,35 @@ namespace MatGl {
 
 
 	VertexList CreateSouthWall(vec2 pos, vec4 color, float layer) {
-		vec3 wallPos = vec3(pos.x + 0.5f, pos.y, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		vec3 wallPos = vec3(pos.x + HALF_WIDTH, pos.y, HALF_HEIGHT + FLOOR_HEIGHT);
 		return GetBasicQuad(color, layer, UP, SOUTH, WALL_SCALE, wallPos);
 	}
 
 	VertexList CreateNorthWall(vec2 pos, vec4 color, float layer) {
-		vec3 wallPos = vec3(pos.x + 0.5f, pos.y, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		vec3 wallPos = vec3(pos.x + 0.5f, pos.y, HALF_HEIGHT + FLOOR_HEIGHT);
 		return GetBasicQuad(color, layer, UP, NORTH, WALL_SCALE, wallPos);
 	}
 
 	VertexList CreateEastWall(glm::vec2 pos, glm::vec4 color, float layer)
 	{
-		vec3 wallPos = vec3(pos.x, pos.y + 0.5f, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		vec3 wallPos = vec3(pos.x, pos.y + HALF_WIDTH, HALF_HEIGHT + FLOOR_HEIGHT);
 		return GetBasicQuad(color, layer, UP, EAST, WALL_SCALE, wallPos);
 	}
 
 	VertexList CreateWestWall(glm::vec2 pos, glm::vec4 color, float layer)
 	{
-		vec3 wallPos = vec3(pos.x, pos.y + 0.5f, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
+		vec3 wallPos = vec3(pos.x, pos.y + HALF_WIDTH, HALF_HEIGHT + FLOOR_HEIGHT);
 		return GetBasicQuad(color, layer, UP, WEST, WALL_SCALE, wallPos);
 	}
-	
+
 	VertexList CreateFloor(glm::vec2 pos, glm::vec4 color, float layer)
 	{
-		vec3 wallPos = vec3(pos.x + 0.5f , pos.y + 0.5f,  FLOOR_HEIGHT);
-		return GetBasicQuad(color, layer, EAST, NORTH, vec2(1.0,1.0), wallPos);
+		vec3 wallPos = vec3(pos.x + HALF_WIDTH, pos.y + HALF_WIDTH, FLOOR_HEIGHT);
+		return GetBasicQuad(color, layer, EAST, NORTH, vec2(1.0, 1.0), wallPos);
 	}
 	VertexList CreateCeiling(glm::vec2 pos, glm::vec4 color, float layer)
 	{
-		vec3 wallPos = vec3(pos.x + 0.5f, pos.y + 0.5f, WALL_HEIGHT + FLOOR_HEIGHT);
+		vec3 wallPos = vec3(pos.x + HALF_WIDTH, pos.y + HALF_WIDTH, WALL_HEIGHT + FLOOR_HEIGHT);
 		return GetBasicQuad(color, layer, EAST, NORTH, vec2(1.0, 1.0), wallPos);
 	}
 }

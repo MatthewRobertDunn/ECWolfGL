@@ -19,7 +19,7 @@ namespace MatGl {
 			exit(1);
 		}
 
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		//glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
 		glGenFramebuffers(1, &framebuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);

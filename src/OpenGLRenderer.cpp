@@ -12,7 +12,6 @@
 namespace MatGl {
 	using namespace glm;
 	using namespace std::chrono;
-	const float TILE_WIDTH = 64.0f;
 
 
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
@@ -37,17 +36,18 @@ namespace MatGl {
 		this->RenderWalls(map, playerX, playerY, playerAngle);
 		auto end_time = high_resolution_clock::now();
 		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
-		std::cout << millisecs << "-";
+		//std::cout << millisecs << "-";
 
 		start_time = std::chrono::high_resolution_clock::now();
-		RenderSprites();
+		RenderSprites(map);
 		end_time = high_resolution_clock::now();
 		millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
-		std::cout << millisecs << std::endl;
+		//std::cout << millisecs << std::endl;
 	}
 
-	void OpenGlRenderer::RenderSprites()
+	void OpenGlRenderer::RenderSprites(GameMap* map)
 	{
+		const float TILE_WIDTH_PIXELS = map->GetHeader().tileSize;
 		std::map<std::string, VertexList> quads;
 		for (AActor::Iterator iter = AActor::GetIterator(); iter.Next();)
 		{
@@ -71,15 +71,19 @@ namespace MatGl {
 			float x = FixedToFloat(actor->x);
 			float y = FixedToFloat(actor->y);
 
-			float scaleX = (texture->GetWidth() / TILE_WIDTH);
-			float scaleY = (texture->GetHeight() / TILE_WIDTH);
+			float tileXScale = TILE_WIDTH_PIXELS * FixedToFloat(texture->xScale);
+			float tileYScale = TILE_WIDTH_PIXELS * FixedToFloat(texture->yScale);
+
+
+			float scaleX = texture->GetWidth() / tileXScale;
+			float scaleY = texture->GetHeight() / tileYScale;
 
 			//Convert all these weird pixel coordinates to OpenGL ones
-			float actualLeftOffset = 0.5f * (texture->GetWidth() / TILE_WIDTH) - 0.5f;
-			float actualTopOffset = 0.5f * (texture->GetHeight() / TILE_WIDTH) - 0.5f;
+			float actualLeftOffset = 0.5f * (texture->GetWidth() / tileXScale) - 0.5f;
+			float actualTopOffset = 0.5f * (texture->GetHeight() / tileYScale) - 0.5f;
 
-			float desiredLeftOffset = (texture->LeftOffset / TILE_WIDTH) - 0.5f;
-			float desiredTopOffset = (texture->TopOffset / TILE_WIDTH) - 0.5f;
+			float desiredLeftOffset = (texture->LeftOffset / tileXScale) - 0.5f;
+			float desiredTopOffset = (texture->TopOffset / tileYScale) - 0.5f;
 
 			vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);
 
@@ -190,16 +194,17 @@ namespace MatGl {
 			auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
-
+		/*
 		{
-			auto wall = CreateFloor(vec2(x , y), color, 3.0);
+			auto wall = CreateFloor(vec2(x , y), vec4(0.5,0.5,0.5,1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
 
 		{
-			auto wall = CreateCeiling(vec2(x, y), color, 2.0);
+
+			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
-
+		*/
 	}
 }
