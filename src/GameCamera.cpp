@@ -27,7 +27,7 @@ void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngl
 
 
 	//45 degree perspective view, 0 is near, 100 is far, cutoff 8:6 ratio
-	glm::mat4 projection = glm::perspective(glm::radians(58.0f), (float)width / (float)height, 0.001f, 15.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(58.0f), (float)width / (float)height, 0.001f, 25.0f);
 
 	//Combine into one transform.
 	this->ModelViewProjection = projection * view * model;

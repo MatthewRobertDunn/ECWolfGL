@@ -179,6 +179,7 @@ namespace MatGl {
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
 		
+		/*
 		{
 			auto wall = CreateFloor(vec2(x , y), vec4(0.5,0.5,0.5,1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
@@ -189,5 +190,6 @@ namespace MatGl {
 			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
+		*/
 	}
 }

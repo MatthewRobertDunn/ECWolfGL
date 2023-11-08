@@ -719,7 +719,7 @@ void AsmRefresh()
 	bool playerInPushwallBackTile = focalspot->pushAmount != 0;
 	MatGl::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
 	MatGl::Renderer->Render(map, FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-	//return;
+	return;
 	for(pixx=0;pixx<viewwidth;pixx++)
 	{
 		short angl=midangle+pixelangle[pixx];
@@ -1175,7 +1175,7 @@ void WallRefresh (void)
 	viewz = curbob - players[ConsolePlayer].mo->viewheight;
 
 	AsmRefresh();
-	ScalePost ();                   // no more optimization on last post
+	//ScalePost ();                   // no more optimization on last post
 }
 
 void CalcViewVariables()
