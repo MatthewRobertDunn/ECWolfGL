@@ -12,6 +12,7 @@
 namespace MatGl {
 	using namespace glm;
 	using namespace std::chrono;
+	const float TILE_WIDTH = 64.0f;
 
 
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
@@ -36,9 +37,17 @@ namespace MatGl {
 		this->RenderWalls(map, playerX, playerY, playerAngle);
 		auto end_time = high_resolution_clock::now();
 		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
-		std::cout << millisecs << std::endl;
-		start_time = std::chrono::high_resolution_clock::now();
+		std::cout << millisecs << "-";
 
+		start_time = std::chrono::high_resolution_clock::now();
+		RenderSprites();
+		end_time = high_resolution_clock::now();
+		millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
+		std::cout << millisecs << std::endl;
+	}
+
+	void OpenGlRenderer::RenderSprites()
+	{
 		std::map<std::string, VertexList> quads;
 		for (AActor::Iterator iter = AActor::GetIterator(); iter.Next();)
 		{
@@ -53,6 +62,7 @@ namespace MatGl {
 				continue;
 			}
 
+			double foo = texture->GetScaledLeftOffsetDouble();
 
 			//Figure out key for our texture dictionary
 			std::string textureArray = std::format("wolf/{}/{}", texture->GetWidth(), texture->GetHeight());
@@ -61,11 +71,22 @@ namespace MatGl {
 			float x = FixedToFloat(actor->x);
 			float y = FixedToFloat(actor->y);
 
-			float scaleX = (texture->GetWidth() / 64.0f) * 1.10f;
-			float scaleY = (texture->GetHeight() / 64.0f) * 1.10f;
+			float scaleX = (texture->GetWidth() / TILE_WIDTH);
+			float scaleY = (texture->GetHeight() / TILE_WIDTH);
+
+			//Convert all these weird pixel coordinates to OpenGL ones
+			float actualLeftOffset = 0.5f * (texture->GetWidth() / TILE_WIDTH) - 0.5f;
+			float actualTopOffset = 0.5f * (texture->GetHeight() / TILE_WIDTH) - 0.5f;
+
+			float desiredLeftOffset = (texture->LeftOffset / TILE_WIDTH) - 0.5f;
+			float desiredTopOffset = (texture->TopOffset / TILE_WIDTH) - 0.5f;
+
+			vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);
+
+			
 
 			int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, texture->GetID());
-			auto quad = CreateSprite(vec2(x, y), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, this->camera->Direction, vec2(scaleX, scaleY));
+			auto quad = CreateSprite(vec2(x, y), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, this->camera->Direction, vec2(scaleX, scaleY), spriteOffset);
 			auto list = &quads[textureArray];
 			list->insert(list->end(), quad.begin(), quad.end());
 		}
@@ -83,13 +104,7 @@ namespace MatGl {
 			spriteUnit->Render();
 			delete spriteUnit;
 		}
-
-		end_time = high_resolution_clock::now();
-		millisecs = (end_time - start_time) / milliseconds(1);
 	}
-
-
-
 
 	void OpenGlRenderer::RenderWalls(GameMap* map, float playerX, float playerY, float playerAngle)
 	{

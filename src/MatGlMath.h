@@ -21,8 +21,7 @@ namespace MatGl
 
 	inline float FixedToFloat(fixed x) {
 
-		float result = (float)(x >> 16) + (float)(x & 0xFFFF) / 0xFFFF;
-		return result;
+		return (float)x / (float)0xFFFF;
 	}
 
 	inline float AngleToFloat(angle_t x) {

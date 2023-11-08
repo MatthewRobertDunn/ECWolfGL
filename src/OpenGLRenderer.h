@@ -14,6 +14,7 @@ namespace MatGl {
 		OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager);
 		void Render(GameMap* map, float playerX, float playerY, float playerAngle);
 	private:
+		void RenderSprites();
 		void RenderWalls(GameMap* map, float playerX, float playerY, float playerAngle);
 		void RenderMapSpot(GameMap::Plane::Map* spot, VertexList& walls);
 		OpenGlTextureManager* textureManager = nullptr;
