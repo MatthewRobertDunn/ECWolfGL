@@ -117,6 +117,9 @@ namespace MatGl {
 		//Calculate offset of sprite in terms of our camera basis vectors
 		auto cameraOffset = -cameraRight * offset.x + UP * offset.y * WALL_HEIGHT;
 
+		//For some reason we have to move slightly closer to the camera in the lookat direction
+		cameraOffset = cameraOffset - 0.1340f * lookAt;
+
 		auto translateMatrix = glm::translate(glm::mat4(1.0f), standingAt + cameraOffset);
 		Transform(translateMatrix, quad);
 
