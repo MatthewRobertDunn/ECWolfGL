@@ -149,4 +149,15 @@ namespace MatGl {
 		vec3 wallPos = vec3(pos.x, pos.y + 0.5f, WALL_HEIGHT * 0.5 + FLOOR_HEIGHT);
 		return GetBasicQuad(color, layer, UP, WEST, WALL_SCALE, wallPos);
 	}
+	
+	VertexList CreateFloor(glm::vec2 pos, glm::vec4 color, float layer)
+	{
+		vec3 wallPos = vec3(pos.x + 0.5f , pos.y + 0.5f,  FLOOR_HEIGHT);
+		return GetBasicQuad(color, layer, EAST, NORTH, vec2(1.0,1.0), wallPos);
+	}
+	VertexList CreateCeiling(glm::vec2 pos, glm::vec4 color, float layer)
+	{
+		vec3 wallPos = vec3(pos.x + 0.5f, pos.y + 0.5f, WALL_HEIGHT + FLOOR_HEIGHT);
+		return GetBasicQuad(color, layer, EAST, NORTH, vec2(1.0, 1.0), wallPos);
+	}
 }

@@ -190,5 +190,16 @@ namespace MatGl {
 			auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
+
+		{
+			auto wall = CreateFloor(vec2(x , y), color, 3.0);
+			walls.insert(walls.end(), wall.begin(), wall.end());
+		}
+
+		{
+			auto wall = CreateCeiling(vec2(x, y), color, 2.0);
+			walls.insert(walls.end(), wall.begin(), wall.end());
+		}
+
 	}
 }
