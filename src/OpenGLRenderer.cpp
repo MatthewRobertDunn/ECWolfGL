@@ -62,8 +62,6 @@ namespace MatGl {
 				continue;
 			}
 
-			double foo = texture->GetScaledLeftOffsetDouble();
-
 			//Figure out key for our texture dictionary
 			std::string textureArray = std::format("wolf/{}/{}", texture->GetWidth(), texture->GetHeight());
 
@@ -86,8 +84,6 @@ namespace MatGl {
 			float desiredTopOffset = (texture->TopOffset / tileYScale) - 0.5f;
 
 			vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);
-
-			
 
 			int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, texture->GetID());
 			auto quad = CreateSprite(vec2(x, y), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, this->camera->Direction, vec2(scaleX, scaleY), spriteOffset);
@@ -116,18 +112,6 @@ namespace MatGl {
 		int tileY = floorf(playerY);
 
 		VertexList walls;
-
-		/*
-		for (int x = tileX - 20; x < tileX + 20; x++)
-			for (int y = tileY - 20; y < tileY + 20; y++)
-			{
-				auto spot = GetSpot(map, x, y);
-				if (!spot)
-					continue;
-
-				RenderMapSpot(spot, walls);
-			}
-			*/
 
 		vec2 playerPos = vec2(playerX, playerY) - 2.0f * vec2(camera->Direction);
 		this->viewFrustrum->RenderCells(playerAngle - 0.90f, playerAngle + 0.90f,
@@ -194,7 +178,7 @@ namespace MatGl {
 			auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
-		/*
+		
 		{
 			auto wall = CreateFloor(vec2(x , y), vec4(0.5,0.5,0.5,1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
@@ -205,6 +189,5 @@ namespace MatGl {
 			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
-		*/
 	}
 }
