@@ -84,6 +84,7 @@ void R_DrawZoomer(FTextureID texID);
 
 namespace MatGl {
 	FTexture* GetActorSprite(AActor* actor);
+	FTexture* GetPlayerSprite(AActor* actor, const Frame* frame);
 }
 
 #endif

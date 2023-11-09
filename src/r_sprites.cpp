@@ -798,3 +798,17 @@ FTexture* MatGl::GetActorSprite(AActor* actor)
 
 	return tex;
 }
+
+FTexture* MatGl::GetPlayerSprite(AActor* actor, const Frame* frame) {
+	if (frame->spriteInf == SPR_NONE || loadedSprites[frame->spriteInf].numFrames == 0)
+		return nullptr;
+
+	const Sprite& spr = spriteFrames[loadedSprites[frame->spriteInf].frames + frame->frame];
+	FTexture* tex;
+	if (spr.rotations == 0)
+		tex = TexMan[spr.texture[0]];
+	else
+		tex = TexMan[spr.texture[(CalcRotate(actor) + 4) % 8]];
+	
+	return tex;
+}

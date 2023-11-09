@@ -9,6 +9,8 @@
 #include <chrono>
 #include <iostream>
 #include "MapCleaner.h"
+#include <wl_agent.h>
+#include "a_inventory.h"
 namespace MatGl {
 	using namespace glm;
 	using namespace std::chrono;
@@ -43,6 +45,8 @@ namespace MatGl {
 		end_time = high_resolution_clock::now();
 		millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
 		//std::cout << millisecs << std::endl;
+
+		RenderPlayer(playerX, playerY, playerAngle);
 	}
 
 	void OpenGlRenderer::RenderSprites(GameMap* map)
@@ -132,6 +136,29 @@ namespace MatGl {
 
 		this->renderUnit->Load(model);
 		this->renderUnit->Render();
+	}
+	const int ConsolePlayer = 0;
+	void OpenGlRenderer::RenderPlayer(float playerX, float playerY, float playerAngle)
+	{
+		for (unsigned int i = 0; i < player_t::NUM_PSPRITES; ++i)
+		{
+			if (!players[ConsolePlayer].psprite[i].frame)
+				return;
+
+			fixed xoffset, yoffset;
+			players[ConsolePlayer].BobWeapon(&xoffset, &yoffset);
+
+			this->DrawPlayerSprite(players[ConsolePlayer].ReadyWeapon, players[ConsolePlayer].psprite[i].frame, players[ConsolePlayer].psprite[i].sx + xoffset, players[ConsolePlayer].psprite[i].sy + yoffset);
+		}
+	}
+
+	void OpenGlRenderer::DrawPlayerSprite(AActor* actor, const Frame* frame, fixed offsetX, fixed offsetY)
+	{
+		auto texture = MatGl::GetPlayerSprite(actor, frame);
+		if (!texture) {
+			return;
+		}
+
 	}
 
 	//Renders a single cube of tiles
