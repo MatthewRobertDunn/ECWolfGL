@@ -1,5 +1,5 @@
 // WL_DRAW.C
-
+#define MATGL
 #include "wl_def.h"
 #include "id_sd.h"
 #include "id_in.h"
@@ -29,6 +29,7 @@
 #include "thingdef/thingdef.h"
 #include <cmath>
 #include <OpenGlMain.h>
+
 
 /*
 =============================================================================
@@ -719,7 +720,9 @@ void AsmRefresh()
 	bool playerInPushwallBackTile = focalspot->pushAmount != 0;
 	MatGl::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
 	MatGl::Renderer->Render(map, FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-	return;
+	#ifdef MATGL
+		return;
+	#endif
 	for(pixx=0;pixx<viewwidth;pixx++)
 	{
 		short angl=midangle+pixelangle[pixx];
@@ -1175,7 +1178,9 @@ void WallRefresh (void)
 	viewz = curbob - players[ConsolePlayer].mo->viewheight;
 
 	AsmRefresh();
-	//ScalePost ();                   // no more optimization on last post
+	#ifndef MATGL
+		ScalePost ();                   // no more optimization on last post
+	#endif
 }
 
 void CalcViewVariables()
@@ -1248,8 +1253,9 @@ void R_RenderView()
 //
 // draw all the scaled images
 //
-	//DrawScaleds();                  // draw scaled stuff
-
+#ifndef MATGL
+	DrawScaleds();                  // draw scaled stuff
+#endif
 #if 0 // USE_RAIN
 	if(GetFeatureFlags() & FF_RAIN)
 		DrawRain(vbuf, vbufPitch);
@@ -1259,8 +1265,9 @@ void R_RenderView()
 		DrawSnow(vbuf, vbufPitch);
 #endif
 
+#ifndef MATGL
 	DrawPlayerWeapon ();    // draw player's hands
-
+#endif
 	if((control[ConsolePlayer].buttonstate[bt_showstatusbar] || control[ConsolePlayer].buttonheld[bt_showstatusbar]) && viewsize == 21)
 	{
 		ingame = false;

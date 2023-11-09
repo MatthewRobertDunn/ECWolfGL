@@ -21,6 +21,7 @@ namespace MatGl {
 		this->textureManager = textureManager;
 		this->wallShader = new Shader("./shader.vert", "./shader.frag");
 		this->spriteShader = new Shader("./shader.vert", "./sprites.frag");
+		this->hudShader = new Shader("./hud.vert", "./sprites.frag");
 		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES), wallShader);
 		this->camera = camera;
 		this->viewFrustrum = new ViewFrustrum(20.0);
@@ -137,30 +138,6 @@ namespace MatGl {
 		this->renderUnit->Load(model);
 		this->renderUnit->Render();
 	}
-	const int ConsolePlayer = 0;
-	void OpenGlRenderer::RenderPlayer(float playerX, float playerY, float playerAngle)
-	{
-		for (unsigned int i = 0; i < player_t::NUM_PSPRITES; ++i)
-		{
-			if (!players[ConsolePlayer].psprite[i].frame)
-				return;
-
-			fixed xoffset, yoffset;
-			players[ConsolePlayer].BobWeapon(&xoffset, &yoffset);
-
-			this->DrawPlayerSprite(players[ConsolePlayer].ReadyWeapon, players[ConsolePlayer].psprite[i].frame, players[ConsolePlayer].psprite[i].sx + xoffset, players[ConsolePlayer].psprite[i].sy + yoffset);
-		}
-	}
-
-	void OpenGlRenderer::DrawPlayerSprite(AActor* actor, const Frame* frame, fixed offsetX, fixed offsetY)
-	{
-		auto texture = MatGl::GetPlayerSprite(actor, frame);
-		if (!texture) {
-			return;
-		}
-
-	}
-
 	//Renders a single cube of tiles
 	void OpenGlRenderer::RenderMapSpot(GameMap::Plane::Map* spot, VertexList& walls)
 	{
@@ -205,8 +182,8 @@ namespace MatGl {
 			auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
+
 		
-		/*
 		{
 			auto wall = CreateFloor(vec2(x , y), vec4(0.5,0.5,0.5,1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
@@ -217,6 +194,72 @@ namespace MatGl {
 			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
-		*/
+	}
+
+
+	const int ConsolePlayer = 0;
+	void OpenGlRenderer::RenderPlayer(float playerX, float playerY, float playerAngle)
+	{
+		for (unsigned int i = 0; i < player_t::NUM_PSPRITES; ++i)
+		{
+			if (!players[ConsolePlayer].psprite[i].frame)
+				return;
+
+			fixed xoffset, yoffset;
+			players[ConsolePlayer].BobWeapon(&xoffset, &yoffset);
+
+			this->DrawPlayerSprite(players[ConsolePlayer].ReadyWeapon, players[ConsolePlayer].psprite[i].frame, players[ConsolePlayer].psprite[i].sx + xoffset, players[ConsolePlayer].psprite[i].sy + yoffset);
+		}
+	}
+
+	void OpenGlRenderer::DrawPlayerSprite(AActor* actor, const Frame* frame, fixed offsetX, fixed offsetY)
+	{
+		auto texture = MatGl::GetPlayerSprite(actor, frame);
+		if (!texture) {
+			return;
+		}
+
+		//Figure out key for our texture dictionary
+		std::string textureArray = std::format("wolf/{}/{}", texture->GetWidth(), texture->GetHeight());
+
+		//Create a quad to hold this hud
+		int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, texture->GetID());
+
+
+		float PIXELS_X = 320.0f;
+		float PIXELS_Y = 200.0f;
+		float ASPECT_RATIO = (9.0f / 6.0f);
+
+		float tileXScale = PIXELS_X * FixedToFloat(texture->xScale) * 0.5f * ASPECT_RATIO;
+		float tileYScale = PIXELS_Y * FixedToFloat(texture->yScale) * 0.5f;
+
+
+		float scaleX = texture->GetWidth() / tileXScale;
+		float scaleY = texture->GetHeight() / tileYScale;
+
+		//Convert all these weird pixel coordinates to OpenGL ones
+		float actualLeftOffset = -0.5f * scaleX - 1.0f;
+		float actualTopOffset = -1 + 0.5f*scaleY;
+
+		float desiredLeftOffset = -(160 + texture->LeftOffset) / tileXScale;
+		float desiredTopOffset = 0.0f;
+
+		vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);
+
+		auto quad = CreateHudQuad(spriteOffset, vec4(1.0, 1.0, 1.0, 1.0), textureIndex, vec2(scaleX, scaleY));
+
+		//render it using our HUD shader
+		auto spriteUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(textureArray), this->hudShader);
+
+		//Create 3d model, we are using triangles.
+		auto model = Model3d
+		{
+			Triangle,
+			quad
+		};
+
+		spriteUnit->Load(model);
+		spriteUnit->Render();
+		delete spriteUnit;
 	}
 }

@@ -25,6 +25,7 @@ namespace MatGl {
 		GameCamera* camera = nullptr;
 		Shader* wallShader = nullptr;
 		Shader* spriteShader = nullptr;
+		Shader* hudShader = nullptr;
 		ViewFrustrum* viewFrustrum = nullptr;
 	};
 }

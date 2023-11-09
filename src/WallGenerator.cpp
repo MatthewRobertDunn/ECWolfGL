@@ -101,6 +101,20 @@ namespace MatGl {
 		}
 	}
 
+	/// <summary>
+	/// Create a quad suitable for display as a hud element
+	/// </summary>
+	/// <param name="pos">position in opengl screen coords</param>
+	/// <param name="color">rgba</param>
+	/// <param name="layer">what texture to use</param>
+	/// <param name="scale"></param>
+	/// <returns></returns>
+	VertexList CreateHudQuad(vec2 pos, vec4 color, float layer, vec2 scale) {
+		const vec3 up = vec3(0.0, 1.0, 0.0);
+		const vec3 right = vec3(1.0, 0.0, 0.0);
+		return GetBasicQuad(color, layer, up, right, scale,vec3(pos,0.0f));
+	}
+
 
 	VertexList CreateSprite(vec2 pos, vec4 color, float layer, vec3 lookAt, vec2 scale, vec2 offset) {
 		//scale = scale * 1.10f; //Not sure why we need this.
