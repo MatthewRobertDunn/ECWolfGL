@@ -45,12 +45,14 @@ namespace MatGl {
 		int stride = sizeof(Vertex);  //We stride a whole vertex at a time
 
 		glBufferData(GL_ARRAY_BUFFER, bufferInBytes, renderUnit.Vertices.data(), GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0); //position
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0); //position vec3
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3))); //color
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3))); //normal vec3
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3) + sizeof(vec4))); //texture
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void*)(2*sizeof(vec3))); //color vec4
 		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(2*sizeof(vec3) + sizeof(vec4))); //texture
+		glEnableVertexAttribArray(3);
 
 		this->vertexCount = renderUnit.Vertices.size();
 		

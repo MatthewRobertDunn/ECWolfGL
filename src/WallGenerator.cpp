@@ -17,76 +17,46 @@ namespace MatGl {
 	const vec3 WEST = vec3(0.0f, -1.0f, 0.0f);
 	const vec3 NORTH = vec3(-1.0f, 0.0f, 0.0f);
 	const vec3 SOUTH = vec3(1.0f, 0.0f, 0.0f);
-
-	VertexList GetBasicQuad(vec4 color, float layer) {
-		VertexList wall{
-			//Triangle 1
-			Vertex{
-					vec3(-0.5f, 0.0f ,0.5f) ,  //TL
-					color,
-					vec3(0.0,1.0,layer),
-				},
-			Vertex{
-					vec3(-0.5f, 0.0f , -0.5f),		//BL
-					color,
-					vec3(0.0,0.0,layer),
-				},
-			Vertex{
-					vec3(0.5f, 0.0f , 0.5f), //TR
-					color,
-					vec3(1.0,1.0,layer),
-				},
-			Vertex{
-					vec3(0.5f, 0.0f , 0.5f), //TR
-					color,
-					vec3(1.0,1.0,layer),
-				},
-			Vertex{
-					vec3(-0.5f, 0.0f , -0.5f),			//BL
-					color,
-					vec3(0.0,0.0,layer),
-				},
-			Vertex{
-					vec3(0.5f, 0.0f , -0.5f), //BR
-					color,
-					vec3(1.0,0.0,layer),
-				}
-		};
-		return wall;
-	}
-
+		
 	VertexList GetBasicQuad(vec4 color, float layer, vec3 up, vec3 right, vec2 scale, vec3 pos = vec3(0.0f)) {
+		auto normal = glm::normalize(glm::cross(up, right));
 		up = 0.5f * up * scale.y;
 		right = 0.5f * right * scale.x;
 		VertexList wall{
 			//Triangle 1
 			Vertex{
 					(up - right) + pos,  //TL
+					normal,
 					color,
 					vec3(0.0,1.0,layer),
 				},
 			Vertex{
 					(-up - right) + pos,		//BL
+					normal,
 					color,
 					vec3(0.0,0.0,layer),
 				},
 			Vertex{
 					(up + right) + pos, //TR
+					normal,
 					color,
 					vec3(1.0,1.0,layer),
 				},
 			Vertex{	//Triangle 2
 					(up + right) + pos, //TR
+					normal,
 					color,
 					vec3(1.0,1.0,layer),
 				},
 			Vertex{
 					(-up - right) + pos,		//BL
+					normal,
 					color,
 					vec3(0.0,0.0,layer),
 				},
 			Vertex{
 					(-up + right) + pos, //BR
+					normal,
 					color,
 					vec3(1.0,0.0,layer),
 				}
