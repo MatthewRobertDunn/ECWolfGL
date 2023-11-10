@@ -245,11 +245,11 @@ namespace MatGl {
 		float scaleY = texture->GetHeight() / tileYScale;
 
 		//Convert all these weird pixel coordinates to OpenGL ones
-		float actualLeftOffset = -0.5*scaleX;
-		float actualTopOffset = -1 + 0.5f * scaleY;
+		float actualLeftOffset = -0.5 * scaleX;
+		float actualTopOffset = (0.5f * scaleY - 1.0);
 
 		float desiredLeftOffset = -(PIXELS_X_HALF + texture->LeftOffset) / tileXScale;
-		float desiredTopOffset = 0.0f;
+		float desiredTopOffset = 0.0f; // ((68.0 + texture->TopOffset) / tileYScale);
 
 		vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);
 
