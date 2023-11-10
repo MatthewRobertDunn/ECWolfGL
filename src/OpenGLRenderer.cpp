@@ -183,9 +183,10 @@ namespace MatGl {
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
 
-		
+		/*
+
 		{
-			auto wall = CreateFloor(vec2(x , y), vec4(0.5,0.5,0.5,1.0), -1);
+			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
 
@@ -194,6 +195,7 @@ namespace MatGl {
 			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
+		*/
 	}
 
 
@@ -230,18 +232,23 @@ namespace MatGl {
 		float PIXELS_Y = 200.0f;
 		float ASPECT_RATIO = (9.0f / 6.0f);
 
+		float PIXELS_X_HALF = FixedToFloat(texture->xScale) * 320.0 * 0.5f;
+		float PIXELS_Y_HALF = FixedToFloat(texture->yScale) * 136.0 * 0.5f;
+
 		float tileXScale = PIXELS_X * FixedToFloat(texture->xScale) * 0.5f * ASPECT_RATIO;
 		float tileYScale = PIXELS_Y * FixedToFloat(texture->yScale) * 0.5f;
 
+		//float tileXScale = PIXELS_X * 0.5f * ASPECT_RATIO;
+		//float tileYScale = PIXELS_Y * 0.5f;
 
 		float scaleX = texture->GetWidth() / tileXScale;
 		float scaleY = texture->GetHeight() / tileYScale;
 
 		//Convert all these weird pixel coordinates to OpenGL ones
-		float actualLeftOffset = -0.5f * scaleX - 1.0f;
-		float actualTopOffset = -1 + 0.5f*scaleY;
+		float actualLeftOffset = -0.5*scaleX;
+		float actualTopOffset = -1 + 0.5f * scaleY;
 
-		float desiredLeftOffset = -(160 + texture->LeftOffset) / tileXScale;
+		float desiredLeftOffset = -(PIXELS_X_HALF + texture->LeftOffset) / tileXScale;
 		float desiredTopOffset = 0.0f;
 
 		vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);

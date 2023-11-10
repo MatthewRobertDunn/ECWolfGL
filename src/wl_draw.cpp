@@ -1265,9 +1265,9 @@ void R_RenderView()
 		DrawSnow(vbuf, vbufPitch);
 #endif
 
-#ifndef MATGL
+//#ifndef MATGL
 	DrawPlayerWeapon ();    // draw player's hands
-#endif
+//#endif
 	if((control[ConsolePlayer].buttonstate[bt_showstatusbar] || control[ConsolePlayer].buttonheld[bt_showstatusbar]) && viewsize == 21)
 	{
 		ingame = false;

@@ -15,7 +15,7 @@ namespace MatGl {
 	GLuint CreateTextureArray();
 
 	//Texture to use when rendering walls.
-	const std::string OpenGlTextureManager::WALL_TEXTURES = "wolf/64/64";
+	const std::string OpenGlTextureManager::WALL_TEXTURES = "wolf/128/128";
 
 	OpenGlTextureManager::OpenGlTextureManager()
 	{
