@@ -654,18 +654,11 @@ void R_DrawPlayerSprite(AActor *actor, const Frame *frame, fixed offsetX, fixed 
 		const int shade = LIGHT2SHADE(gLevelLight) - (gLevelMaxLightVis/LIGHTVISIBILITY_FACTOR);
 		colormap = &NormalLight.Maps[GETPALOOKUP(0, shade)<<8];
 	}
-
-	const fixed scale = viewheight<<(FRACBITS-1);
-
-	const fixed centeringOffset = (centerx - 2*centerxwide)<<FRACBITS;
-	const fixed leftedge = FixedMul((160<<FRACBITS) - fixed(tex->GetScaledLeftOffsetDouble()*FRACUNIT) + offsetX, pspritexscale) + centeringOffset;
-	fixed upperedge = ((100-32)<<FRACBITS) + fixed(tex->GetScaledTopOffsetDouble()*FRACUNIT) - offsetY - AspectCorrection[r_ratio].tallscreen;
-	if(viewsize == 21 && players[ConsolePlayer].ReadyWeapon)
-	{
-		upperedge -= players[ConsolePlayer].ReadyWeapon->yadjust;
-	}
-	upperedge = scale - FixedMul(upperedge, pspriteyscale);
-
+	
+	auto offsets = MatGl::GetWeaponOffsets(tex, offsetX, offsetY);
+	auto leftedge = offsets.first;
+	auto upperedge = offsets.second;
+	
 	// startX and startY indicate where the sprite becomes visible, we only
 	// need to calculate the start since the end will be determined when we hit
 	// the view during drawing.
@@ -811,4 +804,25 @@ FTexture* MatGl::GetPlayerSprite(AActor* actor, const Frame* frame) {
 		tex = TexMan[spr.texture[(CalcRotate(actor) + 4) % 8]];
 	
 	return tex;
+}
+
+#include <utility>
+
+
+
+std::pair<fixed, fixed> MatGl::GetWeaponOffsets(FTexture* tex, fixed offsetX, fixed offsetY) {
+	const fixed scale = viewheight << (FRACBITS - 1);
+	const fixed centeringOffset = (centerx - 2 * centerxwide) << FRACBITS;
+	const fixed leftedge = FixedMul((160 << FRACBITS) - fixed(tex->GetScaledLeftOffsetDouble() * FRACUNIT) + offsetX, pspritexscale) + centeringOffset;
+	fixed upperedge = ((100 - 32) << FRACBITS) + fixed(tex->GetScaledTopOffsetDouble() * FRACUNIT) - offsetY - AspectCorrection[r_ratio].tallscreen;
+
+	if (viewsize == 21 && players[ConsolePlayer].ReadyWeapon)
+	{
+		upperedge -= players[ConsolePlayer].ReadyWeapon->yadjust;
+	}
+
+
+	upperedge = scale - FixedMul(upperedge, pspriteyscale);
+
+	return std::pair(leftedge, upperedge);
 }

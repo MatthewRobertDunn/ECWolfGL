@@ -183,6 +183,7 @@ namespace MatGl {
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
 
+		/*
 		{
 			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
@@ -193,6 +194,7 @@ namespace MatGl {
 			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
+		*/
 	}
 
 
@@ -229,26 +231,28 @@ namespace MatGl {
 		float PIXELS_Y = 200.0f;
 		float ASPECT_RATIO = (9.0f / 6.0f);
 
-		float PIXELS_X_HALF = FixedToFloat(texture->xScale) * 320.0 * 0.5f;
-		float PIXELS_Y_HALF = FixedToFloat(texture->yScale) * 136.0 * 0.5f;
-
 		float tileXScale = PIXELS_X * FixedToFloat(texture->xScale) * 0.5f * ASPECT_RATIO;
 		float tileYScale = PIXELS_Y * FixedToFloat(texture->yScale) * 0.5f;
-
-		//float tileXScale = PIXELS_X * 0.5f * ASPECT_RATIO;
-		//float tileYScale = PIXELS_Y * 0.5f;
 
 		float scaleX = texture->GetWidth() / tileXScale;
 		float scaleY = texture->GetHeight() / tileYScale;
 
-		//Convert all these weird pixel coordinates to OpenGL ones
-		float actualLeftOffset = -0.5 * scaleX;
-		float actualTopOffset = (0.5f * scaleY - 1.0);
 
-		float desiredLeftOffset = -(PIXELS_X_HALF + texture->LeftOffset) / tileXScale;
-		float desiredTopOffset = 0.0f; // ((68.0 + texture->TopOffset) / tileYScale);
+		auto glCurrentOffset = -vec2(0.5 * scaleX, 0.5 * scaleY);
 
-		vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);
+		auto offsets = MatGl::GetWeaponOffsets(texture, offsetX, offsetY);
+		vec2 glOffsets = vec2(FixedToFloat(offsets.first), FixedToFloat(offsets.second));
+		
+		//Scale to 0 to 2
+		glOffsets.x /= (0.5f * this->camera->width);
+		glOffsets.y /= (0.5f * this->camera->height);
+		//subtract 1 to centre
+		glOffsets -= vec2(1.0, 1.0);
+
+
+		vec2 spriteOffset = glOffsets - glCurrentOffset;
+
+		std::cout << spriteOffset.y << ",";
 
 		auto quad = CreateHudQuad(spriteOffset, vec4(1.0, 1.0, 1.0, 1.0), textureIndex, vec2(scaleX, scaleY));
 

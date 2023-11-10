@@ -82,9 +82,11 @@ public:
 
 void R_DrawZoomer(FTextureID texID);
 
+#include <utility>
 namespace MatGl {
 	FTexture* GetActorSprite(AActor* actor);
 	FTexture* GetPlayerSprite(AActor* actor, const Frame* frame);
+	std::pair<fixed, fixed> GetWeaponOffsets(FTexture* tex, fixed offsetX, fixed offsetY);
 }
 
 #endif
