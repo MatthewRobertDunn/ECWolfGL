@@ -1,5 +1,4 @@
 // WL_DRAW.C
-#define MATGL
 #include "wl_def.h"
 #include "id_sd.h"
 #include "id_in.h"
