@@ -247,10 +247,7 @@ namespace MatGl {
 		//subtract 1 to centre
 		glOffsets -= vec2(1.0, 1.0);
 
-
 		vec2 spriteOffset = glOffsets - glCurrentOffset;
-
-		std::cout << spriteOffset.y << ",";
 
 		auto quad = CreateHudQuad(spriteOffset, vec4(1.0, 1.0, 1.0, 1.0), textureIndex, vec2(scaleX, scaleY));
 
