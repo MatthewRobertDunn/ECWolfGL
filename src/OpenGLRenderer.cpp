@@ -184,7 +184,7 @@ namespace MatGl {
 		}
 
 		{
-			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0), -1);
+			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0) , -1);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
 

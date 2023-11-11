@@ -30,9 +30,11 @@ void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngl
 	glm::mat4 projection = glm::perspective(glm::radians(58.0f), (float)width / (float)height, 0.001f, 25.0f);
 
 	//Combine into one transform.
+	this->Model = model;
 	this->ModelViewProjection = projection * view * model;
 	this->Projection = projection;
 	this->View = view;
 	this->CameraPosition = standingAt;
 	this->Direction = direction;
+	
 }

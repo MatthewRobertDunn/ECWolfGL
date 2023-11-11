@@ -26,10 +26,10 @@ namespace MatGl {
 
 	OpenGlRenderUnit::~OpenGlRenderUnit()
 	{
-		if(this->vertexArray)
+		if (this->vertexArray)
 			glDeleteVertexArrays(1, &this->vertexArray);
 
-		if(this->buffer)
+		if (this->buffer)
 			glDeleteBuffers(1, &this->buffer);
 	}
 
@@ -49,19 +49,19 @@ namespace MatGl {
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3))); //normal vec3
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void*)(2*sizeof(vec3))); //color vec4
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void*)(2 * sizeof(vec3))); //color vec4
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(2*sizeof(vec3) + sizeof(vec4))); //texture
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(2 * sizeof(vec3) + sizeof(vec4))); //texture
 		glEnableVertexAttribArray(3);
 
 		this->vertexCount = renderUnit.Vertices.size();
-		
+
 		switch (renderUnit.ShapeType) {
-			case ShapeType::Triangle:
-				this->mode = GL_TRIANGLES;
+		case ShapeType::Triangle:
+			this->mode = GL_TRIANGLES;
 			break;
-			case ShapeType::TriangleStrip:
-				this -> mode = GL_TRIANGLE_STRIP;
+		case ShapeType::TriangleStrip:
+			this->mode = GL_TRIANGLE_STRIP;
 			break;
 		}
 
@@ -77,10 +77,28 @@ namespace MatGl {
 		glBindVertexArray(this->vertexArray);
 
 		//Camera stuff
-		//Get the variable that represents our shader uniform
-		unsigned int transformLoc = glGetUniformLocation(this->shader->ID, "mvp");
-		//pass our matrix to shader
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(this->camera->ModelViewProjection));
+		shader->SetMat4("mvp", this->camera->ModelViewProjection);
+		shader->SetMat4("model", this->camera->Model);
+
+		//Ambient light
+		shader->SetVec4("ambientLight", vec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+		// spotLight
+		shader->SetVec3("spotLight.position", this->camera->CameraPosition);
+		shader->SetVec3("spotLight.direction", this->camera->Direction);
+		shader->SetVec3("spotLight.ambient", 1.0f, 1.0f, 1.0f);
+		shader->SetVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+		shader->SetVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+		shader->SetFloat("spotLight.constant", 1.0f);
+		shader->SetFloat("spotLight.linear", 0.09f * 0.5f);
+		shader->SetFloat("spotLight.quadratic", 0.032f * 0.5f);
+		shader->SetFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		shader->SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(70.0f)));
+
+
+
+		//Get the variable that represents our camera position
+		shader->SetVec3("cameraPosition", this->camera->CameraPosition);
 
 
 		//Texture stuff
