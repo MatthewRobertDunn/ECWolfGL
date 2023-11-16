@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
-
+#include "Lights.h"
 namespace MatGl {
     Shader::Shader(const char* vertexPath, const char* fragmentPath)
     {
@@ -154,6 +154,21 @@ namespace MatGl {
     void Shader::SetMat4(const std::string& name, const glm::mat4& mat) const
     {
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+    }
+
+    void Shader::SetSpotlight(const std::string& name, const MatGl::SpotLight& spotlight)
+    {
+        // spotLight
+        SetVec3(name + ".position", spotlight.Position);
+        SetVec3(name + ".direction", spotlight.Direction);
+        SetVec3(name + ".ambient", spotlight.Ambient);
+        SetVec3(name + ".diffuse", spotlight.Diffuse);
+        SetVec3(name + ".specular", spotlight.Specular);
+        SetFloat(name + ".constant", spotlight.Constant);
+        SetFloat(name + ".linear", spotlight.Linear);
+        SetFloat(name + ".quadratic", spotlight.Quadratic);
+        SetFloat(name + ".cutOff",spotlight.CutOff);
+        SetFloat(name + ".outerCutOff", spotlight.OuterCutOff);
     }
 
 }

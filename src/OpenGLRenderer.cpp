@@ -15,17 +15,19 @@ namespace MatGl {
 	using namespace glm;
 	using namespace std::chrono;
 
-
+	int floorTexture; //fixme
 	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
 	{
 		this->textureManager = textureManager;
 		this->wallShader = new Shader("./shader.vert", "./shader.frag");
 		this->spriteShader = new Shader("./shader.vert", "./sprites.frag");
-		this->hudShader = new Shader("./hud.vert", "./sprites.frag");
+		this->hudShader = new Shader("./hud.vert", "./hud.frag");
 		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES), wallShader);
 		this->camera = camera;
 		this->viewFrustrum = new ViewFrustrum(20.0);
 
+
+		floorTexture = textureManager->GetTextureArrayIndexForName(OpenGlTextureManager::WALL_TEXTURES, "FLOOR");
 	}
 
 
@@ -74,12 +76,12 @@ namespace MatGl {
 			float x = FixedToFloat(actor->x);
 			float y = FixedToFloat(actor->y);
 
-			float tileXScale = TILE_WIDTH_PIXELS * FixedToFloat(texture->xScale);
-			float tileYScale = TILE_WIDTH_PIXELS * FixedToFloat(texture->yScale);
+			float tileXScale = (TILE_WIDTH_PIXELS * FixedToFloat(texture->xScale)) / FixedToFloat(actor->scaleX);
+			float tileYScale = (TILE_WIDTH_PIXELS * FixedToFloat(texture->yScale)) / FixedToFloat(actor->scaleY);
 
 
-			float scaleX = texture->GetWidth() / tileXScale;
-			float scaleY = texture->GetHeight() / tileYScale;
+			float scaleX = (texture->GetWidth() / tileXScale);
+			float scaleY = (texture->GetHeight() / tileYScale);
 
 			//Convert all these weird pixel coordinates to OpenGL ones
 			float actualLeftOffset = 0.5f * (texture->GetWidth() / tileXScale) - 0.5f;
@@ -182,6 +184,7 @@ namespace MatGl {
 			auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
 			walls.insert(walls.end(), wall.begin(), wall.end());
 		}
+		
 
 		{
 			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0) , -1);

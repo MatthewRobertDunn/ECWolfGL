@@ -83,18 +83,23 @@ namespace MatGl {
 		//Ambient light
 		shader->SetVec4("ambientLight", vec4(0.1f, 0.1f, 0.1f, 1.0f));
 
-		// spotLight
-		shader->SetVec3("spotLight.position", this->camera->CameraPosition);
-		shader->SetVec3("spotLight.direction", this->camera->Direction);
-		shader->SetVec3("spotLight.ambient", 1.0f, 1.0f, 1.0f);
-		shader->SetVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-		shader->SetVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-		shader->SetFloat("spotLight.constant", 1.0f);
-		shader->SetFloat("spotLight.linear", 0.09f * 0.5f);
-		shader->SetFloat("spotLight.quadratic", 0.032f * 0.5f);
-		shader->SetFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		shader->SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(70.0f)));
 
+		MatGl::SpotLight light = {
+			.Position = this->camera->CameraPosition,
+			.Direction = this->camera->Direction,
+			.CutOff = glm::cos(glm::radians(12.5f)),
+			.OuterCutOff = glm::cos(glm::radians(30.0f)),
+			.Constant = 1.0f,
+			.Linear = 0.09f * 0.5f,
+			.Quadratic = 0.032f * 0.5f,
+			.Ambient = vec3(1.0f),
+			.Diffuse = vec3(1.0f),
+			.Specular = vec3(1.0f),
+		};
+
+		// spotLight
+		shader->SetSpotlight("spotLight", light);
+		
 
 
 		//Get the variable that represents our camera position

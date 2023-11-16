@@ -25,6 +25,11 @@ struct SpotLight {
 
 uniform SpotLight spotLight;
 
+//uniform SpotLight spotLights[50];
+
+
+
+
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main()

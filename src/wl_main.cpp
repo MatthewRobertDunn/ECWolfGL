@@ -522,9 +522,9 @@ static void InitGame()
 	VL_SetVGAPlaneMode();
 
 	printf("Loading OpenGL Textures");
-	auto textureManager = new MatGl::OpenGlTextureManager();
+	auto textureManager = new MatGl::OpenGlTextureManager(&TexMan);
 	MatGl::TextureManager = textureManager;
-	MatGl::TextureManager->LoadTextures(&TexMan);
+	MatGl::TextureManager->LoadTextures();
 	MatGl::Renderer = new MatGl::OpenGlRenderer(MatGl::Camera, textureManager);
 
 

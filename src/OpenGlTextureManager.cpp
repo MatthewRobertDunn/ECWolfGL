@@ -15,14 +15,14 @@ namespace MatGl {
 	GLuint CreateTextureArray();
 
 	//Texture to use when rendering walls.
-	const std::string OpenGlTextureManager::WALL_TEXTURES = "wolf/64/64";
+	const std::string OpenGlTextureManager::WALL_TEXTURES = "wolf/512/512";
 
-	OpenGlTextureManager::OpenGlTextureManager()
+	OpenGlTextureManager::OpenGlTextureManager(FTextureManager* wolfTextures)
 	{
-
+		this->wolfTextures = wolfTextures;
 	}
 
-	void MatGl::OpenGlTextureManager::LoadTextures(FTextureManager* wolfTextures)
+	void OpenGlTextureManager::OpenGlTextureManager::LoadTextures()
 	{
 		const int totalTextures = wolfTextures->NumTextures();
 		int width = 64;
@@ -74,6 +74,12 @@ namespace MatGl {
 	int OpenGlTextureManager::GetTextureArrayIndexForWolf(std::string texturePack, FTextureID wolfId)
 	{
 		return this->textureMap[texturePack].TextureLayerMap[wolfId];
+	}
+
+	int OpenGlTextureManager::GetTextureArrayIndexForName(std::string texturePack, std::string name)
+	{
+		auto wolfId = this->wolfTextures->GetTexture(name.c_str(),FTexture::TEX_Any);
+		return this->GetTextureArrayIndexForWolf(texturePack, wolfId);
 	}
 
 	//Group all textures by their width and height

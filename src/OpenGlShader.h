@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "glm/glm.hpp"
+#include "Lights.h"
 
 namespace MatGl {
     class Shader
@@ -27,6 +28,7 @@ namespace MatGl {
         void SetMat2(const std::string& name, const glm::mat2& mat) const;
         void SetMat3(const std::string& name, const glm::mat3& mat) const;
         void SetMat4(const std::string& name, const glm::mat4& mat) const;
+        void SetSpotlight(const std::string& name, const MatGl::SpotLight& spotlight);
     
     private:
         void checkCompileErrors(unsigned int shader, std::string type);
