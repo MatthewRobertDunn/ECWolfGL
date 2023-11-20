@@ -525,8 +525,7 @@ static void InitGame()
 	auto textureManager = new MatGl::OpenGlTextureManager(&TexMan);
 	MatGl::TextureManager = textureManager;
 	MatGl::TextureManager->LoadTextures();
-	MatGl::Renderer = new MatGl::OpenGlRenderer(MatGl::Camera, textureManager);
-
+	
 
 	if(DrawStartupConsole("Initialization complete"))
 	{

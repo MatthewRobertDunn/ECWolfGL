@@ -3,20 +3,21 @@
 #include <SDL.h>
 #include <gamemap.h>
 #include "glew.h"
-#include "OpenGLRenderUnit.h"
-#include "OpenGlTextureManager.h"
-#include "WallGenerator.h"
-#include "ViewFrustrum.h"
+#include "openglrenderunit.h"
+#include "opengltexturemanager.h"
+#include "wallgenerator.h"
+#include "viewfrustrum.h"
 #include "actordef.h"
+#include "matglmap.h"
 namespace MatGl {
 	class OpenGlRenderer
 	{
 	public:
-		OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager);
-		void Render(GameMap* map, float playerX, float playerY, float playerAngle);
+		OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager, MatGlMap* matGlMap);
+		void Render(float playerX, float playerY, float playerAngle);
 	private:
-		void RenderSprites(GameMap* map);
-		void RenderWalls(GameMap* map, float playerX, float playerY, float playerAngle);
+		void RenderSprites();
+		void RenderWalls(float playerX, float playerY, float playerAngle);
 		void RenderPlayer(float playerX, float playerY, float playerAngle);
 		void RenderMapSpot(GameMap::Plane::Map* spot, VertexList& walls);
 		void DrawPlayerSprite(AActor* actor, const Frame* frame, fixed offsetX, fixed offsetY);
@@ -27,5 +28,6 @@ namespace MatGl {
 		Shader* spriteShader = nullptr;
 		Shader* hudShader = nullptr;
 		ViewFrustrum* viewFrustrum = nullptr;
+		MatGlMap* matGlMap = nullptr;
 	};
 }

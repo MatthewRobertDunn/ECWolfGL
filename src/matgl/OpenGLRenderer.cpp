@@ -8,7 +8,6 @@
 #include <format>
 #include <chrono>
 #include <iostream>
-#include "mapcleaner.h"
 #include <wl_agent.h>
 #include "a_inventory.h"
 namespace MatGl {
@@ -16,7 +15,7 @@ namespace MatGl {
 	using namespace std::chrono;
 
 	int floorTexture; //fixme
-	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager)
+	OpenGlRenderer::OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager, MatGlMap* matGlMap)
 	{
 		this->textureManager = textureManager;
 		this->wallShader = new Shader("./shader.vert", "./shader.frag");
@@ -25,8 +24,7 @@ namespace MatGl {
 		this->renderUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(OpenGlTextureManager::WALL_TEXTURES), wallShader);
 		this->camera = camera;
 		this->viewFrustrum = new ViewFrustrum(20.0);
-
-
+		this->matGlMap = matGlMap;
 		floorTexture = textureManager->GetTextureArrayIndexForName(OpenGlTextureManager::WALL_TEXTURES, "FLOOR");
 	}
 
@@ -35,16 +33,16 @@ namespace MatGl {
 	//Up is 90 degrees
 	//Positive x is right
 	//Negative y is up
-	void OpenGlRenderer::Render(GameMap* map, float playerX, float playerY, float playerAngle)
+	void OpenGlRenderer::Render(float playerX, float playerY, float playerAngle)
 	{
 		auto start_time = high_resolution_clock::now();
-		this->RenderWalls(map, playerX, playerY, playerAngle);
+		this->RenderWalls(playerX, playerY, playerAngle);
 		auto end_time = high_resolution_clock::now();
 		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
 		//std::cout << millisecs << "-";
 
 		start_time = std::chrono::high_resolution_clock::now();
-		RenderSprites(map);
+		RenderSprites();
 		end_time = high_resolution_clock::now();
 		millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
 		//std::cout << millisecs << std::endl;
@@ -52,9 +50,9 @@ namespace MatGl {
 		RenderPlayer(playerX, playerY, playerAngle);
 	}
 
-	void OpenGlRenderer::RenderSprites(GameMap* map)
+	void OpenGlRenderer::RenderSprites()
 	{
-		const float TILE_WIDTH_PIXELS = map->GetHeader().tileSize;
+		const float TILE_WIDTH_PIXELS = matGlMap->GetHeader().tileSize;
 		std::map<std::string, VertexList> quads;
 		for (AActor::Iterator iter = AActor::GetIterator(); iter.Next();)
 		{
@@ -113,7 +111,7 @@ namespace MatGl {
 		}
 	}
 
-	void OpenGlRenderer::RenderWalls(GameMap* map, float playerX, float playerY, float playerAngle)
+	void OpenGlRenderer::RenderWalls(float playerX, float playerY, float playerAngle)
 	{
 		int tileX = floorf(playerX);
 		int tileY = floorf(playerY);
@@ -122,9 +120,9 @@ namespace MatGl {
 
 		vec2 playerPos = vec2(playerX, playerY) - 2.0f * vec2(camera->Direction);
 		this->viewFrustrum->RenderCells(playerAngle - 0.90f, playerAngle + 0.90f,
-			[this, map, &walls, playerPos](ivec2 pos) -> void {
+			[this, &walls, playerPos](ivec2 pos) -> void {
 				auto wallPos = playerPos + vec2(pos);
-				auto spot = GetSpot(map, wallPos.x, wallPos.y);
+				auto spot = matGlMap->GetSpot(wallPos.x, wallPos.y);
 				if (spot)
 				{
 					RenderMapSpot(spot, walls);
