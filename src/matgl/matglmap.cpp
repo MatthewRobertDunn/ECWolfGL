@@ -24,6 +24,11 @@ namespace MatGl {
 		return gameMap->GetHeader();
 	}
 
+	void MatGlMap::Load()
+	{
+		this->CleanMap();
+	}
+
 	void MatGl::MatGlMap::CleanMap()
 	{
 		std::cout << "Cleaning Map";

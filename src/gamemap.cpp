@@ -482,7 +482,7 @@ void GameMap::LoadMap(bool loadingSave)
 		ScanTiles();
 
 	MatGl::Map = new MatGl::MatGlMap(this);
-	MatGl::Map->CleanMap();
+	MatGl::Map->Load();
 	MatGl::Renderer = new MatGl::OpenGlRenderer(MatGl::Camera, MatGl::TextureManager, MatGl::Map);
 }
 

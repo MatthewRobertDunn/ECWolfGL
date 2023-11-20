@@ -9,9 +9,10 @@ namespace MatGl {
 		MatGlMap(GameMap* map);
 		GameMap::Plane::Map* GetSpot(int x, int y);
 		const GameMap::Header& GetHeader() const;
-		void CleanMap();
+		void Load();
 	private:
 		GameMap* gameMap;
+		void CleanMap();
 	};
 }
 #pragma once
