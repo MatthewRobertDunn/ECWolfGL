@@ -1,14 +1,14 @@
-#include "OpenGLRenderer.h"
+#include "openglrenderer.h"
 #include <array>
-#include "WallGenerator.h"
+#include "wallgenerator.h"
 #include <random>
 #include "actor.h"
 #include <r_sprites.h>
-#include "MatGlMath.h"
+#include "matglmath.h"
 #include <format>
 #include <chrono>
 #include <iostream>
-#include "MapCleaner.h"
+#include "mapcleaner.h"
 #include <wl_agent.h>
 #include "a_inventory.h"
 namespace MatGl {

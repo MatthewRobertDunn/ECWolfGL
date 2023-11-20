@@ -1,8 +1,8 @@
 #pragma once
 #include "glew.h"
-#include "Model3d.h"
-#include "GameCamera.h"
-#include "OpenGlShader.h"
+#include "model3d.h"
+#include "gamecamera.h"
+#include "openglshader.h"
 namespace MatGl {
 	class OpenGlRenderUnit
 	{

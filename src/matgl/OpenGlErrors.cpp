@@ -1,7 +1,7 @@
-#include "OpenGlErrors.h"
+#include "openglerrors.h"
 #include <sstream>
 #include <iostream>
-#include <glew.h>
+#include "glew.h"
 void MatGl::CheckGlErrors()
 {
 		GLenum error = glGetError();

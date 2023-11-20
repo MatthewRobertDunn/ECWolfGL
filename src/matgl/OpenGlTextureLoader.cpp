@@ -1,4 +1,4 @@
-#include "OpenGlTextureLoader.h"
+#include "opengltextureloader.h"
 #include "glew.h"
 #include <SDL.h>
 #include <iostream>

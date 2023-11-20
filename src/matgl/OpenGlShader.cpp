@@ -1,10 +1,10 @@
-#include "OpenGlShader.h"
+#include "openglshader.h"
 #include "glew.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include "glm/gtc/type_ptr.hpp"
-#include "Lights.h"
+#include "lights.h"
 namespace MatGl {
     Shader::Shader(const char* vertexPath, const char* fragmentPath)
     {

@@ -1,8 +1,8 @@
 #pragma once
 #define GL_GLEXT_PROTOTYPES
-#include <SDL.h>
+#include <sdl.h>
 #include "glew.h"
-#include "OpenGlShader.h"
+#include "openglshader.h"
 namespace MatGl {
 	class OpenGlSurface
 	{

@@ -1,4 +1,4 @@
-#include "MapCleaner.h"
+#include "mapcleaner.h"
 #include <iostream>
 
 namespace MatGl {

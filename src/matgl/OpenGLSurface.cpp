@@ -1,5 +1,5 @@
-#include "OpenGLSurface.h"
-#include <SDL.h>
+#include "openglsurface.h"
+#include <sdl.h>
 #include <iostream>
 
 namespace MatGl {

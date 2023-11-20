@@ -53,7 +53,7 @@
 #include "doomerrors.h"
 #include "m_random.h"
 #include "g_mapinfo.h"
-#include "MapCleaner.h"
+#include "./matgl/mapcleaner.h"
 
 const FName SpecialThingNames[SMT_NumThings] = {
 	"$Player1Start",
