@@ -2,12 +2,12 @@
 #include <iostream>
 #include "textures/bitmap.h"
 #include <vector>
-#include <OpenGlErrors.h>
-#include <OpenGlTextureLoader.h>
+#include "OpenGlErrors.h"
+#include "OpenGlTextureLoader.h"
 #include <format>
 #include <memory>
-#include <glm/glm.hpp>
-#include <MatGlMath.h>
+#include "glm/glm.hpp"
+#include "MatGlMath.h"
 using namespace glm;
 namespace MatGl {
 	//prototypes of private functions

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <glm/gtc/type_ptr.hpp>
+#include "glm/gtc/type_ptr.hpp"
 #include "Lights.h"
 namespace MatGl {
     Shader::Shader(const char* vertexPath, const char* fragmentPath)

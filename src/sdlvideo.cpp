@@ -19,7 +19,7 @@
 
 #include <SDL.h>
 #define PORTABLEGL_IMPLEMENTATION
-#include <OpenGlMain.h>
+#include "./matgl/OpenGlMain.h"
 
 IVideo* Video = NULL;
 

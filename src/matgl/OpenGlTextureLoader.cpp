@@ -1,5 +1,5 @@
 #include "OpenGlTextureLoader.h"
-#include <glew.h>
+#include "glew.h"
 #include <SDL.h>
 #include <iostream>
 #include <sstream>

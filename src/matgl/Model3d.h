@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 namespace MatGl {
 	//standardizes the data we pass to all vertex shaders.
 	struct Vertex

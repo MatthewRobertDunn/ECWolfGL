@@ -27,7 +27,7 @@
 #include "a_inventory.h"
 #include "thingdef/thingdef.h"
 #include <cmath>
-#include <OpenGlMain.h>
+#include "./matgl/OpenGlMain.h"
 
 
 /*
@@ -1241,6 +1241,7 @@ void R_RenderView()
 #endif
 	WallRefresh ();
 
+#ifndef MATGL
 
 	DrawParallax(vbuf, vbufPitch);
 #if 0 // USE_CLOUDSKY
@@ -1252,7 +1253,7 @@ void R_RenderView()
 //
 // draw all the scaled images
 //
-#ifndef MATGL
+
 	DrawScaleds();                  // draw scaled stuff
 #endif
 #if 0 // USE_RAIN

@@ -1,10 +1,10 @@
 #include "OpenGLRenderUnit.h"
 #include "Model3d.h"
-#include <glew.h>
+#include "glew.h"
 #include "OpenGlTextureLoader.h"
-#include <glm/gtc/type_ptr.hpp>
+#include "glm/gtc/type_ptr.hpp"
 #include <stdexcept>
-#include <OpenGlErrors.h>
+#include "OpenGlErrors.h"
 
 namespace MatGl {
 	using namespace glm;

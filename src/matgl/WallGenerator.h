@@ -1,7 +1,7 @@
 #pragma once
 #include "Model3d.h"
 #include <memory>
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 namespace MatGl {
 	typedef std::vector<Vertex> VertexList;
 	VertexList CreateSprite(glm::vec2 pos, glm::vec4 color, float layer, glm::vec3 cameraPos,  glm::vec2 scale, glm::vec2 offset);

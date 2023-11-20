@@ -46,7 +46,7 @@
 #include "filesys.h"
 #include "g_conversation.h"
 #include "g_intermission.h"
-#include "OpenGlMain.h"
+#include "./matgl/OpenGlMain.h"
 
 #include <clocale>
 
