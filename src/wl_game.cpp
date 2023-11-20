@@ -33,6 +33,7 @@
 #include "colormatcher.h"
 #include "thingdef/thingdef.h"
 #include "doomerrors.h"
+#include "./matgl/openglmain.h"
 
 #ifdef MYPROFILE
 #include <TIME.H>
@@ -325,6 +326,10 @@ void SetupGameLevel (void)
 		map->SpawnThings();
 		CheckSpawnPlayer(true);
 	}
+#ifdef  MATGL
+	MatGl::Map->LoadLights();
+#endif //  MATGL
+	
 }
 
 

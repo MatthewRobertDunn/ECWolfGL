@@ -1,6 +1,5 @@
 #ifndef __WL_DRAW_H__
 #define __WL_DRAW_H__
-#define MATGL
 
 #include "tmemory.h"
 

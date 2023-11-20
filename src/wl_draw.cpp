@@ -717,9 +717,9 @@ void AsmRefresh()
 	longword xpartial=0,ypartial=0;
 	MapSpot focalspot = map->GetSpot(focaltx, focalty, 0);
 	bool playerInPushwallBackTile = focalspot->pushAmount != 0;
+	#ifdef MATGL
 	MatGl::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
 	MatGl::Renderer->Render(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-	#ifdef MATGL
 		return;
 	#endif
 	for(pixx=0;pixx<viewwidth;pixx++)

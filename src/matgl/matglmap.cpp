@@ -81,6 +81,8 @@ namespace MatGl {
 
 		std::cout << std::endl;
 	}
+
+	//Scans the map and loads any sprites of lights and converts them to opengl lights
 	void MatGlMap::LoadLights()
 	{
 		this->SpotLights.clear();
@@ -101,8 +103,6 @@ namespace MatGl {
 			if (strcmp(texture->Name, "GLMPA0") != 0) {
 				continue;
 			}
-
-			std::cout << texture->Name << std::endl;
 
 			this->SpotLights.push_back(SpotLight{
 				.Position = vec3(FixedToFloat(actor->x), FixedToFloat(actor->y),0.99f),
