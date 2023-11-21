@@ -39,13 +39,13 @@ namespace MatGl {
 		this->RenderWalls(playerX, playerY, playerAngle);
 		auto end_time = high_resolution_clock::now();
 		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
-		std::cout << millisecs << "-";
+		//std::cout << millisecs << "-";
 
 		start_time = std::chrono::high_resolution_clock::now();
 		RenderSprites();
 		end_time = high_resolution_clock::now();
 		millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
-		std::cout << millisecs << std::endl;
+		//std::cout << millisecs << std::endl;
 
 		RenderPlayer(playerX, playerY, playerAngle);
 	}
@@ -157,10 +157,6 @@ namespace MatGl {
 			else {
 				cubeCached->clear();
 			}
-		}
-
-		if (spot->Spot->pushAmount != 0) {
-			std::cout << "pushy" << std::endl;
 		}
 
 		//Otherwise create it dynamically.
