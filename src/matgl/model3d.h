@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "lights.h"
 namespace MatGl {
+
 	//standardizes the data we pass to all vertex shaders.
 	struct Vertex
 	{
@@ -11,6 +12,8 @@ namespace MatGl {
 		glm::vec4 color;
 		glm::vec3 texture;
 	};
+
+	typedef std::vector<Vertex> VertexList;
 
 	//Provides abstraction over commonly supported rendering data
 	enum ShapeType {

@@ -9,6 +9,7 @@ namespace MatGl {
 	MatGl::MatGlMap::MatGlMap(GameMap* map)
 	{
 		this->gameMap = map;
+		gameMapHeader = &map->GetHeader();
 	}
 
 	GameMap::Plane::Map* MatGlMap::GetSpot(int x, int y)
@@ -23,6 +24,18 @@ namespace MatGl {
 		return gameMap->GetSpot(x, y, 0);
 	}
 
+	MatGlMapSpot* MatGlMap::GetMatGlSpot(int x, int y)
+	{
+		if (x < 0 || y < 0)
+			return nullptr;
+
+		if (!gameMap->IsValidTileCoordinate(x, y, 0)) {
+			return nullptr;
+		}
+
+		return &this->mapSpots[y * gameMapHeader->width + x];
+	}
+
 	const GameMap::Header& MatGlMap::GetHeader() const
 	{
 		return gameMap->GetHeader();
@@ -31,6 +44,13 @@ namespace MatGl {
 	void MatGlMap::Load()
 	{
 		this->CleanMap();
+		const auto header = this->gameMap->GetHeader();
+		this->mapSpots.resize(header.width * header.height);
+
+		for (int i = 0; i < header.width * header.height; i++) {
+			this->mapSpots[i].Spot = &this->gameMap->GetPlane(0).map[i];
+		}
+		
 	}
 
 	void MatGl::MatGlMap::CleanMap()

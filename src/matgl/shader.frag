@@ -1,4 +1,5 @@
-#version 330 core
+#version 430 core
+layout(early_fragment_tests) in;
 out vec4 FragColor;
 in vec4 VertexColor;
 in vec3 TextureCoords;
@@ -36,7 +37,7 @@ void main()
 {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(cameraPosition - FragPos);
-    vec4 result = mix(texture(textureArray,TextureCoords) * VertexColor, VertexColor, TextureCoords.z < 0.0) * ambientLight;
+    vec4 result = mix(texture(textureArray,TextureCoords) * VertexColor, VertexColor, float(TextureCoords.z < 0.0)) * ambientLight;
     result += vec4(CalcSpotLight(spotLight, norm, FragPos, viewDir),0.0);
     
     for(int i=0;i<spotLightsCount;i++){
@@ -73,7 +74,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
     // combine results
         
-    vec3 tex = vec3(mix(texture(textureArray,TextureCoords), VertexColor, TextureCoords.z < 0.0));
+    vec3 tex = vec3(mix(texture(textureArray,TextureCoords), VertexColor, float(TextureCoords.z < 0.0)));
     //vec3 tex = vec3(texture(textureArray,TextureCoords) * VertexColor);
 
     vec3 ambient = light.ambient * tex;

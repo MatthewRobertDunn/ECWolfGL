@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 out vec4 FragColor;
 in vec4 VertexColor;
 in vec3 TextureCoords;
@@ -62,7 +62,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
     // combine results
         
-    vec3 tex = vec3(mix(texture(textureArray,TextureCoords), VertexColor, TextureCoords.z < 0.0));
+    vec3 tex = vec3(mix(texture(textureArray,TextureCoords), VertexColor, float(TextureCoords.z < 0.0)));
     
     vec3 ambient = light.ambient * tex;
     ambient *= attenuation * intensity;

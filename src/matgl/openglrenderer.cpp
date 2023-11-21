@@ -39,13 +39,13 @@ namespace MatGl {
 		this->RenderWalls(playerX, playerY, playerAngle);
 		auto end_time = high_resolution_clock::now();
 		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
-		//std::cout << millisecs << "-";
+		std::cout << millisecs << "-";
 
 		start_time = std::chrono::high_resolution_clock::now();
 		RenderSprites();
 		end_time = high_resolution_clock::now();
 		millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
-		//std::cout << millisecs << std::endl;
+		std::cout << millisecs << std::endl;
 
 		RenderPlayer(playerX, playerY, playerAngle);
 	}
@@ -121,8 +121,8 @@ namespace MatGl {
 		vec2 playerPos = vec2(playerX, playerY) - 2.0f * vec2(camera->Direction);
 		this->viewFrustrum->RenderCells(playerAngle - 0.90f, playerAngle + 0.90f,
 			[this, &walls, playerPos](ivec2 pos) -> void {
-				auto wallPos = playerPos + vec2(pos);
-				auto spot = matGlMap->GetSpot(wallPos.x, wallPos.y);
+				auto cubePos = playerPos + vec2(pos);
+				auto spot = matGlMap->GetMatGlSpot(cubePos.x, cubePos.y);
 				if (spot)
 				{
 					RenderMapSpot(spot, walls);
@@ -140,12 +140,54 @@ namespace MatGl {
 		this->renderUnit->Render();
 	}
 	//Renders a single cube of tiles
-	void OpenGlRenderer::RenderMapSpot(GameMap::Plane::Map* spot, VertexList& walls)
+	void OpenGlRenderer::RenderMapSpot(MatGlMapSpot* spot, VertexList& walls)
+	{
+		//Is this spot static or dynamic
+		bool isStatic = !(spot->Spot->thinker || spot->Spot->pushAmount != 0 || spot->Spot->pushReceptor);
+
+		auto cubeCached = &spot->Geometry;
+
+		//If there is any pre-cached geometry then use it if the tile is not dynamic
+		if (!cubeCached->empty()) {
+			if (isStatic)
+			{
+				walls.insert(walls.end(), cubeCached->begin(), cubeCached->end());
+				return;
+			}
+			else {
+				cubeCached->clear();
+			}
+		}
+
+		if (spot->Spot->pushAmount != 0) {
+			std::cout << "pushy" << std::endl;
+		}
+
+		//Otherwise create it dynamically.
+		VertexList cube;
+		GenerateGeometryForMapSpot(spot->Spot, cube);
+
+		if (isStatic) {
+			cubeCached->insert(cubeCached->end(), cube.begin(), cube.end());
+		}
+
+		walls.insert(walls.end(), cube.begin(), cube.end());
+
+
+		/*
+		VertexList cube;
+		bool isDynamic = GenerateGeometryForMapSpot(spot, cube);
+		walls.insert(walls.end(), cube.begin(), cube.end());
+		*/
+	}
+
+
+	void OpenGlRenderer::GenerateGeometryForMapSpot(GameMap::Plane::Map* spot, VertexList& cube)
 	{
 		int x = spot->GetX();
 		int y = spot->GetY();
-		vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
 
+		vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
 
 		float max1 = std::max(spot->slideAmount[NORTH], spot->slideAmount[SOUTH]);
 		float max2 = std::max(spot->slideAmount[EAST], spot->slideAmount[WEST]);
@@ -162,38 +204,37 @@ namespace MatGl {
 			auto pos = !offsetHorizontal ? vec2(x, y + 1) : vec2(x + dooropen, y + 1 - 0.5f);
 			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::South]);
 			auto wall = CreateSouthWall(pos, color, texture);
-			walls.insert(walls.end(), wall.begin(), wall.end());
+			cube.insert(cube.end(), wall.begin(), wall.end());
 		}
 
 		if (spot->sideSolid[MapTile::North] && !offsetHorizontal) {
 			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::North]);
 			auto wall = CreateNorthWall(vec2(x, y), color, texture);
-			walls.insert(walls.end(), wall.begin(), wall.end());
+			cube.insert(cube.end(), wall.begin(), wall.end());
 		}
 
 		if (spot->sideSolid[MapTile::East]) {
 			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::East]);
 			auto pos = !offsetVertical ? vec2(x, y) : vec2(x + 0.5f, y + dooropen);
 			auto wall = CreateEastWall(pos, color, texture);
-			walls.insert(walls.end(), wall.begin(), wall.end());
+			cube.insert(cube.end(), wall.begin(), wall.end());
 		}
 
 		if (spot->sideSolid[MapTile::West] && !offsetVertical) {
 			int texture = textureManager->GetTextureArrayIndexForWolf(textureArray, spot->texture[MapTile::West]);
 			auto wall = CreateWestWall(vec2(x + 1, y), color, texture);
-			walls.insert(walls.end(), wall.begin(), wall.end());
-		}
-		
-
-		{
-			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0) , -1);
-			walls.insert(walls.end(), wall.begin(), wall.end());
+			cube.insert(cube.end(), wall.begin(), wall.end());
 		}
 
-		{
 
+		{
+			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0), -1);
+			cube.insert(cube.end(), wall.begin(), wall.end());
+		}
+
+		{
 			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
-			walls.insert(walls.end(), wall.begin(), wall.end());
+			cube.insert(cube.end(), wall.begin(), wall.end());
 		}
 	}
 
@@ -242,7 +283,7 @@ namespace MatGl {
 
 		auto offsets = MatGl::GetWeaponOffsets(texture, offsetX, offsetY);
 		vec2 glOffsets = vec2(FixedToFloat(offsets.first), FixedToFloat(offsets.second));
-		
+
 		//Scale to 0 to 2
 		glOffsets.x /= (0.5f * this->camera->width);
 		glOffsets.y /= (0.5f * this->camera->height);

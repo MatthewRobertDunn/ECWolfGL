@@ -19,7 +19,8 @@ namespace MatGl {
 		void RenderSprites();
 		void RenderWalls(float playerX, float playerY, float playerAngle);
 		void RenderPlayer(float playerX, float playerY, float playerAngle);
-		void RenderMapSpot(GameMap::Plane::Map* spot, VertexList& walls);
+		void RenderMapSpot(MatGlMapSpot* spot, VertexList& walls);
+		void GenerateGeometryForMapSpot(GameMap::Plane::Map* spot, VertexList& cube);
 		void DrawPlayerSprite(AActor* actor, const Frame* frame, fixed offsetX, fixed offsetY);
 		OpenGlTextureManager* textureManager = nullptr;
 		OpenGlRenderUnit* renderUnit = nullptr;
