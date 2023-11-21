@@ -103,11 +103,7 @@ namespace MatGl {
 		// spotLight
 		shader->SetSpotlight("spotLight", light);
 
-		if (this->spotLights) {
-			SetSpotlightsUniform();
-		}
-					
-
+		SetSpotlightsUniform();
 
 		//Get the variable that represents our camera position
 		shader->SetVec3("cameraPosition", this->camera->CameraPosition);
@@ -131,7 +127,7 @@ namespace MatGl {
 	void OpenGlRenderUnit::SetSpotlightsUniform()
 	{
 		int i = 0;
-		for (auto& light : *this->spotLights) {
+		for (auto& light : this->spotLights) {
 
 			shader->SetSpotlight(std::string("spotLights[") + std::to_string(i) + std::string("]"), light);
 			i++;

@@ -119,22 +119,27 @@ namespace MatGl {
 		VertexList walls;
 
 		vec2 playerPos = vec2(playerX, playerY) - 2.0f * vec2(camera->Direction);
-		this->viewFrustrum->RenderCells(playerAngle - 0.90f, playerAngle + 0.90f,
-			[this, &walls, playerPos](ivec2 pos) -> void {
-				auto cubePos = playerPos + vec2(pos);
-				auto spot = matGlMap->GetMatGlSpot(cubePos.x, cubePos.y);
-				if (spot)
-				{
-					RenderMapSpot(spot, walls);
-				}
-			});
+		
 
 		auto model = Model3d
 		{
 			.ShapeType = Triangle,
-			.Vertices = walls,
-			.SpotLights = &this->matGlMap->SpotLights
+			.Vertices = VertexList(),
+			.SpotLights = std::vector<SpotLight>()
 		};
+		
+		
+		this->viewFrustrum->RenderCells(playerAngle - 0.90f, playerAngle + 0.90f,
+			[this, &model, playerPos](ivec2 pos) -> void {
+				auto cubePos = playerPos + vec2(pos);
+				auto spot = matGlMap->GetMatGlSpot(cubePos.x, cubePos.y);
+				if (spot)
+				{
+					RenderMapSpot(spot, model.Vertices);
+					model.SpotLights.insert(model.SpotLights.end(), spot->SpotLights.begin(), spot->SpotLights.end());
+				}
+			});
+
 
 		this->renderUnit->Load(model);
 		this->renderUnit->Render();

@@ -31,7 +31,7 @@ namespace MatGl {
 	{
 		ShapeType ShapeType;
 		std::vector<Vertex> Vertices;
-		std::vector<SpotLight> *SpotLights = nullptr;
+		std::vector<SpotLight> SpotLights;
 		//TODO: Different shaders, texture array set?
 	};
 }

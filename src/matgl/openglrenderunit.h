@@ -5,6 +5,7 @@
 #include "openglshader.h"
 #include "lights.h"
 namespace MatGl {
+	typedef std::vector <SpotLight> SpotLightList;
 	class OpenGlRenderUnit
 	{
 	public:
@@ -21,7 +22,7 @@ namespace MatGl {
 		GLsizei vertexCount = 0;
 		GLenum mode = 0;
 		GameCamera* camera = nullptr;
-		std::vector <SpotLight> *spotLights;
+		SpotLightList spotLights;
 		//todo: shaders etc if needed
 	};
 }

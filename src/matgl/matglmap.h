@@ -11,6 +11,7 @@ namespace MatGl {
 	struct MatGlMapSpot {
 		GameMap::Plane::Map* Spot;
 		VertexList Geometry;
+		std::vector<MatGl::SpotLight> SpotLights;
 	};
 
 

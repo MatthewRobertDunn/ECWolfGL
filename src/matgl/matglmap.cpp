@@ -123,9 +123,9 @@ namespace MatGl {
 			if (strcmp(texture->Name, "GLMPA0") != 0) {
 				continue;
 			}
-
-			this->SpotLights.push_back(SpotLight{
-				.Position = vec3(FixedToFloat(actor->x), FixedToFloat(actor->y),0.99f),
+			float x = FixedToFloat(actor->x), y = FixedToFloat(actor->y);
+			auto light = SpotLight{
+				.Position = vec3(x,y,0.99f),
 				.Direction = vec3(0.0f,0.0f,-1.0f),
 				.CutOff = glm::cos(glm::radians(12.5f)),
 				.OuterCutOff = glm::cos(glm::radians(30.0f)),
@@ -135,7 +135,11 @@ namespace MatGl {
 				.Ambient = vec3(1.0f),
 				.Diffuse = vec3(1.0f),
 				.Specular = vec3(1.0f),
-			});
+			};
+
+			this->SpotLights.push_back(light);
+
+			this->GetMatGlSpot(x, y)->SpotLights.push_back(light);
 
 		}
 	}
