@@ -308,7 +308,7 @@ private:
 	};
 
 	SDL_Texture* OpenGlTexture = NULL; //Matty
-	
+
 #else
 	SDL_Surface* Screen;
 #endif
@@ -869,11 +869,11 @@ void SDLFB::Update()
 #if SDL_VERSION_ATLEAST(2,0,0)
 	void* pixels = NULL;
 	int pitch = NULL;
-	
+
 
 	if (UsingRenderer)
 	{
-		
+
 		if (SDL_LockTexture(Texture, NULL, &pixels, &pitch))
 		{
 			exit(0);
@@ -1120,7 +1120,7 @@ void SDLFB::ResetSDLRenderer()
 	{
 		if (Texture)
 			SDL_DestroyTexture(Texture);
-		if(OpenGlTexture)
+		if (OpenGlTexture)
 			SDL_DestroyTexture(OpenGlTexture);
 
 		SDL_DestroyRenderer(Renderer);
@@ -1131,7 +1131,7 @@ void SDLFB::ResetSDLRenderer()
 	{
 		Renderer = SDL_CreateRenderer(Screen, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE |
 			(vid_vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
-		
+
 		SDL_SetRenderDrawBlendMode(Renderer, SDL_BLENDMODE_NONE);
 
 		if (!Renderer)
@@ -1149,10 +1149,18 @@ void SDLFB::ResetSDLRenderer()
 		case 15: fmt = SDL_PIXELFORMAT_ARGB1555; break;
 		}
 		Texture = SDL_CreateTexture(Renderer, fmt, SDL_TEXTUREACCESS_STREAMING, Width, Height);
-		OpenGlTexture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING , Width, Height);
+		OpenGlTexture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, Width, Height);
 		SDL_SetTextureBlendMode(OpenGlTexture, SDL_BLENDMODE_BLEND);
-		MatGl::Surface = new MatGl::OpenGlSurface(Screen, Width, Height);
-		MatGl::Camera = new MatGl::GameCamera(Width, Height);
+
+		if (!MatGl::Surface) {
+			MatGl::Surface = new MatGl::OpenGlSurface(Screen, Width, Height);
+			MatGl::Camera = new MatGl::GameCamera(Width, Height);
+		}
+		else {
+			MatGl::Surface->Resize(Width, Height);
+			MatGl::Camera->Resize(Width, Height);
+		}
+
 		{
 			NotPaletted = true;
 

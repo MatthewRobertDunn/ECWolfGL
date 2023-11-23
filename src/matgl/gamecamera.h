@@ -6,6 +6,7 @@ namespace MatGl {
 	public:
 		GameCamera(int width, int height);
 		void SetCamera(float playerX, float playerY, float playerAngle);
+		void Resize(int width, int height);
 		glm::mat4 ModelViewProjection;
 		glm::mat4 Model;
 		glm::mat4 View;

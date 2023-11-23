@@ -8,6 +8,7 @@ namespace MatGl {
 	{
 	public:
 		OpenGlSurface(SDL_Window* window, int width, int height);
+		void Resize(int width, int height);
 		void Render(void* texture);
 	private:
 		SDL_GLContext  glContext;

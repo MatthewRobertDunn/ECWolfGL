@@ -38,3 +38,9 @@ void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngl
 	this->Direction = direction;
 	
 }
+
+void MatGl::GameCamera::Resize(int width, int height)
+{
+	this->width = width;
+	this->height = height;
+}

@@ -6,9 +6,9 @@
 #include "opengltexturemanager.h"
 #include "matglmap.h"
 namespace MatGl{
-	inline OpenGlRenderer* Renderer;
-	inline GameCamera* Camera;
-	inline OpenGlSurface* Surface;
-	inline OpenGlTextureManager* TextureManager;
-	inline MatGlMap* Map;
+	inline OpenGlRenderer* Renderer = nullptr;
+	inline GameCamera* Camera = nullptr;
+	inline OpenGlSurface* Surface = nullptr;
+	inline OpenGlTextureManager* TextureManager = nullptr;
+	inline MatGlMap* Map = nullptr;
 }
