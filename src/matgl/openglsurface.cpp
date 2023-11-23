@@ -1,4 +1,5 @@
 #include "openglsurface.h"
+#include "openglerrors.h"
 #include <sdl.h>
 #include <iostream>
 
@@ -16,22 +17,7 @@ namespace MatGl {
 			exit(1);
 		}
 
-		//glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-
 		this->Resize(width, height);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		//Test if everything failed    
-		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		if (status != GL_FRAMEBUFFER_COMPLETE) {
-			printf("failed to make complete framebuffer object %x", status);
-		}
-
-		glEnable(GL_DEPTH_TEST);
-		//glDepthFunc(GL_SM);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void OpenGlSurface::Resize(int width, int height)
@@ -73,6 +59,25 @@ namespace MatGl {
 
 		this->width = width;
 		this->height = height;
+
+		//Test if everything failed    
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE) {
+			printf("failed to make complete framebuffer object %x", status);
+		}
+
+		glViewport(0, 0, width, height);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_SM);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		CheckGlErrors();
 	}
 
 	void OpenGlSurface::Render(void* texture)
