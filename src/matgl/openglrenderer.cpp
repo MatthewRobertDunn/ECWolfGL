@@ -37,7 +37,7 @@ namespace MatGl {
 	void OpenGlRenderer::Render(float playerX, float playerY, float playerAngle)
 	{
 		auto start_time = high_resolution_clock::now();
-		//this->RenderWalls(playerX, playerY, playerAngle);
+		this->RenderWalls(playerX, playerY, playerAngle);
 		auto end_time = high_resolution_clock::now();
 		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
 		//std::cout << millisecs << "-";
@@ -295,7 +295,7 @@ namespace MatGl {
 				
 		vec2 spriteOffset = glOffsets - glCurrentOffset;
 
-		auto quad = CreateHudQuad(spriteOffset, vec4(1.0, 1.0, 1.0, 1.0), textureIndex, vec2(scaleX, scaleY));
+		auto quad = CreateHudQuad(spriteOffset, vec4(1.0, 0.0, 0.0, 1.0), textureIndex, vec2(scaleX, scaleY));
 
 		//render it using our HUD shader
 		auto spriteUnit = new OpenGlRenderUnit(this->hudCamera, textureManager->GetTextureArray(textureArray), this->hudShader);
