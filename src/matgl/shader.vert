@@ -19,11 +19,7 @@ void main()
     FragPos = vec3(model * vec4(position, 1.0));
     Normal = normal;
     gl_Position =  mvp * vec4(position, 1.0);  //perspective transform on position
-    
-    float diff = abs(dot(normal, vec3(1.0,0.0,0.0)));
-    diff = max(diff,0.5);
-    
-    VertexColor = color * vec4(diff,diff,diff,1.0);
+    VertexColor = color;
     TextureCoords = texture * vec3(1.0,-1.0,1.0); //upside down, why?
 
 }

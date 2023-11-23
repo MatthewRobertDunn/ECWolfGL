@@ -230,12 +230,12 @@ namespace MatGl {
 
 
 		{
-			auto wall = CreateFloor(vec2(x, y), vec4(0.5, 0.5, 0.5, 1.0), -1);
+			auto wall = CreateFloor(vec2(x, y), vec4(0.44, 0.44, 0.44, 1.0), -1);
 			cube.insert(cube.end(), wall.begin(), wall.end());
 		}
 
 		{
-			auto wall = CreateCeiling(vec2(x, y), vec4(0.4, 0.4, 0.4, 1.0), -1);
+			auto wall = CreateCeiling(vec2(x, y), vec4(0.22, 0.22, 0.22, 1.0), -1);
 			cube.insert(cube.end(), wall.begin(), wall.end());
 		}
 	}
