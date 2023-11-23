@@ -14,7 +14,7 @@ out vec3 TextureCoords;
 //pretty much an identity shader for the HUD elements
 void main()
 {
-    gl_Position =  vec4(position,1.0);
+    gl_Position =  mvp * vec4(position,1.0);
     VertexColor = color;
     TextureCoords = texture;
 }

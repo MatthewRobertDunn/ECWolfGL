@@ -28,6 +28,7 @@ namespace MatGl {
 		Shader* wallShader = nullptr;
 		Shader* spriteShader = nullptr;
 		Shader* hudShader = nullptr;
+		HudCamera* hudCamera = nullptr;
 		ViewFrustrum* viewFrustrum = nullptr;
 		MatGlMap* matGlMap = nullptr;
 	};

@@ -26,6 +26,7 @@ namespace MatGl {
 		this->viewFrustrum = new ViewFrustrum(20.0);
 		this->matGlMap = matGlMap;
 		floorTexture = textureManager->GetTextureArrayIndexForName(OpenGlTextureManager::WALL_TEXTURES, "FLOOR");
+		this->hudCamera = new HudCamera();
 	}
 
 
@@ -36,7 +37,7 @@ namespace MatGl {
 	void OpenGlRenderer::Render(float playerX, float playerY, float playerAngle)
 	{
 		auto start_time = high_resolution_clock::now();
-		this->RenderWalls(playerX, playerY, playerAngle);
+		//this->RenderWalls(playerX, playerY, playerAngle);
 		auto end_time = high_resolution_clock::now();
 		double millisecs = duration<double, std::ratio<1, 1000>>(end_time - start_time).count();
 		//std::cout << millisecs << "-";
@@ -271,10 +272,13 @@ namespace MatGl {
 
 		float PIXELS_X = 320.0f;
 		float PIXELS_Y = 200.0f;
-		float ASPECT_RATIO = (9.0f / 6.0f);
 
-		float tileXScale = PIXELS_X * FixedToFloat(texture->xScale) * 0.5f * ASPECT_RATIO;
-		float tileYScale = PIXELS_Y * FixedToFloat(texture->yScale) * 0.5f;
+		float baseRatio = 4.0f / 3.0f;
+		float ratioChange = baseRatio / camera->AspectRatio;
+
+		
+		float tileXScale = PIXELS_X * FixedToFloat(texture->xScale) / ratioChange;
+		float tileYScale = PIXELS_Y * FixedToFloat(texture->yScale);
 
 		float scaleX = texture->GetWidth() / tileXScale;
 		float scaleY = texture->GetHeight() / tileYScale;
@@ -285,18 +289,16 @@ namespace MatGl {
 		auto offsets = MatGl::GetWeaponOffsets(texture, offsetX, offsetY);
 		vec2 glOffsets = vec2(FixedToFloat(offsets.first), FixedToFloat(offsets.second));
 
-		//Scale to 0 to 2
-		glOffsets.x /= (0.5f * this->camera->Width);
-		glOffsets.y /= (0.5f * this->camera->Height);
-		//subtract 1 to centre
-		glOffsets -= vec2(1.0, 1.0);
-
+		//Scale 0 to width to 0 to 1.0
+		glOffsets.x /= this->camera->Width;
+		glOffsets.y /= this->camera->Height;
+				
 		vec2 spriteOffset = glOffsets - glCurrentOffset;
 
 		auto quad = CreateHudQuad(spriteOffset, vec4(1.0, 1.0, 1.0, 1.0), textureIndex, vec2(scaleX, scaleY));
 
 		//render it using our HUD shader
-		auto spriteUnit = new OpenGlRenderUnit(camera, textureManager->GetTextureArray(textureArray), this->hudShader);
+		auto spriteUnit = new OpenGlRenderUnit(this->hudCamera, textureManager->GetTextureArray(textureArray), this->hudShader);
 
 		//Create 3d model, we are using triangles.
 		auto model = Model3d

@@ -9,7 +9,7 @@
 
 namespace MatGl {
 	using namespace glm;
-	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(GameCamera* camera, GLuint textureArray, Shader* shader)
+	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(Camera* camera, GLuint textureArray, Shader* shader)
 	{
 		this->camera = camera;
 		this->textureArray = textureArray;

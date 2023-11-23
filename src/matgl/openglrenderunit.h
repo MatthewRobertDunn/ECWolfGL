@@ -9,7 +9,7 @@ namespace MatGl {
 	class OpenGlRenderUnit
 	{
 	public:
-		OpenGlRenderUnit(GameCamera* camera, GLuint textureArray, Shader* shader);
+		OpenGlRenderUnit(Camera* camera, GLuint textureArray, Shader* shader);
 		~OpenGlRenderUnit();
 		void Load(Model3d model);
 		void Render();
@@ -21,7 +21,7 @@ namespace MatGl {
 		GLuint buffer = {};
 		GLsizei vertexCount = 0;
 		GLenum mode = 0;
-		GameCamera* camera = nullptr;
+		Camera* camera = nullptr;
 		SpotLightList spotLights;
 		//todo: shaders etc if needed
 	};

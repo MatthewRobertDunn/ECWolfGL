@@ -717,11 +717,6 @@ void AsmRefresh()
 	longword xpartial=0,ypartial=0;
 	MapSpot focalspot = map->GetSpot(focaltx, focalty, 0);
 	bool playerInPushwallBackTile = focalspot->pushAmount != 0;
-	#ifdef MATGL
-	MatGl::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-	MatGl::Renderer->Render(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-		return;
-	#endif
 	for(pixx=0;pixx<viewwidth;pixx++)
 	{
 		short angl=midangle+pixelangle[pixx];
@@ -1176,7 +1171,16 @@ void WallRefresh (void)
 
 	viewz = curbob - players[ConsolePlayer].mo->viewheight;
 
-	AsmRefresh();
+
+	#if defined(MATGL) || defined(MATGLFORCE)
+		MatGl::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
+		MatGl::Renderer->Render(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
+	#endif
+
+	#ifndef MATGL
+		AsmRefresh();
+	#endif
+
 	#ifndef MATGL
 		ScalePost ();                   // no more optimization on last post
 	#endif
