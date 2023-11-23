@@ -91,7 +91,7 @@ namespace MatGl {
 			vec2 spriteOffset = vec2(desiredLeftOffset, desiredTopOffset) - vec2(actualLeftOffset, actualTopOffset);
 
 			int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, texture->GetID());
-			auto quad = CreateSprite(vec2(x, y), vec4(1.0, 0.0, 1.0, 0.5), textureIndex, this->camera->Direction, vec2(scaleX, scaleY), spriteOffset);
+			auto quad = CreateSprite(vec2(x, y), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, this->camera->Direction, vec2(scaleX, scaleY), spriteOffset);
 			auto list = &quads[textureArray];
 			list->insert(list->end(), quad.begin(), quad.end());
 		}
