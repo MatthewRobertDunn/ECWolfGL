@@ -1151,14 +1151,14 @@ void SDLFB::ResetSDLRenderer()
 		Texture = SDL_CreateTexture(Renderer, fmt, SDL_TEXTUREACCESS_STREAMING, Width, Height);
 		OpenGlTexture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, Width, Height);
 		SDL_SetTextureBlendMode(OpenGlTexture, SDL_BLENDMODE_BLEND);
-
+		float aspectRatio = MatGl::GameCamera::ConvertRatio(r_ratio, Width, Height);
 		if (!MatGl::Surface) {
 			MatGl::Surface = new MatGl::OpenGlSurface(Screen, Width, Height);
-			MatGl::Camera = new MatGl::GameCamera(Width, Height);
+			MatGl::Camera = new MatGl::GameCamera(aspectRatio, Width, Height);
 		}
 		else {
 			MatGl::Surface->Resize(Width, Height);
-			MatGl::Camera->Resize(Width, Height);
+			MatGl::Camera->Resize(aspectRatio, Width, Height);
 		}
 
 		{

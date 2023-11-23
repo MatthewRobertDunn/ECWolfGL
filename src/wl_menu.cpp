@@ -37,6 +37,7 @@
 #include "am_map.h"
 
 #include <climits>
+#include <matgl/openglmain.h>
 
 static int	lastgamemusicoffset;
 static FName playerClass = NAME_None;
@@ -269,6 +270,10 @@ MENU_LISTENER(SetAspectRatio)
 	r_ratio = static_cast<Aspect>(CheckRatio(screenWidth, screenHeight));
 	NewViewSize(viewsize);
 	displayMenu.draw();
+	if (MatGl::Camera) {
+		float aspectRatio = MatGl::GameCamera::ConvertRatio(r_ratio, screenWidth, screenHeight);
+		MatGl::Camera->Resize(aspectRatio, screenWidth, screenHeight);
+	}
 	return true;
 }
 

@@ -2,11 +2,13 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include <c_cvars.h>
 
-MatGl::GameCamera::GameCamera(int width, int height)
+MatGl::GameCamera::GameCamera(float aspectRatio, int width, int height)
 {
-	this->width = width;
-	this->height = height;
+	this->Width = width;
+	this->Height = height;
+	this->AspectRatio = aspectRatio;
 	this->SetCamera(0.0, 0.0, 0.0);
 }
 
@@ -27,7 +29,7 @@ void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngl
 
 
 	//45 degree perspective view, 0 is near, 100 is far, cutoff 8:6 ratio
-	glm::mat4 projection = glm::perspective(glm::radians(58.0f), (float)width / (float)height, 0.001f, 25.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(58.0f), AspectRatio, 0.001f, 25.0f);
 
 	//Combine into one transform.
 	this->Model = model;
@@ -39,8 +41,40 @@ void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngl
 	
 }
 
-void MatGl::GameCamera::Resize(int width, int height)
+void MatGl::GameCamera::Resize(float aspectRatio, int width, int height)
 {
-	this->width = width;
-	this->height = height;
+	this->Width = width;
+	this->Height = height;
+	this->AspectRatio = aspectRatio;
+}
+
+float MatGl::GameCamera::ConvertRatio(Aspect ratio, int width, int height)
+{
+	switch (ratio)
+	{
+	case ASPECT_16_9:
+		return 16.0 / 9.0;
+		break;
+	case ASPECT_16_10:
+		return 16.0 / 10.0;
+		break;
+	case ASPECT_17_10:
+		return 17.0 / 10.0;
+		break;
+	case ASPECT_4_3:
+		return 4.0 / 3.0;
+		break;
+	case ASPECT_5_4:
+		return 5.0 / 4.0;
+		break;
+	case ASPECT_64_27:
+		return 64.0 / 27.0;
+		break;
+	case ASPECT_32_9:
+		return 32.0 / 9.0;
+		break;
+	default:
+		return (float)width / (float)height;
+		break;
+	}
 }
