@@ -918,7 +918,7 @@ void SDLFB::Update()
 		int openGlPitch;
 		if (!SDL_LockTexture(OpenGlTexture, NULL, &openGlPixels, &openGlPitch))
 		{
-			MatGl::Surface->Render(openGlPixels);
+			MatGl::Globals::Surface->Render(openGlPixels);
 			SDL_UnlockTexture(OpenGlTexture);
 		}
 		//SDLFlipCycles.Clock();
@@ -1152,13 +1152,14 @@ void SDLFB::ResetSDLRenderer()
 		OpenGlTexture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, Width, Height);
 		SDL_SetTextureBlendMode(OpenGlTexture, SDL_BLENDMODE_BLEND);
 		float aspectRatio = MatGl::GameCamera::ConvertRatio(r_ratio, Width, Height);
-		if (!MatGl::Surface) {
-			MatGl::Surface = new MatGl::OpenGlSurface(Screen, Width, Height);
-			MatGl::Camera = new MatGl::GameCamera(aspectRatio, Width, Height);
+		if (!MatGl::Globals::Surface) {
+			MatGl::Globals::Surface = new MatGl::OpenGlSurface(Screen, Width, Height);
+			MatGl::Globals::Camera = new MatGl::GameCamera(aspectRatio, Width, Height);
+			MatGl::Globals::HudCamera = new MatGl::HudCamera(aspectRatio, Width, Height);
 		}
 		else {
-			MatGl::Surface->Resize(Width, Height);
-			MatGl::Camera->Resize(aspectRatio, Width, Height);
+			MatGl::Globals::Surface->Resize(Width, Height);
+			MatGl::Globals::ResizeCameras(aspectRatio, Width, Height);
 		}
 
 		{

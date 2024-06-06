@@ -481,9 +481,9 @@ void GameMap::LoadMap(bool loadingSave)
 	if(!loadingSave)
 		ScanTiles();
 
-	MatGl::Map = new MatGl::MatGlMap(this);
-	MatGl::Map->Load();
-	MatGl::Renderer = new MatGl::OpenGlRenderer(MatGl::Camera, MatGl::TextureManager, MatGl::Map);
+	MatGl::Globals::Map = new MatGl::MatGlMap(this);
+	MatGl::Globals::Map->Load();
+	MatGl::Globals::Renderer = new MatGl::OpenGlRenderer(MatGl::Globals::Camera, MatGl::Globals::TextureManager, MatGl::Globals::Map);
 }
 
 GameMap::Plane &GameMap::NewPlane()

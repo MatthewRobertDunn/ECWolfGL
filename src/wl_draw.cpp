@@ -1173,8 +1173,8 @@ void WallRefresh (void)
 
 
 	#if defined(MATGL) || defined(MATGLFORCE)
-		MatGl::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-		MatGl::Renderer->Render(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
+		MatGl::Globals::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
+		MatGl::Globals::Renderer->Render(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
 	#endif
 
 	#ifndef MATGL

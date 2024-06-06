@@ -5,6 +5,11 @@ namespace MatGl {
 
 	class Camera {
 		public:
+			Camera(float aspectRatio, int width, int height);
+			void Resize(float aspectRatio, int width, int height);
+			static float ConvertRatio(Aspect ratio, int width, int height);
+			int Width, Height;
+			float AspectRatio;
 			glm::mat4 ModelViewProjection;
 			glm::mat4 Model;
 			glm::mat4 View;
@@ -18,15 +23,11 @@ namespace MatGl {
 	public:
 		GameCamera(float aspectRatio, int width, int height);
 		void SetCamera(float playerX, float playerY, float playerAngle);
-		void Resize(float aspectRatio, int width, int height);
-		static float ConvertRatio(Aspect ratio, int width, int height);
-		int Width, Height;
-		float AspectRatio;
 	};
 
 
 	class HudCamera : public Camera {
 	public:
-		HudCamera();
+		HudCamera(float aspectRatio, int width, int height);
 	};
 }
