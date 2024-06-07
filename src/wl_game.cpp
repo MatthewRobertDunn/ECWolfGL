@@ -326,7 +326,7 @@ void SetupGameLevel (void)
 		map->SpawnThings();
 		CheckSpawnPlayer(true);
 	}
-#ifdef  MATGL
+#if defined(MATGL) || defined(MATGLFORCE)
 	MatGl::Globals::Map->LoadLights();
 #endif //  MATGL
 	

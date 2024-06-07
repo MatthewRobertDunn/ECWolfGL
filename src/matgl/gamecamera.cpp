@@ -55,7 +55,7 @@ MatGl::GameCamera::GameCamera(float aspectRatio, int width, int height) : Camera
 
 void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngle)
 {
-	glm::vec3 standingAt = glm::vec3(playerX, playerY, 3.6f);
+	glm::vec3 standingAt = glm::vec3(playerX, playerY, 0.6f);
 	glm::vec3 direction = glm::normalize(glm::vec3(cos(playerAngle), -sin(playerAngle), 0.0));
 	glm::vec3 lookingAt = direction + standingAt;
 	const float wallHeight = 1.2039f;

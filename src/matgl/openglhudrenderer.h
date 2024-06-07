@@ -15,10 +15,11 @@ namespace MatGl {
 	public:
 		OpenGlHudRenderer(HudCamera* camera, OpenGlTextureManager* textureManager);
 		void STACK_ARGS DrawTexture(FTexture* img, double x, double y, int tags_first, ...);
+		void Render();
 	private:
 		Shader* hudShader = nullptr;
 		HudCamera* camera = nullptr;
 		OpenGlTextureManager* textureManager = nullptr;
-		HudCamera* hudCamera = nullptr;
+		std::vector<OpenGlRenderUnit*> renderUnits;
 	};
 }

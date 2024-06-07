@@ -481,9 +481,11 @@ void GameMap::LoadMap(bool loadingSave)
 	if(!loadingSave)
 		ScanTiles();
 
+#if defined(MATGL) || defined(MATGLFORCE)
 	MatGl::Globals::Map = new MatGl::MatGlMap(this);
 	MatGl::Globals::Map->Load();
 	MatGl::Globals::Renderer = new MatGl::OpenGlRenderer(MatGl::Globals::Camera, MatGl::Globals::TextureManager, MatGl::Globals::Map);
+#endif
 }
 
 GameMap::Plane &GameMap::NewPlane()

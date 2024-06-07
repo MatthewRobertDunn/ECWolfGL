@@ -14,10 +14,13 @@ namespace MatGl {
 	using namespace glm;
 	using namespace std::chrono;
 
+	float depth = 0.0;
+
 	OpenGlHudRenderer::OpenGlHudRenderer(HudCamera* hudCamera, OpenGlTextureManager* textureManager)
 	{
 		this->textureManager = textureManager;
-		this->hudCamera = hudCamera;
+		this->camera = hudCamera;
+		this->hudShader = new Shader("./hud.vert", "./hud.frag");
 	}
 
 	void STACK_ARGS OpenGlHudRenderer::DrawTexture(FTexture* texture, double x, double y, int tags_first, ...) {
@@ -53,7 +56,8 @@ namespace MatGl {
 
 		vec2 spriteOffset = glOffsets - glCurrentOffset;
 
-		auto quad = CreateHudQuad(spriteOffset, vec4(1.0, 1.0, 1.0, 1.0), textureIndex, vec2(scaleX, scaleY));
+		depth += 0.001;
+		auto quad = CreateHudQuad(vec3(spriteOffset,depth), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, vec2(scaleX, scaleY));
 
 		//render it using our HUD shader
 		auto spriteUnit = new OpenGlRenderUnit(this->camera, textureManager->GetTextureArray(textureArray), this->hudShader);
@@ -66,7 +70,20 @@ namespace MatGl {
 		};
 
 		spriteUnit->Load(model);
-		spriteUnit->Render();
-		delete spriteUnit;
+		renderUnits.push_back(spriteUnit);
+	}
+
+	void OpenGlHudRenderer::Render()
+	{
+		std::cout << this->renderUnits.size() << std::endl;
+		for (auto & unit : this->renderUnits)
+		{
+			unit->Render();
+			delete unit;
+		}
+
+		this->renderUnits.clear();
+
+		depth = 0.0f;
 	}
 }

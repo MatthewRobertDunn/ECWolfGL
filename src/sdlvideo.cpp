@@ -918,6 +918,7 @@ void SDLFB::Update()
 		int openGlPitch;
 		if (!SDL_LockTexture(OpenGlTexture, NULL, &openGlPixels, &openGlPitch))
 		{
+			MatGl::Globals::HudRenderer->Render();
 			MatGl::Globals::Surface->Render(openGlPixels);
 			SDL_UnlockTexture(OpenGlTexture);
 		}
@@ -1151,6 +1152,8 @@ void SDLFB::ResetSDLRenderer()
 		Texture = SDL_CreateTexture(Renderer, fmt, SDL_TEXTUREACCESS_STREAMING, Width, Height);
 		OpenGlTexture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, Width, Height);
 		SDL_SetTextureBlendMode(OpenGlTexture, SDL_BLENDMODE_BLEND);
+		
+#if defined(MATGL) || defined(MATGLFORCE)
 		float aspectRatio = MatGl::GameCamera::ConvertRatio(r_ratio, Width, Height);
 		if (!MatGl::Globals::Surface) {
 			MatGl::Globals::Surface = new MatGl::OpenGlSurface(Screen, Width, Height);
@@ -1161,7 +1164,7 @@ void SDLFB::ResetSDLRenderer()
 			MatGl::Globals::Surface->Resize(Width, Height);
 			MatGl::Globals::ResizeCameras(aspectRatio, Width, Height);
 		}
-
+#endif
 		{
 			NotPaletted = true;
 

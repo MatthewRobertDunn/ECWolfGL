@@ -1172,18 +1172,18 @@ void WallRefresh (void)
 	viewz = curbob - players[ConsolePlayer].mo->viewheight;
 
 
-	#if defined(MATGL) || defined(MATGLFORCE)
+#if defined(MATGL) || defined(MATGLFORCE)
 		MatGl::Globals::Camera->SetCamera(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
 		MatGl::Globals::Renderer->Render(FixedToFloat(viewx), FixedToFloat(viewy), AngleToFloat(viewangle));
-	#endif
+#endif
 
-	#ifndef MATGL
+#ifndef MATGL
 		AsmRefresh();
-	#endif
+#endif
 
-	#ifndef MATGL
+#ifndef MATGL
 		ScalePost ();                   // no more optimization on last post
-	#endif
+#endif
 }
 
 void CalcViewVariables()

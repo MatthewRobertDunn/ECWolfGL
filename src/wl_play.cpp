@@ -27,7 +27,7 @@
 #include "g_mapinfo.h"
 #include "a_inventory.h"
 #include "am_map.h"
-
+#include "./matgl/OpenGlMain.h"
 /*
 =============================================================================
 
@@ -1009,8 +1009,14 @@ void PlayFrame()
 	if (!loadedgame)
 	{
 		StatusBar->Tick();
+	
+#if defined(MATGL) || defined(MATGLFORCE)
+			StatusBar->DrawStatusBar();
+
+#else
 		if ((gamestate.TimeCount & 1) || !(tics & 1))
 			StatusBar->DrawStatusBar();
+#endif
 	}
 
 	if (screenfaded)

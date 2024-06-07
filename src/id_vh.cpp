@@ -349,9 +349,8 @@ void VWB_DrawFill(FTexture *tex, int ix, int iy, int ix2, int iy2, bool local)
 
 void VWB_DrawGraphic(FTexture *tex, int ix, int iy, double wd, double hd, MenuOffset menu, FRemapTable *remap, bool stencil, BYTE stencilcolor)
 {
-	return;
+	//return;
 	double x = ix, y = iy;
-	std::cout << tex->Name << std::endl;
 	screen->Lock(false);
 	if(menu)
 		MenuToRealCoords(x, y, wd, hd, menu);
@@ -360,38 +359,38 @@ void VWB_DrawGraphic(FTexture *tex, int ix, int iy, double wd, double hd, MenuOf
 
 	if(stencil)
 	{
-		#if defined(MATGL) || defined(MATGLFORCE)
-				MatGl::Globals::Renderer->DrawTexture(tex, x, y,
+#if defined(MATGL) || defined(MATGLFORCE)
+				MatGl::Globals::HudRenderer->DrawTexture(tex, x, y,
 					DTA_DestWidthF, wd,
 					DTA_DestHeightF, hd,
 					DTA_Translation, remap,
 					DTA_FillColor, GPalette.BaseColors[stencilcolor].d,
 					TAG_DONE);
-		#elif
+#else
 			screen->DrawTexture(tex, x, y,
 				DTA_DestWidthF, wd,
 				DTA_DestHeightF, hd,
 				DTA_Translation, remap,
 				DTA_FillColor, GPalette.BaseColors[stencilcolor].d,
 				TAG_DONE);
-		#endif
+#endif
 	}
 	else
 	{
-		#if defined(MATGL) || defined(MATGLFORCE)
-			MatGl::Globals::Renderer->DrawTexture(tex, x, y,
+#if defined(MATGL) || defined(MATGLFORCE)
+			MatGl::Globals::HudRenderer->DrawTexture(tex, x, y,
 				DTA_DestWidthF, wd,
 				DTA_DestHeightF, hd,
 				DTA_Translation, remap,
 				TAG_DONE);
 
-		#elif
+#else
 		screen->DrawTexture(tex, x, y,
 			DTA_DestWidthF, wd,
 			DTA_DestHeightF, hd,
 			DTA_Translation, remap,
 			TAG_DONE);
-		#endif
+#endif
 	}
 	screen->Unlock();
 }

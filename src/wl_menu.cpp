@@ -271,7 +271,9 @@ MENU_LISTENER(SetAspectRatio)
 	NewViewSize(viewsize);
 	displayMenu.draw();
 	float aspectRatio = MatGl::Camera::ConvertRatio(r_ratio, screenWidth, screenHeight);
+#if defined(MATGL) || defined(MATGLFORCE)
 	MatGl::Globals::ResizeCameras(aspectRatio, screenWidth, screenHeight);
+#endif
 	return true;
 }
 

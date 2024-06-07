@@ -463,11 +463,13 @@ static void InitGame()
 	// Setup a temporary window so if we have to terminate we don't do extra mode sets
 	VL_SetVGAPlaneMode (true);
 
+#if defined(MATGL) || defined(MATGLFORCE)
 	printf("Loading OpenGL Textures");
 	auto textureManager = new MatGl::OpenGlTextureManager(&TexMan);
 	MatGl::Globals::TextureManager = textureManager;
 	MatGl::Globals::TextureManager->LoadTextures();
-
+	MatGl::Globals::HudRenderer = new MatGl::OpenGlHudRenderer(MatGl::Globals::HudCamera, MatGl::Globals::TextureManager);
+#endif
 	DrawStartupConsole("Initializing game engine");
 
 //
