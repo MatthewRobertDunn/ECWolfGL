@@ -259,7 +259,7 @@ namespace MatGl
 			int openGlPitch;
 			if (!SDL_LockTexture(OpenGlTexture, NULL, &openGlPixels, &openGlPitch))
 			{
-				MatGl::Globals::HudRenderer->Render();
+				//MatGl::Globals::HudRenderer->Render();
 				MatGl::Globals::Surface->Render(openGlPixels);
 				SDL_UnlockTexture(OpenGlTexture);
 			}

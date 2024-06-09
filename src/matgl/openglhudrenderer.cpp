@@ -74,7 +74,6 @@ namespace MatGl {
 
 	void OpenGlHudRenderer::Render()
 	{
-		std::cout << this->renderUnits.size() << std::endl;
 		for (auto & unit : this->renderUnits)
 		{
 			unit->Render();

@@ -18,6 +18,8 @@
 #include "version.h"
 
 #include <SDL.h>
+#include "matgl/openglmain.h"
+#include "matgl/openglsdlvideo.h"
 
 IVideo *Video = NULL;
 
@@ -241,7 +243,13 @@ void I_InitGraphics ()
 	Android_InitGraphics();
 #endif
 
-	Video = new SDLVideo (0);
+#ifndef MATGL
+	Video = new SDLVideo(0);
+#else
+	Video = new MatGl::OpenGlSDLVideo(0);
+#endif // DEBUG
+
+	
 	if (Video == NULL)
 		I_FatalError ("Failed to initialize display");
 
