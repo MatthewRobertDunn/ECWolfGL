@@ -469,7 +469,10 @@ static void InitGame()
 	MatGl::Globals::TextureManager = textureManager;
 	MatGl::Globals::TextureManager->LoadTextures();
 	MatGl::Globals::HudRenderer = new MatGl::OpenGlHudRenderer(MatGl::Globals::HudCamera, MatGl::Globals::TextureManager);
+	screen = MatGl::Globals::HudRenderer;
 #endif
+
+
 	DrawStartupConsole("Initializing game engine");
 
 //

@@ -16,21 +16,20 @@ namespace MatGl {
 
 	float depth = 0.0;
 
-	OpenGlHudRenderer::OpenGlHudRenderer(HudCamera* hudCamera, OpenGlTextureManager* textureManager)
+	OpenGlHudRenderer::OpenGlHudRenderer(HudCamera* hudCamera, OpenGlTextureManager* textureManager) : DFrameBuffer(hudCamera->Width, hudCamera->Height)
 	{
 		this->textureManager = textureManager;
 		this->camera = hudCamera;
 		this->hudShader = new Shader("./hud.vert", "./hud.frag");
 	}
 
-	void STACK_ARGS OpenGlHudRenderer::DrawTexture(FTexture* texture, double x, double y, int tags_first, ...) {
-
-
+	void STACK_ARGS OpenGlHudRenderer::DrawTextureV(FTexture* img, double x, double y, uint32 tag, va_list tags)
+	{
 		//Figure out key for our texture dictionary
-		std::string textureArray = std::format("wolf/{}/{}", texture->GetWidth(), texture->GetHeight());
+		std::string textureArray = std::format("wolf/{}/{}", img->GetWidth(), img->GetHeight());
 
 		//Create a quad to hold this hud
-		int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, texture->GetID());
+		int textureIndex = textureManager->GetTextureArrayIndexForWolf(textureArray, img->GetID());
 
 		float PIXELS_X = 320.0f;
 		float PIXELS_Y = 200.0f;
@@ -39,11 +38,11 @@ namespace MatGl {
 		float ratioChange = baseRatio / camera->AspectRatio;
 
 
-		float tileXScale = PIXELS_X * FixedToFloat(texture->xScale) / ratioChange;
-		float tileYScale = PIXELS_Y * FixedToFloat(texture->yScale);
+		float tileXScale = PIXELS_X * FixedToFloat(img->xScale) / ratioChange;
+		float tileYScale = PIXELS_Y * FixedToFloat(img->yScale);
 
-		float scaleX = texture->GetWidth() / tileXScale;
-		float scaleY = texture->GetHeight() / tileYScale;
+		float scaleX = img->GetWidth() / tileXScale;
+		float scaleY = img->GetHeight() / tileYScale;
 
 
 		auto glCurrentOffset = -vec2(0.5 * scaleX, 0.5 * scaleY);
@@ -85,5 +84,54 @@ namespace MatGl {
 		this->renderUnits.clear();
 
 		depth = 0.0f;
+	}
+
+	// Inherited via DFrameBuffer
+	bool OpenGlHudRenderer::Lock(bool buffered)
+	{
+		return false;
+	}
+	void OpenGlHudRenderer::Update()
+	{
+	}
+	PalEntry* OpenGlHudRenderer::GetPalette()
+	{
+		return nullptr;
+	}
+	void OpenGlHudRenderer::GetFlashedPalette(PalEntry palette[256])
+	{
+	}
+	void OpenGlHudRenderer::UpdatePalette()
+	{
+	}
+	bool OpenGlHudRenderer::SetGamma(float gamma)
+	{
+		return false;
+	}
+	bool OpenGlHudRenderer::SetFlash(PalEntry rgb, int amount)
+	{
+		return false;
+	}
+	void OpenGlHudRenderer::GetFlash(PalEntry& rgb, int& amount)
+	{
+	}
+	int OpenGlHudRenderer::GetPageCount()
+	{
+		return 0;
+	}
+	bool OpenGlHudRenderer::IsFullscreen()
+	{
+		return false;
+	}
+	void OpenGlHudRenderer::PaletteChanged()
+	{
+	}
+	int OpenGlHudRenderer::QueryNewPalette()
+	{
+		return 0;
+	}
+	bool OpenGlHudRenderer::Is8BitMode()
+	{
+		return false;
 	}
 }

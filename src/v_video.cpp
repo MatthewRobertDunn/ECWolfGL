@@ -121,7 +121,6 @@ bool DCanvas::IsValid ()
 
 void DCanvas::FlatFill (int left, int top, int right, int bottom, FTexture *src, bool local_origin)
 {
-	return;
 	int w = src->GetWidth();
 	int h = src->GetHeight();
 

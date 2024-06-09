@@ -1,5 +1,5 @@
 #pragma once
-#define MATGL
+//#define MATGL
 //#define MATGLFORCE
 #include "openglrenderer.h"
 #include "openglsurface.h"

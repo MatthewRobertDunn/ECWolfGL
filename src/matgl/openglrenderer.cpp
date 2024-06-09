@@ -315,6 +315,8 @@ namespace MatGl {
 
 
 	void STACK_ARGS OpenGlRenderer::DrawTexture(FTexture* texture, double x, double y, int tags_first, ...) {
+		va_list tags;
+		va_start(tags, tags_first);
 
 		
 		//Figure out key for our texture dictionary
