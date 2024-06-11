@@ -476,6 +476,7 @@ FFont::FFont (const char *name, const char *nametemplate, int first, int count, 
 		if (charlumps[i] != NULL)
 		{
 			Chars[i].Pic = new FFontChar1 (charlumps[i]);
+			Chars[i].Pic->id = lump;
 			Chars[i].ID = lump;
 			Chars[i].XMove = Chars[i].Pic->GetScaledWidth();
 		}
