@@ -85,8 +85,8 @@ void MatGl::GameCamera::SetCamera(float playerX, float playerY, float playerAngl
 MatGl::HudCamera::HudCamera(float aspectRatio, int width, int height) : Camera(aspectRatio, width, height)
 {
 	//translate into the middle
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, -0.5f, 0.0f));
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.0f));
 
-	glm::mat4 projection = glm::ortho(-0.5, 0.5, -0.5, 0.5);  //left, right, bottom, top
+	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);  //left, right, bottom, top
 	this->ModelViewProjection = projection * model;
 }

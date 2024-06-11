@@ -468,7 +468,6 @@ static void InitGame()
 	auto textureManager = new MatGl::OpenGlTextureManager(&TexMan);
 	MatGl::Globals::TextureManager = textureManager;
 	MatGl::Globals::TextureManager->LoadTextures();
-	MatGl::Globals::HudRenderer = new MatGl::OpenGlHudRenderer(MatGl::Globals::HudCamera, MatGl::Globals::TextureManager);
 #endif
 
 

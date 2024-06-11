@@ -1,5 +1,6 @@
 #pragma once
 #include "v_video.h"
+#include "gamecamera.h"
 
 
 namespace MatGl
@@ -57,5 +58,9 @@ namespace MatGl
 		void ResetSDLRenderer();
 
 		OpenGlSDLFB() {}
+
+	protected:
+		HudCamera* hudCamera = nullptr;
+		virtual void Render() {};
 	};
 }

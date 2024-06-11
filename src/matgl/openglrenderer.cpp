@@ -281,8 +281,8 @@ namespace MatGl {
 		float tileXScale = PIXELS_X * FixedToFloat(texture->xScale) / ratioChange;
 		float tileYScale = PIXELS_Y * FixedToFloat(texture->yScale);
 
-		float scaleX = texture->GetWidth() / tileXScale;
-		float scaleY = texture->GetHeight() / tileYScale;
+		float scaleX = texture->GetWidth() * camera->Width / tileXScale;
+		float scaleY = texture->GetHeight() * camera->Height / tileYScale;
 
 
 		auto glCurrentOffset = -vec2(0.5 * scaleX, 0.5 * scaleY);
@@ -291,8 +291,8 @@ namespace MatGl {
 		vec2 glOffsets = vec2(FixedToFloat(offsets.first), FixedToFloat(offsets.second));
 
 		//Scale 0 to width to 0 to 1.0
-		glOffsets.x /= this->camera->Width;
-		glOffsets.y /= this->camera->Height;
+		//glOffsets.x /= this->camera->Width;
+		//glOffsets.y /= this->camera->Height;
 				
 		vec2 spriteOffset = glOffsets - glCurrentOffset;
 

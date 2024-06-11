@@ -1,6 +1,6 @@
 #include "openglsdlvideo.h"
 #include "c_cvars.h"
-#include "openglsdlfb.h"
+#include "openglhudrenderer.h"
 
 namespace MatGl
 {
@@ -173,7 +173,7 @@ namespace MatGl
 
 		if (old != NULL)
 		{ // Reuse the old framebuffer if its attributes are the same
-			OpenGlSDLFB* fb = static_cast<OpenGlSDLFB*> (old);
+			OpenGlHudRenderer* fb = static_cast<OpenGlHudRenderer*> (old);
 			if (fb->Width == width &&
 				fb->Height == height)
 			{
@@ -200,7 +200,7 @@ namespace MatGl
 			flashAmount = 0;
 		}
 
-		OpenGlSDLFB* fb = new OpenGlSDLFB(width, height, fullscreen, oldwin);
+		OpenGlHudRenderer* fb = new OpenGlHudRenderer(width, height, fullscreen, oldwin);
 
 		// If we could not create the framebuffer, try again with slightly
 		// different parameters in this order:
@@ -239,7 +239,7 @@ namespace MatGl
 			}
 
 			++retry;
-			fb = static_cast<OpenGlSDLFB*>(CreateFrameBuffer(width, height, fullscreen, NULL));
+			fb = static_cast<OpenGlHudRenderer*>(CreateFrameBuffer(width, height, fullscreen, NULL));
 		}
 		retry = 0;
 
