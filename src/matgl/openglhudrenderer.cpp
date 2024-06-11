@@ -17,9 +17,21 @@ namespace MatGl {
 	using namespace std::chrono;
 	float depth = 0.0;
 
+
 	OpenGlHudRenderer::OpenGlHudRenderer(int width, int height, bool fullscreen, SDL_Window* oldwin) : OpenGlSDLFB(width, height, fullscreen, oldwin)
 	{
 		this->hudShader = new Shader("./hud.vert", "./hud.frag");
+	}
+			
+	//Deletes all render units then empties the render unit list
+	void OpenGlHudRenderer::Clear(int left, int top, int right, int bottom, int palcolor, uint32 color)
+	{
+		for (auto& unit : this->renderUnits)
+		{
+			delete unit;
+		}
+		this->renderUnits.clear();
+		depth = 0.0f;
 	}
 
 	void STACK_ARGS OpenGlHudRenderer::DrawTextureV(FTexture* img, double x, double y, uint32 tag, va_list tags)

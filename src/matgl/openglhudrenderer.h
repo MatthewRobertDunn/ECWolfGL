@@ -16,6 +16,7 @@ namespace MatGl {
 	{
 	public:
 		OpenGlHudRenderer(int width, int height, bool fullscreen, SDL_Window* oldwin);
+		void Clear(int left, int top, int right, int bottom, int palcolor, uint32 color) override;
 	protected:
 		void Render() override;
 		void STACK_ARGS DrawTextureV(FTexture* img, double x, double y, uint32 tag, va_list tags) override;
