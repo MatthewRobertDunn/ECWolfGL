@@ -57,6 +57,8 @@ namespace MatGl
 		void UpdateColors();
 		void ResetSDLRenderer();
 
+		void RenderToTexture();
+
 		OpenGlSDLFB() {}
 
 	protected:

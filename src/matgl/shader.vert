@@ -20,6 +20,6 @@ void main()
     Normal = normal;
     gl_Position =  mvp * vec4(position, 1.0);  //perspective transform on position
     VertexColor = color;
-    TextureCoords = texture * vec3(1.0,-1.0,1.0); //upside down, why?
+    TextureCoords = vec3(texture.x,1.0 - texture.y,texture.z); //upside down, why?
 
 }

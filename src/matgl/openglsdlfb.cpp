@@ -3,7 +3,7 @@
 #include "version.h"
 #include "v_pfx.h"
 #include "wl_main.h"
-
+#include "openglsurface.h"
 #define vid_adapter 0
 #define rgamma 1.f
 #define ggamma 1.f
@@ -191,101 +191,58 @@ namespace MatGl
 			UpdateColors();
 		}
 
-#if 0
-#ifndef __APPLE__
-		if (vid_maxfps && !cl_capfps)
-		{
-			SEMAPHORE_WAIT(FPSLimitSemaphore)
-		}
-#endif
-#endif
-
 		Buffer = NULL;
 		LockCount = 0;
 		UpdatePending = false;
 
-		//BlitCycles.Reset();
-		//SDLFlipCycles.Reset();
-		//BlitCycles.Clock();
+#ifdef MATGL_RENDER_TEXTURE
+		RenderToTexture();
+#else
+		this->Render();
+		SDL_GL_SwapWindow(Screen);
+		MatGl::Globals::Surface->Render(NULL);
+#endif // MATGL_RENDER_TEXTURE
 
+	}
+
+
+	void OpenGlSDLFB::RenderToTexture()
+	{
 		void* pixels = NULL;
 		int pitch = NULL;
 
-
-		if (UsingRenderer)
+		if (SDL_LockTexture(Texture, NULL, &pixels, &pitch))
 		{
-
-			if (SDL_LockTexture(Texture, NULL, &pixels, &pitch))
-			{
-				exit(0);
-				return;
-			}
-		}
-		else
-		{
-			if (SDL_LockSurface(Surface))
-				return;
-
-			pixels = Surface->pixels;
-			pitch = Surface->pitch;
+			exit(0);
+			return;
 		}
 
-		if (NotPaletted)
+		GPfx.Convert(MemBuffer, Pitch,
+			pixels, pitch, Width, Height,
+			FRACUNIT, FRACUNIT, 0, 0);
+
+
+		void* openGlPixels = NULL;
+		int openGlPitch;
+		if (!SDL_LockTexture(OpenGlTexture, NULL, &openGlPixels, &openGlPitch))
 		{
-
-			GPfx.Convert(MemBuffer, Pitch,
-				pixels, pitch, Width, Height,
-				FRACUNIT, FRACUNIT, 0, 0);
-
+			this->Render();
+			MatGl::Globals::Surface->Render(openGlPixels);
+			SDL_UnlockTexture(OpenGlTexture);
 		}
-		else
-		{
-			if (pitch == Pitch)
-			{
-				memcpy(pixels, MemBuffer, Width * Height);
-			}
-			else
-			{
-				for (int y = 0; y < Height; ++y)
-				{
-					memcpy((BYTE*)pixels + y * pitch, MemBuffer + y * Pitch, Width);
-				}
-			}
-		}
-
-		if (UsingRenderer)
-		{
-			void* openGlPixels = NULL;
-			int openGlPitch;
-			if (!SDL_LockTexture(OpenGlTexture, NULL, &openGlPixels, &openGlPitch))
-			{
-				this->Render();
-				MatGl::Globals::Surface->Render(openGlPixels);
-				SDL_UnlockTexture(OpenGlTexture);
-			}
-			//SDLFlipCycles.Clock();
-			SDL_RenderClear(Renderer);
-			SDL_UnlockTexture(Texture);
-			SDL_RenderCopy(Renderer, Texture, NULL, NULL);
-			SDL_RenderCopy(Renderer, OpenGlTexture, NULL, NULL);
+		//SDLFlipCycles.Clock();
+		SDL_RenderClear(Renderer);
+		SDL_UnlockTexture(Texture);
+		SDL_RenderCopy(Renderer, Texture, NULL, NULL);
+		SDL_RenderCopy(Renderer, OpenGlTexture, NULL, NULL);
 
 #ifdef __ANDROID__
-			// Hack control overlay in
-			extern void frameControls();
-			frameControls();
+		// Hack control overlay in
+		extern void frameControls();
+		frameControls();
 #endif
 
-			SDL_RenderPresent(Renderer);
-			//SDLFlipCycles.Unclock();
-		}
-		else
-		{
-			SDL_UnlockSurface(Surface);
-
-			//SDLFlipCycles.Clock();
-			SDL_UpdateWindowSurface(Screen);
-			//SDLFlipCycles.Unclock();
-		}
+		SDL_RenderPresent(Renderer);
 	}
 
 	void OpenGlSDLFB::UpdateColors()
@@ -395,11 +352,13 @@ namespace MatGl
 
 	void fillTexture(SDL_Renderer* renderer, SDL_Texture* texture, int r, int g, int b, int a)
 	{
+		/*
 		SDL_SetRenderTarget(renderer, texture);
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 		SDL_SetRenderDrawColor(renderer, r, g, b, a);
 		SDL_RenderFillRect(renderer, NULL);
 		SDL_SetRenderTarget(renderer, NULL);
+		*/
 	}
 
 
