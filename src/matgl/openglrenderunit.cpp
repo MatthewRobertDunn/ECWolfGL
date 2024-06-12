@@ -88,8 +88,8 @@ namespace MatGl {
 
 
 		MatGl::SpotLight light = {
-			.Position = this->camera->CameraPosition,
-			.Direction = this->camera->Direction,
+			.Position = this->camera->GlPosition,
+			.Direction = this->camera->GlDirection,
 			.CutOff = glm::cos(glm::radians(12.5f)),
 			.OuterCutOff = glm::cos(glm::radians(60.0f)),
 			.Constant = 1.0f,
@@ -106,7 +106,7 @@ namespace MatGl {
 		SetSpotlightsUniform();
 
 		//Get the variable that represents our camera position
-		shader->SetVec3("cameraPosition", this->camera->CameraPosition);
+		shader->SetVec3("cameraPosition", this->camera->GlPosition);
 
 
 		//Texture stuff
