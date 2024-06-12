@@ -88,8 +88,8 @@ namespace MatGl {
 
 
 		MatGl::SpotLight light = {
-			.Position = this->camera->GlPosition,
-			.Direction = this->camera->GlDirection,
+			.Position = this->camera->Position,
+			.Direction = this->camera->Direction,
 			.CutOff = glm::cos(glm::radians(12.5f)),
 			.OuterCutOff = glm::cos(glm::radians(60.0f)),
 			.Constant = 1.0f,
@@ -101,7 +101,7 @@ namespace MatGl {
 		};
 
 		// spotLight
-		shader->SetSpotlight("spotLight", light);
+		shader->SetSpotlight("spotLight", light, this->camera->Model);
 
 		SetSpotlightsUniform();
 
@@ -129,7 +129,7 @@ namespace MatGl {
 		int i = 0;
 		for (auto& light : this->spotLights) {
 
-			shader->SetSpotlight(std::string("spotLights[") + std::to_string(i) + std::string("]"), light);
+			shader->SetSpotlight(std::string("spotLights[") + std::to_string(i) + std::string("]"), light, this->camera->Model);
 			i++;
 		}
 
