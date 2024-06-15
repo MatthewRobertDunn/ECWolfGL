@@ -12,6 +12,8 @@ namespace MatGl {
 		OpenGlRenderUnit(Camera* camera, GLuint textureArray, Shader* shader);
 		~OpenGlRenderUnit();
 		void Load(Model3d model);
+		glm::vec3 TopLeft;
+		glm::vec3 BottomRight;
 		void Render();
 	private:
 		void SetSpotlightsUniform();

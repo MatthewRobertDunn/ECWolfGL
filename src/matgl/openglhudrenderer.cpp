@@ -64,6 +64,7 @@ namespace MatGl {
 		depth += 0.001;
 		auto quad = CreateHudQuad(vec3(spriteOffset,depth), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, spriteScale);
 
+		
 		//render it using our HUD shader
 		auto spriteUnit = new OpenGlRenderUnit(this->hudCamera, MatGl::Globals::TextureManager->GetTextureArray(textureArray), this->hudShader);
 
@@ -75,18 +76,53 @@ namespace MatGl {
 		};
 
 		spriteUnit->Load(model);
-		renderUnits.push_back(spriteUnit);
+		spriteUnit->TopLeft = quad[0].position;
+		spriteUnit->BottomRight = quad[5].position;
+		AddQuad(spriteUnit);
+	}
+
+	//After removing the overlapped quads, the new quad is added to this->quad
+	//Overlap is checked by using the coordinates of the vertexes in each quad in the list
+	//Vertexes are always stored in quad in the following order TL, BL, TR, TR, BL, BR
+	void OpenGlHudRenderer::AddQuad(OpenGlRenderUnit* quad)
+	{
+		auto topLeft = quad->TopLeft;
+		auto bottomRight = quad->BottomRight;
+
+		std::vector<decltype(this->renderUnits)::iterator> quadsToRemove;
+
+		for (auto it = this->renderUnits.begin(); it != this->renderUnits.end(); ++it)
+		{
+			const auto& existingQuad = *it;
+			auto existingTopLeft = existingQuad->TopLeft;
+			auto existingBottomRight = existingQuad->BottomRight;
+		
+			bool overlap = existingTopLeft.x >= topLeft.x
+						&& existingTopLeft.y >= topLeft.y
+						&& existingBottomRight.x <= bottomRight.x
+						&& existingBottomRight.y <= bottomRight.y;
+
+			if (overlap)
+			{
+				quadsToRemove.push_back(it);
+				delete existingQuad;
+			}
+		}
+
+		for (auto it = quadsToRemove.rbegin(); it != quadsToRemove.rend(); ++it)
+		{
+			this->renderUnits.erase(*it);
+		}
+
+		this->renderUnits.push_back(quad);
 	}
 	void OpenGlHudRenderer::Render()
 	{
 		for (auto & unit : this->renderUnits)
 		{
 			unit->Render();
-			delete unit;
 		}
 
-		this->renderUnits.clear();
-
-		depth = 0.0f;
+		depth = 0;
 	}
 }

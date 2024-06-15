@@ -21,6 +21,7 @@ namespace MatGl {
 		void Render() override;
 		void STACK_ARGS DrawTextureV(FTexture* img, double x, double y, uint32 tag, va_list tags) override;
 	private:
+		void AddQuad(OpenGlRenderUnit* quad);
 		Shader* hudShader = nullptr;
 		std::vector<OpenGlRenderUnit*> renderUnits;
 	};
