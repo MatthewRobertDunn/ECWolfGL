@@ -156,11 +156,11 @@ namespace MatGl {
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
     }
 
-    void Shader::SetSpotlight(const std::string& name, const MatGl::SpotLight& spotlight)
+    void Shader::SetSpotlight(const std::string& name, const MatGl::SpotLight& spotlight, const glm::mat4& model)
     {
         // spotLight
-        SetVec3(name + ".position", spotlight.Position);
-        SetVec3(name + ".direction", spotlight.Direction);
+        SetVec3(name + ".position", glm::vec3(model * glm::vec4(spotlight.Position, 1.0)));
+        SetVec3(name + ".direction", glm::vec3(model * glm::vec4(spotlight.Direction, 1.0)));
         SetVec3(name + ".ambient", spotlight.Ambient);
         SetVec3(name + ".diffuse", spotlight.Diffuse);
         SetVec3(name + ".specular", spotlight.Specular);

@@ -462,6 +462,15 @@ static void InitGame()
 
 	// Setup a temporary window so if we have to terminate we don't do extra mode sets
 	VL_SetVGAPlaneMode (true);
+
+#if defined(MATGL) || defined(MATGLFORCE)
+	printf("Loading OpenGL Textures");
+	auto textureManager = new MatGl::OpenGlTextureManager(&TexMan);
+	MatGl::Globals::TextureManager = textureManager;
+	MatGl::Globals::TextureManager->LoadTextures();
+#endif
+
+
 	DrawStartupConsole("Initializing game engine");
 
 //
@@ -520,12 +529,6 @@ static void InitGame()
 // Finish signon screen
 //
 	VL_SetVGAPlaneMode();
-
-	printf("Loading OpenGL Textures");
-	auto textureManager = new MatGl::OpenGlTextureManager(&TexMan);
-	MatGl::TextureManager = textureManager;
-	MatGl::TextureManager->LoadTextures();
-	
 
 	if(DrawStartupConsole("Initialization complete"))
 	{

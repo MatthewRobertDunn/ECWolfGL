@@ -9,9 +9,9 @@
 
 namespace MatGl {
 	using namespace glm;
-	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(Camera* camera, GLuint textureArray, Shader* shader)
+	MatGl::OpenGlRenderUnit::OpenGlRenderUnit(MatGl::Camera* camera, GLuint textureArray, Shader* shader)
 	{
-		this->camera = camera;
+		this->Camera = camera;
 		this->textureArray = textureArray;
 
 		//vertex array
@@ -80,16 +80,16 @@ namespace MatGl {
 		glBindVertexArray(this->vertexArray);
 
 		//Camera stuff
-		shader->SetMat4("mvp", this->camera->ModelViewProjection);
-		shader->SetMat4("model", this->camera->Model);
+		shader->SetMat4("mvp", this->Camera->ModelViewProjection);
+		shader->SetMat4("model", this->Camera->Model);
 
 		//Ambient light
 		shader->SetVec4("ambientLight", vec4(0.1f, 0.1f, 0.1f, 1.0f));
 
 
 		MatGl::SpotLight light = {
-			.Position = this->camera->CameraPosition,
-			.Direction = this->camera->Direction,
+			.Position = this->Camera->Position,
+			.Direction = this->Camera->Direction,
 			.CutOff = glm::cos(glm::radians(12.5f)),
 			.OuterCutOff = glm::cos(glm::radians(60.0f)),
 			.Constant = 1.0f,
@@ -101,12 +101,12 @@ namespace MatGl {
 		};
 
 		// spotLight
-		shader->SetSpotlight("spotLight", light);
+		shader->SetSpotlight("spotLight", light, this->Camera->Model);
 
 		SetSpotlightsUniform();
 
 		//Get the variable that represents our camera position
-		shader->SetVec3("cameraPosition", this->camera->CameraPosition);
+		shader->SetVec3("cameraPosition", this->Camera->GlPosition);
 
 
 		//Texture stuff
@@ -129,7 +129,7 @@ namespace MatGl {
 		int i = 0;
 		for (auto& light : this->spotLights) {
 
-			shader->SetSpotlight(std::string("spotLights[") + std::to_string(i) + std::string("]"), light);
+			shader->SetSpotlight(std::string("spotLights[") + std::to_string(i) + std::string("]"), light, this->Camera->Model);
 			i++;
 		}
 

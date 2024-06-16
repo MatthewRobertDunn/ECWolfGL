@@ -22,6 +22,7 @@ namespace MatGl {
 
 	void OpenGlSurface::Resize(int width, int height)
 	{
+#ifdef MATGL_RENDER_TEXTURE
 		// Check if framebuffer already exists, delete it if true
 		if (glIsFramebuffer(framebuffer)) {
 			glDeleteFramebuffers(1, &framebuffer);
@@ -42,11 +43,11 @@ namespace MatGl {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
+
 		// Check if texture already exists, delete it if true
 		if (glIsTexture(glTexture)) {
 			glDeleteTextures(1, &glTexture);
 		}
-
 		// Generate a new texture
 		glGenTextures(1, &glTexture);
 		glBindTexture(GL_TEXTURE_2D, glTexture);
@@ -57,8 +58,6 @@ namespace MatGl {
 		// Attach the texture to the framebuffer
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glTexture, 0);
 
-		this->width = width;
-		this->height = height;
 
 		//Test if everything failed    
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -66,10 +65,19 @@ namespace MatGl {
 			printf("failed to make complete framebuffer object %x", status);
 		}
 
+#endif // MATGL_RENDER_TEXTURE
+
+		this->width = width;
+		this->height = height;
+
+
 		glViewport(0, 0, width, height);
 
+#ifdef MATGL_RENDER_TEXTURE
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
+#else
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+#endif
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -82,7 +90,9 @@ namespace MatGl {
 
 	void OpenGlSurface::Render(void* texture)
 	{
+#ifdef MATGL_RENDER_TEXTURE
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, texture);
+#endif
 		//glDepthMask(GL_TRUE);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}

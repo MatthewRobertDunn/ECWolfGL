@@ -32,8 +32,10 @@ void main()
 {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(cameraPosition - FragPos);
-    vec4 result = texture(textureArray,TextureCoords) * VertexColor;
+    vec4 result = texture(textureArray,TextureCoords) * VertexColor * ambientLight;
+    result += vec4(CalcSpotLight(spotLight, norm, FragPos, viewDir),0.0);
     FragColor = result;
+
     if(FragColor.a < 0.9f){
         discard;
     }

@@ -1,4 +1,5 @@
 #version 430 core
+layout(early_fragment_tests) in;
 out vec4 FragColor;
 in vec4 VertexColor;
 in vec3 TextureCoords;
@@ -24,21 +25,33 @@ struct SpotLight {
 };
 
 uniform SpotLight spotLight;
+uniform SpotLight spotLights[50];
+uniform int spotLightsCount;
+
+
+
 
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-
 
 void main()
 {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(cameraPosition - FragPos);
-    vec4 result = texture(textureArray,TextureCoords) * VertexColor;
-    FragColor = result;
-    if(FragColor.a < 0.9f){
-        discard;
+    vec4 result = mix(texture(textureArray,TextureCoords) * VertexColor, VertexColor, float(TextureCoords.z < 0.0)) * ambientLight;
+    result += vec4(CalcSpotLight(spotLight, norm, FragPos, viewDir),0.0);
+    
+    for(int i=0;i<spotLightsCount;i++){
+        result += vec4(CalcSpotLight(spotLights[i], norm, FragPos, viewDir),0.0);
     }
-}
+    
+    FragColor = result;
 
+    //FragColor = vec4(1.0,0.0,0.0,1.0) * VertexColor;
+    //FragColor = VertexColor;
+    //FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
+    //float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
+    //FragColor = vec4(vec3(depth), 1.0);
+} 
 
 
 
@@ -54,6 +67,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+    attenuation = clamp(attenuation, 0.0, 1.0);
     // spotlight intensity
     float theta = dot(lightDir, normalize(-light.direction)); 
     float epsilon = light.cutOff - light.outerCutOff;
@@ -61,7 +75,8 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     // combine results
         
     vec3 tex = vec3(mix(texture(textureArray,TextureCoords), VertexColor, float(TextureCoords.z < 0.0)));
-    
+    //vec3 tex = vec3(texture(textureArray,TextureCoords) * VertexColor);
+
     vec3 ambient = light.ambient * tex;
     ambient *= attenuation * intensity;
     return ambient;

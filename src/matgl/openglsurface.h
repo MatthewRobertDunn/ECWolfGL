@@ -3,6 +3,7 @@
 #include <sdl.h>
 #include "glew.h"
 #include "openglshader.h"
+//#define MATGL_RENDER_TEXTURE
 namespace MatGl {
 	class OpenGlSurface
 	{

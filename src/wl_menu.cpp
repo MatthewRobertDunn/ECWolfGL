@@ -270,10 +270,10 @@ MENU_LISTENER(SetAspectRatio)
 	r_ratio = static_cast<Aspect>(CheckRatio(screenWidth, screenHeight));
 	NewViewSize(viewsize);
 	displayMenu.draw();
-	if (MatGl::Camera) {
-		float aspectRatio = MatGl::GameCamera::ConvertRatio(r_ratio, screenWidth, screenHeight);
-		MatGl::Camera->Resize(aspectRatio, screenWidth, screenHeight);
-	}
+	float aspectRatio = MatGl::Camera::ConvertRatio(r_ratio, screenWidth, screenHeight);
+#if defined(MATGL) || defined(MATGLFORCE)
+	MatGl::Globals::ResizeCameras(aspectRatio, screenWidth, screenHeight);
+#endif
 	return true;
 }
 

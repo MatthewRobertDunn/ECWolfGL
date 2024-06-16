@@ -55,7 +55,7 @@ namespace MatGl {
 				FCopyInfo inf = { OP_OVERWRITE, BLEND_NONE, {0}, 0, 0 };
 				FBitmap bmp((BYTE*)(openGlTextureData.data()), size.x * 4, size.x, size.y);
 				currentTexture->CopyTrueColorPixels(&bmp, 0, 0, 0, &inf);
-				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, size.x, size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE, openGlTextureData.data());
+				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, size.x, size.y, 1, GL_BGRA, GL_UNSIGNED_BYTE, openGlTextureData.data());
 				newTextureArray.TextureLayerMap.insert(std::pair<FTextureID, int>(currentTexture->id, layer));
 				layer++;
 				CheckGlErrors();

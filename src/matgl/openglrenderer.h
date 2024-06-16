@@ -15,6 +15,7 @@ namespace MatGl {
 	public:
 		OpenGlRenderer(GameCamera* camera, OpenGlTextureManager* textureManager, MatGlMap* matGlMap);
 		void Render(float playerX, float playerY, float playerAngle);
+		void STACK_ARGS DrawTexture(FTexture* img, double x, double y, int tags_first, ...);
 	private:
 		void RenderSprites();
 		void RenderWalls(float playerX, float playerY, float playerAngle);

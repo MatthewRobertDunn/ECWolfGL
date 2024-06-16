@@ -37,13 +37,7 @@ void main()
 {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(cameraPosition - FragPos);
-    vec4 result = mix(texture(textureArray,TextureCoords) * VertexColor, VertexColor, float(TextureCoords.z < 0.0)) * ambientLight;
-    result += vec4(CalcSpotLight(spotLight, norm, FragPos, viewDir),0.0);
-    
-    for(int i=0;i<spotLightsCount;i++){
-        result += vec4(CalcSpotLight(spotLights[i], norm, FragPos, viewDir),0.0);
-    }
-    
+    vec4 result = mix(texture(textureArray,TextureCoords) * VertexColor, VertexColor, float(TextureCoords.z < 0.0));
     FragColor = result;
 
     //FragColor = vec4(1.0,0.0,0.0,1.0) * VertexColor;
