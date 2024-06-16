@@ -15,9 +15,6 @@
 namespace MatGl {
 	using namespace glm;
 	using namespace std::chrono;
-	float depth = 0.0;
-
-
 	OpenGlHudRenderer::OpenGlHudRenderer(int width, int height, bool fullscreen, SDL_Window* oldwin) : OpenGlSDLFB(width, height, fullscreen, oldwin)
 	{
 		this->hudShader = new Shader("./hud.vert", "./hud.frag");
@@ -31,7 +28,12 @@ namespace MatGl {
 			delete unit;
 		}
 		this->renderUnits.clear();
-		depth = 0.0f;
+
+		// Convert uint32 color to float red, green, and blue components
+		float red = static_cast<float>((color & 0xFF0000) >> 16) / 255.0f;
+		float green = static_cast<float>((color & 0x00FF00) >> 8) / 255.0f;
+		float blue = static_cast<float>(color & 0x0000FF) / 255.0f;
+		glClearColor(red, green, blue, 1.0f);
 	}
 
 	void STACK_ARGS OpenGlHudRenderer::DrawTextureV(FTexture* img, double x, double y, uint32 tag, va_list tags)
@@ -61,8 +63,7 @@ namespace MatGl {
 		auto spriteScale = vec2(parms.destwidth, parms.destheight);
 		auto spriteOffset = vec2(x0, y0) + spriteScale * 0.5f;
 		
-		depth += 0.001;
-		auto quad = CreateHudQuad(vec3(spriteOffset,depth), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, spriteScale);
+		auto quad = CreateHudQuad(vec3(spriteOffset,0.0f), vec4(1.0, 1.0, 1.0, 1.0), textureIndex, spriteScale);
 
 		
 		//render it using our HUD shader
@@ -118,11 +119,13 @@ namespace MatGl {
 	}
 	void OpenGlHudRenderer::Render()
 	{
+		float startDepth = 0.0f;
 		for (auto & unit : this->renderUnits)
 		{
+			auto camera = dynamic_cast<HudCamera*>(unit->Camera); //HudCamera is a subclass of unit->Camera
+			camera->SetDepth(startDepth);
 			unit->Render();
+			startDepth += 0.001f;
 		}
-
-		depth = 0;
 	}
 }

@@ -15,6 +15,7 @@ namespace MatGl {
 		glm::vec3 TopLeft;
 		glm::vec3 BottomRight;
 		void Render();
+		Camera* Camera = nullptr;
 	private:
 		void SetSpotlightsUniform();
 		Shader* shader = nullptr;
@@ -23,7 +24,6 @@ namespace MatGl {
 		GLuint buffer = {};
 		GLsizei vertexCount = 0;
 		GLenum mode = 0;
-		Camera* camera = nullptr;
 		SpotLightList spotLights;
 		//todo: shaders etc if needed
 	};

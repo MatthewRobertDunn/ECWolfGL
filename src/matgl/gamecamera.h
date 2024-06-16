@@ -6,6 +6,7 @@ namespace MatGl {
 	class Camera {
 		public:
 			Camera(float aspectRatio, int width, int height);
+			virtual ~Camera() = default;
 			void Resize(float aspectRatio, int width, int height);
 			static float ConvertRatio(Aspect ratio, int width, int height);
 			int Width, Height;
@@ -33,5 +34,6 @@ namespace MatGl {
 	class HudCamera : public Camera {
 	public:
 		HudCamera(float aspectRatio, int width, int height);
+		void SetDepth(float depth);
 	};
 }

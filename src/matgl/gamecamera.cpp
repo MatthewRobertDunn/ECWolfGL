@@ -95,3 +95,11 @@ MatGl::HudCamera::HudCamera(float aspectRatio, int width, int height) : Camera(a
 	glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f);  //left, right, bottom, top
 	this->ModelViewProjection = projection * model;
 }
+
+void MatGl::HudCamera::SetDepth(float depth)
+{
+	//translate into the middle
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f,  depth));
+	glm::mat4 projection = glm::ortho(0.0f, (float)Width, (float)Height, 0.0f);  //left, right, bottom, top
+	this->ModelViewProjection = projection * model;
+}
